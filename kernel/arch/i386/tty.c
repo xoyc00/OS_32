@@ -4,12 +4,8 @@
 #include <string.h>
 
 #include <kernel/tty.h>
-#include <kernel/cpu/ports.h>
 
 #include "vga.h"
-
-#define REG_SCREEN_CTRL 0x3d4
-#define REG_SCREEN_DATA 0x3d5
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -44,36 +40,12 @@ void terminal_putentryat(unsigned char c, uint8_t color, size_t x, size_t y) {
 
 void terminal_putchar(char c) {
 	unsigned char uc = c;
-	if (uc == '\n')
-	{
-		terminal_row ++;
-		terminal_column = -1;
-	}
-	else
-		terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
-
+	terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
 		if (++terminal_row == VGA_HEIGHT)
 			terminal_row = 0;
 	}
-	if (terminal_row == VGA_HEIGHT) {
-		// Scroll the screen
-		int i;
-        for (i = 1; i < VGA_HEIGHT; i++) {
-			uint16_t* src = terminal_buffer + (i * VGA_WIDTH);
-			uint16_t* dst = terminal_buffer + ((i - 1) * VGA_WIDTH);
-			memcpy(dst, src, VGA_WIDTH);
-		}
-
-		// Clear the bottom line
-		for (i = 0; i < VGA_WIDTH; i++)
-			terminal_putentryat(' ', terminal_color, i, VGA_HEIGHT-1);
-
-		terminal_row --;
-	}
-
-	terminal_setcursor(terminal_column, terminal_row);
 }
 
 void terminal_write(const char* data, size_t size) {
@@ -83,16 +55,4 @@ void terminal_write(const char* data, size_t size) {
 
 void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));
-}
-
-void terminal_setcursor(size_t x, size_t y) {
-	terminal_column = x;
-	terminal_row = y;
-
-	int offset = (x + (y * VGA_WIDTH));
-
-    port_byte_out(REG_SCREEN_CTRL, 14);
-    port_byte_out(REG_SCREEN_DATA, (unsigned char)(offset >> 8));
-    port_byte_out(REG_SCREEN_CTRL, 15);
-    port_byte_out(REG_SCREEN_DATA, (unsigned char)(offset & 0xff));
 }

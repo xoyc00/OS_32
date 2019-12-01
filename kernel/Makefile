@@ -52,9 +52,9 @@ $(ARCHDIR)/crtn.o \
 
 all: myos.kernel
 
-os_32.kernel: $(OBJS) $(ARCHDIR)/linker.ld
+myos.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
-	grub-file --is-x86-multiboot os_32.kernel
+	grub-file --is-x86-multiboot myos.kernel
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
@@ -76,8 +76,8 @@ install-headers:
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
-install-kernel: os_32.kernel
+install-kernel: myos.kernel
 	mkdir -p $(DESTDIR)$(BOOTDIR)
-	cp os_32.kernel $(DESTDIR)$(BOOTDIR)
+	cp myos.kernel $(DESTDIR)$(BOOTDIR)
 
 -include $(OBJS:.o=.d)
