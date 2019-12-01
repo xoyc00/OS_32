@@ -4,8 +4,12 @@
 #include <string.h>
 
 #include <kernel/tty.h>
+#include <kernel/cpu/ports.h>
 
 #include "vga.h"
+
+#define REG_SCREEN_CTRL 0x3d4
+#define REG_SCREEN_DATA 0x3d5
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -68,6 +72,8 @@ void terminal_putchar(char c) {
 
 		terminal_row --;
 	}
+
+	terminal_setcursor(terminal_column, terminal_row);
 }
 
 void terminal_write(const char* data, size_t size) {
@@ -77,4 +83,16 @@ void terminal_write(const char* data, size_t size) {
 
 void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));
+}
+
+void terminal_setcursor(size_t x, size_t y) {
+	terminal_column = x;
+	terminal_row = y;
+
+	int offset = (x + (y * VGA_WIDTH));
+
+    port_byte_out(REG_SCREEN_CTRL, 14);
+    port_byte_out(REG_SCREEN_DATA, (unsigned char)(offset >> 8));
+    port_byte_out(REG_SCREEN_CTRL, 15);
+    port_byte_out(REG_SCREEN_DATA, (unsigned char)(offset & 0xff));
 }
