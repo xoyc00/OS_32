@@ -8,6 +8,12 @@ mkdir -p isodir/boot/grub
 
 cp sysroot/boot/myos.kernel isodir/boot/myos.kernel
 cat > isodir/boot/grub/grub.cfg << EOF
+
+default=0
+timeout=30
+
+insomod ext2
+
 menuentry "myos" {
 	multiboot /boot/myos.kernel
 }

@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 static bool print(const char* data, size_t length) {
 	const unsigned char* bytes = (const unsigned char*) data;
@@ -61,6 +62,30 @@ int printf(const char* restrict format, ...) {
 			if (!print(str, len))
 				return -1;
 			written += len;
+		} else if (*format == 'i' || *format == 'd') {
+			format ++;
+			int i = va_arg(parameters, int);
+			if (!maxrem) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			char buf[6];
+			itoa(i, buf, 10);
+			if (!print(buf, strlen(buf)))
+				return -1;
+			written += strlen(buf);
+		} else if (*format == 'x' || *format == 'X') {
+			format ++;
+			int i = va_arg(parameters, int);
+			if (!maxrem) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			char buf[6];
+			itoa(i, buf, 16);
+			if (!print(buf, strlen(buf)))
+				return -1;
+			written += strlen(buf);
 		} else {
 			format = format_begun_at;
 			size_t len = strlen(format);

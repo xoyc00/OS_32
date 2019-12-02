@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include <kernel/tty.h>
+#include <kernel/cpu/ports.h>
 
 #include "vga.h"
 
@@ -46,6 +47,8 @@ void terminal_putchar(char c) {
 		if (++terminal_row == VGA_HEIGHT)
 			terminal_row = 0;
 	}
+
+	terminal_setcursor(terminal_column, terminal_row);
 }
 
 void terminal_write(const char* data, size_t size) {
@@ -55,4 +58,19 @@ void terminal_write(const char* data, size_t size) {
 
 void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));
+}
+
+void terminal_setcursor(size_t x, size_t y) {
+	terminal_column = x;
+	terminal_row = y;
+
+	int offset = (x + (y*VGA_WIDTH));
+	outb(REG_SCREEN_CTRL, 14);
+	outb(REG_SCREEN_DATA, (unsigned char)(offset >> 8));
+	outb(REG_SCREEN_CTRL, 15);
+	outb(REG_SCREEN_DATA, (unsigned char)(offset & 0xff));
+}
+
+void terminal_nl() {
+	terminal_setcursor(0, ++terminal_row);
 }
