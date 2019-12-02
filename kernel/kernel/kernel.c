@@ -15,9 +15,5 @@ void kernel_main(void) {
 	gdt_install();
 	idt_init();
 
-	init_keyboard();
-
-	asm volatile("int $1");
-
 	while(1) {}
 }

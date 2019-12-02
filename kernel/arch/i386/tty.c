@@ -48,6 +48,22 @@ void terminal_putchar(char c) {
 			terminal_row = 0;
 	}
 
+	if (terminal_row == VGA_HEIGHT) {
+		// Scroll the screen
+		int i;
+        for (i = 1; i < VGA_HEIGHT; i++) {
+			uint16_t* src = terminal_buffer + (i * VGA_WIDTH);
+			uint16_t* dst = terminal_buffer + ((i - 1) * VGA_WIDTH);
+			memcpy(dst, src, VGA_WIDTH);
+		}
+
+		// Clear the bottom line
+		for (i = 0; i < VGA_WIDTH; i++)
+			terminal_putentryat(' ', terminal_color, i, VGA_HEIGHT);
+
+		terminal_row --;
+	}
+
 	terminal_setcursor(terminal_column, terminal_row);
 }
 

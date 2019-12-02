@@ -31,6 +31,9 @@
 .global isr30
 .global isr31
 
+.global isr_wrapper
+.align 4
+
 .global irq0
 .global irq1
 .global irq2
@@ -66,368 +69,367 @@
 .global irq13_handler
 .global irq14_handler
 .global irq15_handler
- 
-.extern irq_handler
-
-isr_common_stub:
-	pusha
-	mov %ds, %ax
-	push %eax 
-	mov $0x10, %ax  
-	mov %ax, %ds
-	mov %ax, %es
-	mov %ax, %fs
-	mov %ax, %gs
-	
-	call isr_handler
-	
-	pop %eax 
-	mov %ax, %ds
-	mov %ax, %es
-	mov %ax, %fs
-	mov %ax, %gs
-	popa
-	add $8, %esp
-	sti
-	iret
 
 .extern isr_handler
 
-irq_common_stub:
-    pusha 
-    mov %ds, %ax
-    push %eax
-    mov $0x10, %ax
-    mov %ax, %ds
-    mov %ax, %es
-    mov %ax, %fs
-    mov %ax, %gs
-    call irq_handler
-    pop %ebx
-    mov %bx, %ds
-    mov %bx, %es
-    mov %bx, %fs
-    mov %bx, %gs
-    popa
-    add $8, %esp
-    sti
-    iret 
+isr_wrapper:
+	cld
+	call isr_handler
+	popal
+	iret
 
 // 0: Divide By Zero Exception
 isr0:
-    cli
-    push $0
-    push $0
-    jmp isr_common_stub
+	pusha
+	push $0
+	call isr_handler
+	popa
+	ret
 
 // 1: Debug Exception
 isr1:
-    cli
-    push $0
-    push $1
-    jmp isr_common_stub
+	pushal
+	push $1
+	jmp isr_wrapper
 
 // 2: Non Maskable Interrupt Exception
 isr2:
-    cli
-    push $0
-    push $2
-    jmp isr_common_stub
+	pusha
+	push $2
+	call isr_handler
+	popa
+	ret
 
 // 3: Int 3 Exception
 isr3:
-    cli
-    push $0
+	pusha
     push $3
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 4: INTO Exception
 isr4:
-    cli
-    push $0
+	pusha
     push $4
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 5: Out of Bounds Exception
 isr5:
-    cli
-    push $0
+	pusha
     push $5
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 6: Invalid Opcode Exception
 isr6:
-    cli
-    push $0
+	pusha
     push $6
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 7: Coprocessor Not Available Exception
 isr7:
-    cli
-    push $0
+	pusha
     push $7
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 8: Double Fault Exception (With Error Code!)
 isr8:
-    cli
+	pusha
     push $8
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 9: Coprocessor Segment Overrun Exception
 isr9:
-    cli
-    push $0
+	pusha
     push $9
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 10: Bad TSS Exception (With Error Code!)
 isr10:
-    cli
+	pusha
     push $10
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 11: Segment Not Present Exception (With Error Code!)
 isr11:
-    cli
+    pusha
     push $11
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 12: Stack Fault Exception (With Error Code!)
 isr12:
-    cli
+    pusha
     push $12
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 13: General Protection Fault Exception (With Error Code!)
 isr13:
-    cli
+    pusha
     push $13
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 14: Page Fault Exception (With Error Code!)
 isr14:
-    cli
+    pusha
     push $14
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 15: Reserved Exception
 isr15:
-    cli
-    push $0
+    pusha
     push $15
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 16: Floating Point Exception
 isr16:
-    cli
-    push $0
+    pusha
     push $16
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 17: Alignment Check Exception
 isr17:
-    cli
-    push $0
+    pusha
     push $17
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 18: Machine Check Exception
 isr18:
-    cli
-    push $0
+    pusha
     push $18
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 19: Reserved
 isr19:
-    cli
-    push $0
+    pusha
     push $19
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 20: Reserved
 isr20:
-    cli
-    push $0
+    pusha
     push $20
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 21: Reserved
 isr21:
-    cli
-    push $0
+    pusha
     push $21
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 22: Reserved
 isr22:
-    cli
-    push $0
+    pusha
     push $22
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 23: Reserved
 isr23:
-    cli
-    push $0
+    pusha
     push $23
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 24: Reserved
 isr24:
-    cli
-    push $0
+    pusha
     push $24
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 25: Reserved
 isr25:
-    cli
-    push $0
+    pusha
     push $25
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 26: Reserved
 isr26:
-    cli
-    push $0
+    pusha
     push $26
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 27: Reserved
 isr27:
-    cli
-    push $0
+    pusha
     push $27
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 28: Reserved
 isr28:
-    cli
-    push $0
+    pusha
     push $28
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 29: Reserved
 isr29:
-    cli
-    push $0
+    pusha
     push $29
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 30: Reserved
 isr30:
-    cli
-    push $0
+    pusha
     push $30
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 // 31: Reserved
 isr31:
-    cli
-    push $0
+    pusha
     push $31
-    jmp isr_common_stub
+	call isr_handler
+	popa
+	ret
 
 irq0:
-  	cli
-	push $0
-	push $32
-	jmp irq_common_stub
+  pusha
+  call irq0_handler
+  popa
+  iret
  
 irq1:
-  	cli
-	push $1
-	push $33
-	jmp irq_common_stub
+  pusha
+  call irq1_handler
+  popa
+  iret
  
 irq2:
-  	cli
-	push $2
-	push $34
-	jmp irq_common_stub
+  pusha
+  call irq2_handler
+  popa
+  iret
  
 irq3:
-  	cli
-	push $3
-	push $35
-	jmp irq_common_stub
+  pusha
+  call irq3_handler
+  popa
+  iret
  
 irq4:
-  	cli
-	push $4
-	push $36
-	jmp irq_common_stub
+  pusha
+  call irq4_handler
+  popa
+  iret
  
 irq5:
-  	cli
-	push $5
-	push $37
-	jmp irq_common_stub
+  pusha
+  call irq5_handler
+  popa
+  iret
  
 irq6:
-  	cli
-	push $6
-	push $38
-	jmp irq_common_stub
+  pusha
+  call irq6_handler
+  popa
+  iret
  
 irq7:
- 	cli
-	push $7
-	push $39
-	jmp irq_common_stub
+  pusha
+  call irq7_handler
+  popa
+  iret
  
 irq8:
-  	cli
-	push $8
-	push $40
-	jmp irq_common_stub
-
+  pusha
+  call irq8_handler
+  popa
+  iret
+ 
 irq9:
-  	cli
-	push $9
-	push $41
-	jmp irq_common_stub
+  pusha
+  call irq9_handler
+  popa
+  iret
  
 irq10:
-  	cli
-	push $10
-	push $42
-	jmp irq_common_stub
+  pusha
+  call irq10_handler
+  popa
+  iret
  
 irq11:
-  	cli
-	push $11
-	push $43
-	jmp irq_common_stub
+  pusha
+  call irq11_handler
+  popa
+  iret
  
 irq12:
-  	cli
-	push $12
-	push $44
-	jmp irq_common_stub
+  pusha
+  call irq12_handler
+  popa
+  iret
  
 irq13:
-  	cli
-	push $13
-	push $45
-	jmp irq_common_stub
+  pusha
+  call irq13_handler
+  popa
+  iret
  
 irq14:
-  	cli
-	push $14
-	push $46
-	jmp irq_common_stub
+  pusha
+  call irq14_handler
+  popa
+  iret
  
 irq15:
-  	cli
-	push $15
-	push $47
-	jmp irq_common_stub
+  pusha
+  call irq15_handler
+  popa
+  iret
  
 load_idt:
 	mov 4(%esp,1), %edx
 	lidt (%edx)
+	sti
 	ret

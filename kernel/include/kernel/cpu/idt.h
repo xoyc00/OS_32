@@ -39,7 +39,7 @@ struct IDT_entry IDT[256];
 
 void set_idt_gate(int n, uint32_t handler);
 
-void isr_handler(registers_t r);
+void isr_handler(uint16_t r);
 
 typedef void (*isr_t)(registers_t);
 void register_interrupt_handler(uint8_t n, isr_t handler);
