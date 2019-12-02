@@ -6,16 +6,14 @@ mkdir -p isodir
 mkdir -p isodir/boot
 mkdir -p isodir/boot/grub
 
-cp sysroot/boot/myos.kernel isodir/boot/myos.kernel
+cp sysroot/boot/os_32.kernel isodir/boot/os_32.kernel
 cat > isodir/boot/grub/grub.cfg << EOF
 
 default=0
 timeout=30
 
-insomod ext2
-
-menuentry "myos" {
-	multiboot /boot/myos.kernel
+menuentry "os_32" {
+	multiboot /boot/os_32.kernel
 }
 EOF
-grub-mkrescue -o myos.iso isodir
+grub-mkrescue -o os_32.iso isodir
