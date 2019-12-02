@@ -3,6 +3,9 @@
 
 #include <kernel/tty.h>
 #include <kernel/cpu/gdt.h>
+#include <kernel/cpu/idt.h>
+
+#include <kernel/drivers/keyboard.h>
 
 void kernel_main(void) {
 	terminal_initialize();
@@ -10,6 +13,11 @@ void kernel_main(void) {
 	printf("Test Number: %x\n", 27);
 
 	gdt_install();
+	idt_init();
 
-	assert(0);
+	init_keyboard();
+
+	asm volatile("int $1");
+
+	while(1) {}
 }
