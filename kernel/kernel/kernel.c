@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <assert.h>
+#include <math.h>
 
 #include <kernel/tty.h>
 #include <kernel/cpu/gdt.h>
@@ -10,16 +10,10 @@
 void kernel_main(void) {
 	terminal_initialize();
 	printf("Hello, kernel World!\nCreated By Millie!\n");
-	printf("Test Number: %x\n", 27);
+	printf("Test Number: %f\n", tan(3.14159265/4));
 
 	gdt_install();
 	idt_init();
 
-	unsigned int i;
-	while(1) {
-		if (i % 100000000 == 0)
-			printf("\nHello!");
-
-		i ++;
-	}
+	while(1) {}
 }

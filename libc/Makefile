@@ -44,11 +44,15 @@ ctype/isupper.o \
 ctype/isxdigit.o \
 ctype/tolower.o \
 ctype/toupper.o \
+math/cos.o \
+math/sin.o \
+math/tan.o \
 stdio/printf.o \
 stdio/putchar.o \
 stdio/puts.o \
 stdlib/abort.o \
 stdlib/itoa.o \
+stdlib/ftoa.o \
 string/memcmp.o \
 string/memcpy.o \
 string/memmove.o \

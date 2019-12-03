@@ -20,6 +20,8 @@
 #define IRQ14 46
 #define IRQ15 47
 
+void idt_init(void);
+
 struct IDT_entry {
 	unsigned short int offset_lowerbits;
 	unsigned short int selector;

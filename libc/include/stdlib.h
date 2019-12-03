@@ -11,6 +11,7 @@ __attribute__((__noreturn__))
 void abort(void);
 
 char* itoa(int value, char* str, int base);
+char* ftoa(double value, char* str, int precision);
 
 #ifdef __cplusplus
 }

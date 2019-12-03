@@ -86,6 +86,18 @@ int printf(const char* restrict format, ...) {
 			if (!print(buf, strlen(buf)))
 				return -1;
 			written += strlen(buf);
+		} else if (*format == 'f' || *format == 'F') {
+			format ++;
+			double i = va_arg(parameters, double);
+			if (!maxrem) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			char buf[128];
+			ftoa(i, buf, -1);
+			if (!print(buf, strlen(buf)))
+				return -1;
+			written += strlen(buf);
 		} else {
 			format = format_begun_at;
 			size_t len = strlen(format);
