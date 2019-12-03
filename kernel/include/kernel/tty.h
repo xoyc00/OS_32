@@ -11,6 +11,5 @@ void terminal_putchar(char c);
 void terminal_write(const char* data, size_t size);
 void terminal_writestring(const char* data);
 void terminal_setcursor(size_t x, size_t y);
-void terminal_nl();
 
 #endif

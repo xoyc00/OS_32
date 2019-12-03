@@ -7,5 +7,5 @@
 void keyboard_callback() {
     /* The PIC leaves us the scancode in port 0x60 */
     uint8_t scancode = inb(0x60);
-    printf("Keyboard scancode: %i\n", scancode);
+    printf("\nKeyboard scancode: %i", scancode);
 }

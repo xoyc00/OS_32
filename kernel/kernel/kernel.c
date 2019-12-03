@@ -15,5 +15,11 @@ void kernel_main(void) {
 	gdt_install();
 	idt_init();
 
-	while(1) {}
+	unsigned int i;
+	while(1) {
+		if (i % 100000000 == 0)
+			printf("\nHello!");
+
+		i ++;
+	}
 }
