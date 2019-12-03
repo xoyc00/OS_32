@@ -15,5 +15,7 @@ void kernel_main(void) {
 	gdt_install();
 	idt_init();
 
+	printf("> ");
+
 	while(1) {}
 }

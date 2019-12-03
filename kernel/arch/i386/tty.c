@@ -94,7 +94,7 @@ void terminal_setcursor(size_t x, size_t y) {
 }
 
 void terminal_backspace() {
-	if (terminal_column == 0) return;
+	if (terminal_column <= 2) return;
 	terminal_setcursor(terminal_column - 1, terminal_row);
 	terminal_putchar(' ');
 	terminal_setcursor(terminal_column - 1, terminal_row);

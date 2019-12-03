@@ -3,7 +3,7 @@
 #include <kernel/cpu/idt.h>
 #include <kernel/tty.h>
 #include <stdio.h>
-#include <assert.h>
+#include <string.h>
 
 #define BACKSPACE 0x0e
 #define ENTER 0x1c
@@ -43,9 +43,11 @@ void keyboard_callback() {
     /* The PIC leaves us the scancode in port 0x60 */
     uint8_t scancode = inb(0x60);
 	if (scancode == BACKSPACE) {
+		backspace(key_buffer);
 		terminal_backspace();
 	} else if (scancode == ENTER) {
-		printf("\n");
+		printf("\n> ");
+		key_buffer[0] = '\0';
 	} else if (scancode == SHIFT_PRESS) {
 		shifted = 1;
 	} else if (scancode == SHIFT_RELEASE) {
@@ -55,13 +57,18 @@ void keyboard_callback() {
 	} else {
 		if (scancode > SC_MAX) return;
     	
+		char c; 
+
 		if (shifted && caps)
-			printf("%c", sc_ascii_std[(int)scancode]);
+			c = sc_ascii_std[(int)scancode];
 		else if (shifted)
-			printf("%c", sc_ascii_shift[(int)scancode]);
+			c = sc_ascii_shift[(int)scancode];
 		else if (caps)
-			printf("%c", sc_ascii_caps[(int)scancode]);
+			c = sc_ascii_caps[(int)scancode];
 		else
-			printf("%c", sc_ascii_std[(int)scancode]);
+			c = sc_ascii_std[(int)scancode];
+
+		printf("%c", c);
+		append(key_buffer, c);
 	}
 }
