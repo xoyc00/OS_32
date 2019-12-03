@@ -92,3 +92,10 @@ void terminal_setcursor(size_t x, size_t y) {
 	outb(REG_SCREEN_CTRL, 15);
 	outb(REG_SCREEN_DATA, (unsigned char)(offset & 0xff));
 }
+
+void terminal_backspace() {
+	if (terminal_column == 0) return;
+	terminal_setcursor(terminal_column - 1, terminal_row);
+	terminal_putchar(' ');
+	terminal_setcursor(terminal_column - 1, terminal_row);
+}
