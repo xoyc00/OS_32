@@ -20,7 +20,7 @@
 #define IRQ14 46
 #define IRQ15 47
 
-void idt_init(void);
+void idt_install(void);
 
 struct IDT_entry {
 	unsigned short int offset_lowerbits;
@@ -38,12 +38,5 @@ typedef struct {
 } registers_t;
 
 struct IDT_entry IDT[256];
-
-void set_idt_gate(int n, uint32_t handler);
-
-void isr_handler(uint16_t r);
-
-typedef void (*isr_t)(registers_t);
-void register_interrupt_handler(uint8_t n, isr_t handler);
 
 #endif
