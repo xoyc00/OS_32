@@ -33,6 +33,7 @@ KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 $(KERNEL_DRIVER_OBJS) \
 kernel/kernel.o \
+kernel/shell.o \
 
 OBJS=\
 $(ARCHDIR)/crti.o \

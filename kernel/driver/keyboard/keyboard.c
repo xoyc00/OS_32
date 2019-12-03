@@ -2,6 +2,7 @@
 #include <kernel/cpu/ports.h>
 #include <kernel/cpu/idt.h>
 #include <kernel/tty.h>
+#include <kernel/shell.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -11,7 +12,7 @@
 #define SHIFT_RELEASE 0xaa
 #define CAPS 0xba
 
-static char key_buffer[256];
+static char key_buffer[512];
 
 int shifted = 0;
 int caps = 0;
@@ -46,7 +47,8 @@ void keyboard_callback() {
 		backspace(key_buffer);
 		terminal_backspace();
 	} else if (scancode == ENTER) {
-		printf("\n> ");
+		printf("\n");
+		process_input(key_buffer);
 		key_buffer[0] = '\0';
 	} else if (scancode == SHIFT_PRESS) {
 		shifted = 1;
