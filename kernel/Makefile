@@ -34,6 +34,7 @@ $(KERNEL_ARCH_OBJS) \
 $(KERNEL_DRIVER_OBJS) \
 kernel/kernel.o \
 kernel/shell.o \
+kernel/memory_mapper.o \
 
 OBJS=\
 $(ARCHDIR)/crti.o \
