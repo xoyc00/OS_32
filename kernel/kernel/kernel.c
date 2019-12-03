@@ -20,14 +20,6 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	idt_install();
 	memory_mapper_init(mbt);
 
-	kmalloc(1);
-	kmalloc(10);
-	kmalloc(256);
-	void* ptr = kmalloc(256);
-	kfree(ptr);
-	kmalloc(128);
-	kmalloc(128);
-
 	printf("> ");
 
 	while(1) {}
