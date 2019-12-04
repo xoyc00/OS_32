@@ -99,3 +99,13 @@ void terminal_backspace() {
 	terminal_putchar(' ');
 	terminal_setcursor(terminal_column - 1, terminal_row);
 }
+
+void terminal_clear() {
+	terminal_setcursor(0, 0);
+
+	for (size_t x = 0; x < VGA_WIDTH; x++) {
+		for  (int y = 0; y < VGA_HEIGHT; y++) {
+			terminal_putentryat(' ', terminal_color, x, y);
+		}
+	}
+}
