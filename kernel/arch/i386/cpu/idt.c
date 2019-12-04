@@ -1,6 +1,7 @@
 #include <kernel/cpu/idt.h>
 #include <kernel/cpu/ports.h>
-#include <kernel/drivers/keyboard.h>
+#include <kernel/cpu/timer.h>
+#include <kernel/driver/keyboard.h>
 #include <stdio.h>
 #include <assert.h>
 
@@ -176,6 +177,8 @@ void idt_install(void) {
 
 void irq0_handler(void) {
     outb(0x20, 0x20); //EOI
+
+	timer_callback();
 }
  
 void irq1_handler(void) {

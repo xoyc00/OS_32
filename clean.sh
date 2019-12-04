@@ -8,4 +8,4 @@ done
 
 rm -rf sysroot
 rm -rf isodir
-rm -rf os_32.iso
+rm -rf disk_image.img
