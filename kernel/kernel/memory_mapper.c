@@ -1,6 +1,7 @@
 #include <kernel/memory_mapper.h>
 
 #include <stdio.h>
+#include <assert.h>
 
 void* get_next_block_of_size(size_t size) {
 	if (map.size >= size && map.free) {
@@ -13,7 +14,6 @@ void* get_next_block_of_size(size_t size) {
 		map.free = 0;
 		map.size = size;
 		map.next_ptr = next;
-		printf("Map:\n Size: %i\n Addr: 0x%x\n", map.size, map.addr);
 		return (void*)map.addr;
 	} else {
 		memory_block_t* next = map.next_ptr;
@@ -28,7 +28,6 @@ void* get_next_block_of_size(size_t size) {
 				next->free = 0;
 				next->size = size;
 				next->next_ptr = n;
-				printf("Next:\n Size: %i\n Addr: 0x%x\n", next->size, next->addr);
 				return (void*)next->addr;
 			} else {
 				next = next->next_ptr;
@@ -42,13 +41,12 @@ void* get_next_block_of_size(size_t size) {
 void optimise_blocks() {
 	memory_block_t* next = &map;
 	while(next != 0) {
-		memory_block_t* n = (memory_block_t*)(next->addr + next->size);
-		if (next->free && n->free) {
+		memory_block_t* n = next->next_ptr;
+		if (next->free && n->free && n->addr == (next->addr + sizeof(memory_block_t) + next->size)) {
 			next->next_ptr = n->next_ptr;
 			next->size += n->size;
 			next->size += sizeof(memory_block_t);
 		}
-
 		next = next->next_ptr;
 	}
 }
@@ -63,12 +61,19 @@ void* kmalloc(size_t size) {
 }
 
 void kfree(void* ptr) {
-	memory_block_t* to_free = (memory_block_t*)(ptr - sizeof(memory_block_t));
+	memory_block_t* to_free = &map;
+	
+	while (to_free) {
+		if ((void*)to_free->addr == ptr)
+			break;
+		to_free = to_free->next_ptr;
+	}
+
 	to_free->free = 1;
 	optimise_blocks();
 }
 
-void memory_mapper_init(multiboot_info_t* mbt) {
+void memory_mapper_init(multiboot_info_t* mbt) {	
 	memory_block_t* prev = 0;
 	int counter = 0;
 
@@ -78,18 +83,22 @@ void memory_mapper_init(multiboot_info_t* mbt) {
 			// The memory is available for use
 			if (prev == 0) {
 				map.free = 1;
-				map.size = (size_t)mmap->size - sizeof(memory_block_t);
+				map.size = (size_t)mmap->len - sizeof(memory_block_t);
 				map.addr = mmap->addr + sizeof(memory_block_t);
 				map.next_ptr = 0;
 				prev = &map;
+
+				printf("Memory Map:\nFree: %i\nSize: %i\nAddress: %i\n", map.free, map.size, map.addr);
 			} else {
-				memory_block_t* next = (memory_block_t*)mmap->addr - sizeof(memory_block_t);
+				memory_block_t* next = (memory_block_t*)(mmap->addr);
 				next->free = 1;
-				next->size = (size_t)mmap->size - sizeof(memory_block_t);
-				next->addr = mmap->addr;
+				next->size = (size_t)mmap->len - sizeof(memory_block_t);
+				next->addr = mmap->addr + sizeof(memory_block_t);
 				next->next_ptr = 0;
 				prev->next_ptr = next;
 				prev = next;
+
+				printf("\t Next:\n\t\t Free: %i\n\t\t Size: %i\n\t\t Address: %i\n", next->free, next->size, next->addr);
 			}
 			counter ++;
 		}		
@@ -98,4 +107,13 @@ void memory_mapper_init(multiboot_info_t* mbt) {
 	}
 
 	printf("Found %i free memory blocks.\n", counter);
+}
+
+void print_memory_map() {
+	memory_block_t* next = &map;
+	while(next != 0) {
+		printf("\t Next:\n\t\t Free: %i\n\t\t Size: %i\n\t\t Address: %i\n", next->free, next->size, next->addr);
+
+		next = next->next_ptr;
+	}
 }

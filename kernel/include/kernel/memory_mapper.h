@@ -18,4 +18,6 @@ void kfree(void* ptr);
 
 void memory_mapper_init(multiboot_info_t* mbt);
 
+void print_memory_map();
+
 #endif

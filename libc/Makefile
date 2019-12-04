@@ -63,6 +63,7 @@ string/strlen.o \
 string/strcmp.o \
 string/append.o \
 string/backspace.o \
+string/strtok.o \
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \

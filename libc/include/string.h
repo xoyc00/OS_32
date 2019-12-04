@@ -19,6 +19,9 @@ int strcmp(char* s1, char* s2);
 void append(char s[], char n);
 void backspace(char s[]);
 
+char* strtok(char* str, char* delim);
+char* strcpy(char* dest, const char* src);
+
 #ifdef __cplusplus
 }
 #endif

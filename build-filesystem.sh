@@ -16,7 +16,6 @@ cleanup() {
     if [ -d mnt ]; then
         printf "unmounting filesystem... "
         sudo umount mnt || ( sleep 1 && sync && umount mnt )
-        sudo rm -rf mnt
         echo "done"
     fi
 
