@@ -16,4 +16,5 @@ menuentry "os_32" {
 	multiboot /boot/os_32.kernel
 }
 EOF
-grub-mkrescue -o os_32.iso isodir
+
+cp -a files/. isodir/

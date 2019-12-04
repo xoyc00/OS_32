@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
-. ./iso.sh
+./build-filesystem.sh
 
-qemu-system-$(./target-triplet-to-arch.sh $HOST) -cdrom os_32.iso -m 512M -enable-kvm
+qemu-system-i386 -hda disk_image.img -m 512M -enable-kvm
