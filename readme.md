@@ -13,10 +13,16 @@ The system can be compiled via the following commands:
 	
 		2. ./build.sh
 
-To create an iso, follow the above steps and then run:
+To create an img, run:
 	
-		./iso.sh
+		./build_filesystem.sh
 
 To run in qemu (with packages qemu and qemu-kvm installed):
 	
-		./qemu.sh	
+		./qemu.sh
+
+This command will call ./build.sh and ./build_filesystem.sh.
+
+To run without calling these commands, run:
+		
+		./run.sh
