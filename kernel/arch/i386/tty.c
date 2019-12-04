@@ -6,6 +6,8 @@
 #include <kernel/tty.h>
 #include <kernel/cpu/ports.h>
 
+#include <kernel/driver/pcspkr.h>
+
 #include "vga.h"
 
 static const size_t VGA_WIDTH = 80;
@@ -94,7 +96,10 @@ void terminal_setcursor(size_t x, size_t y) {
 }
 
 void terminal_backspace() {
-	if (terminal_column <= 2) return;
+	if (terminal_column <= 2) {
+		pcspkr_beep();
+		return;
+	}
 	terminal_setcursor(terminal_column - 1, terminal_row);
 	terminal_putchar(' ');
 	terminal_setcursor(terminal_column - 1, terminal_row);

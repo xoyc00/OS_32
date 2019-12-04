@@ -83,11 +83,26 @@
 
 #define insl(port, buffer, count) asm volatile("cld; rep; insl" :: "D" (buffer), "d" (port), "c" (count))
 
+struct ide_device {
+	unsigned char Reserved;
+	unsigned char Channel;
+	unsigned char Drive;
+	unsigned short Type;
+	unsigned short Signature;
+	unsigned short Capabilities;
+	unsigned int CommandSets;
+	unsigned int Size;
+	unsigned char Model[4];
+	unsigned char* Path;
+};
+
 unsigned char ide_read(unsigned char channel, unsigned char reg);
 void ide_write(unsigned char channel, unsigned char reg, unsigned char data);
 void ide_read_buffer(unsigned char channel, unsigned char reg, unsigned int buffer, unsigned int quads);
 unsigned char ide_polling(unsigned char channel, unsigned int advanced_check);
 unsigned char ide_print_error(unsigned int drive, unsigned char err);
 void ide_init(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, unsigned int BAR3, unsigned int BAR4);
+
+void ide_list();
 
 #endif

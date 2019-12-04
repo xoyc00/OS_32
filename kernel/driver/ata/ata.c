@@ -17,17 +17,7 @@ static unsigned char atapi_packet[12] = {0xA8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 uint32_t package[] = {0x0};
 
-struct ide_device {
-	unsigned char Reserved;
-	unsigned char Channel;
-	unsigned char Drive;
-	unsigned short Type;
-	unsigned short Signature;
-	unsigned short Capabilities;
-	unsigned int CommandSets;
-	unsigned int Size;
-	unsigned char Model[4];
-} ide_devices[4];
+struct ide_device ide_devices[4];
 
 unsigned char ide_read(unsigned char channel, unsigned char reg) {
 	unsigned char result;
@@ -211,7 +201,8 @@ void ide_init(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, unsigned 
          	// (VIII) String indicates model of device (like Western Digital HDD and SONY DVD-RW...):
          	for(k = 0; k < 40; k += 2) {
             	ide_devices[count].Model[k] = ide_buf[ATA_IDENT_MODEL + k + 1];
-            	ide_devices[count].Model[k + 1] = ide_buf[ATA_IDENT_MODEL + k];}
+            	ide_devices[count].Model[k + 1] = ide_buf[ATA_IDENT_MODEL + k];
+			}
          	ide_devices[count].Model[40] = 0; // Terminate String.
  
          	count++;
@@ -219,10 +210,21 @@ void ide_init(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, unsigned 
  
    	// 4- Print Summary:
    	for (i = 0; i < 4; i++)
-     	 if (ide_devices[i].Reserved == 1 && ide_devices[i].Size > 0) {
-         	printf("\t Found %s Drive %dMB - %s\n",
-            	(const char *[]){"ATA", "ATAPI"}[ide_devices[i].Type],         /* Type */
-            	ide_devices[i].Size / 1024 / 2,               /* Size */
-            	ide_devices[i].Model);
+     	 if (ide_devices[i].Reserved == 1) {
+			ide_devices[i].Path = 0x41 + i;
+         	printf("\t Found %s Drive %dMB - %s - %c:/\n",
+            	(const char *[]){"ATA", "ATAPI"}[ide_devices[i].Type],         	/* Type */
+            	ide_devices[i].Size / 1024 / 2,               					/* Size */
+            	ide_devices[i].Model, ide_devices[i].Path);
+      	}
+}
+
+void ide_list() {
+	for (int i = 0; i < 4; i++)
+     	 if (ide_devices[i].Reserved == 1) {
+         	printf("\t %s Drive %dMB - %s - %c:/\n",
+            	(const char *[]){"ATA", "ATAPI"}[ide_devices[i].Type],         	/* Type */
+            	ide_devices[i].Size / 1024 / 2,               					/* Size */
+            	ide_devices[i].Model, ide_devices[i].Path);
       	}
 }

@@ -5,7 +5,7 @@
 uint32_t tick = 0;
 
 void timer_callback() {
-	tick++;
+	tick = tick + 1;
 }
 
 void timer_init(uint32_t freq) {
@@ -18,6 +18,6 @@ void timer_init(uint32_t freq) {
 }
 
 void sleep(uint32_t ms) {
-	uint32_t end = tick + (1 * ms);
-	while(tick != end) { asm("nop"); }
+	uint32_t end = tick + ms;
+	while(tick < end) {asm("nop");}
 }
