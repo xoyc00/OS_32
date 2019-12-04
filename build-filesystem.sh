@@ -3,10 +3,10 @@
 set -e
 . ./imgfiles.sh
 
-echo "Setting up disk image..."
-dd if=/dev/zero of=disk_image.img bs=1M count="${DISK_SIZE:-257}" status=none
+printf "Setting up disk image..."
+dd if=/dev/zero of=disk_image.img bs=512k count="${DISK_SIZE:-513}" status=none
 chown 1000:1000 disk_image.img
-echo "Done."
+echo "done"
 
 echo "Creating loopback device..."
 dev=$(sudo losetup --find --partscan --show disk_image.img)
@@ -29,20 +29,20 @@ cleanup() {
 trap cleanup EXIT
 
 printf "creating partition table... "
-sudo parted -s "${dev}" mklabel gpt mkpart BIOSBOOT ext3 1MiB 8MiB mkpart OS fat32 8MiB 256MiB set 1 bios_grub || die "couldn't partition disk"
+sudo parted -s "${dev}" mklabel msdos mkpart primary fat32 512k 100% -a minimal set 1 boot on || die "couldn't partition disk"
 echo "done"
 
 printf "destroying old filesystem... "
-sudo dd if=/dev/zero of="${dev}"p2 bs=1M count=1 status=none || die "couldn't destroy old filesystem"
+sudo dd if=/dev/zero of="${dev}"p1 bs=512k count=1 status=none || die "couldn't destroy old filesystem"
 echo "done"
 
 printf "creating new filesystem... "
-sudo mkdosfs -F 32 "${dev}"p2 || die "couldn't create filesystem"
+sudo mkdosfs -F 32 "${dev}"p1 || die "couldn't create filesystem"
 echo "done"
 
 printf "mounting filesystem... "
 mkdir -p mnt
-sudo mount -o uid=1000,gid=1000 "${dev}"p2 mnt/ || die "couldn't mount filesystem"
+sudo mount -o uid=1000,gid=1000 "${dev}"p1 mnt/ || die "couldn't mount filesystem"
 echo "done"
 
 sudo cp -a isodir/. mnt/
