@@ -36,6 +36,10 @@ char* strtok(char* str, char* tokens) {
         str=temp;
     }
 
+	if (strlen(temp) == 0) {
+		return 0;
+	}
+
     int chars=0, len = strlen(tokens), flag=0;
     
     //Run the loop till we find a token or our copy is fully parsed.

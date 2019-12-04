@@ -9,13 +9,13 @@
 
 void process_input(char* input) {
 	char* i1 = strtok(input, " ");
-	char* iargs[64];
-	for (int i = 0; i < 64; i++) {
+	char* iargs[256];
+	for (int i = 0; i < 256; i++) {
 		char* arg = strtok(0, " ");
-		if (arg) {
+		if (arg != 0) {
 			iargs[i] = arg;
 		} else {
-			break;
+			iargs[i] = 0;
 		}
 	}
 
@@ -28,10 +28,18 @@ void process_input(char* input) {
 		print_memory_map();
 	} else if (strcmp(i1, "drvlist") == 0) {
 		ide_list();
-	}else if (strcmp(i1, "chdir") == 0) {
+	} else if (strcmp(i1, "chdir") == 0) {
 		if (iargs[0]) {
 			printf("Changing directory to %s\n", iargs[0]);
 		}
+	} else if (strcmp(i1, "print") == 0) {
+		for (int i = 0; i < 256; i ++) {
+			if (iargs[i] != 0) {
+				printf(iargs[i]);
+				printf(" ");
+			}
+		}
+		printf("\n");
 	}
 
     printf("> ");
