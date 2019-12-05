@@ -13,16 +13,9 @@ The system can be compiled via the following commands:
 	
 		2. ./build.sh
 
-To create an img, run:
+To create an iso, run:
 	
-		./build_filesystem.sh
-
-To run in qemu (with packages qemu and qemu-kvm installed):
-	
-		./qemu.sh
-
-This command will call ./build.sh and ./build_filesystem.sh.
-
-To run without calling these commands, run:
+		./iso.sh
 		
-		./run.sh
+You can run this iso in either VirtualBox or VMWare, most likely any other emulator or virtual machine program also.
+It will also run on physical hardware, (requires parralel ATA drives right now).
