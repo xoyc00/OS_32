@@ -1,9 +1,9 @@
 #include <kernel/shell.h>
 
 #include <kernel/memory_mapper.h>
-#include <kernel/driver/ata.h>
-#include <kernel/driver/vfs.h>
 #include <kernel/tty.h>
+
+#include <kernel/driver/pcspkr.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -27,12 +27,6 @@ void process_input(char* input) {
 		terminal_clear();
 	} else if (strcmp(i1, "memmap") == 0) {
 		print_memory_map();
-	} else if (strcmp(i1, "drvlist") == 0) {
-		ide_list();
-	} else if (strcmp(i1, "chdir") == 0) {
-		if (iargs[0]) {
-			vfs_change_dir(iargs[0]);
-		}
 	} else if (strcmp(i1, "print") == 0) {
 		for (int i = 0; i < 256; i ++) {
 			if (iargs[i] != 0) {
@@ -41,7 +35,9 @@ void process_input(char* input) {
 			}
 		}
 		printf("\n");
+	} else if (strcmp(i1, "beep") == 0) {
+		pcspkr_beep();
 	}
 
-    printf("%s> ", currentPath);
+    printf("> ");
 }
