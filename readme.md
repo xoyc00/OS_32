@@ -1,5 +1,5 @@
 # OS_32
-A simple unix-like 32-bit operating system.
+A simple 32-bit operating system.
 
 (Currently unnamed!)
 
