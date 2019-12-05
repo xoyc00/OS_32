@@ -228,3 +228,11 @@ void ide_list() {
             	ide_devices[i].Model, ide_devices[i].Path);
       	}
 }
+
+int ide_drive_exists(const char* DrvChar) {
+	for (int i = 0; i < 4; i++) {
+		if (ide_devices[i].Path == DrvChar[0])
+			return 1;
+	}
+	return 0;
+}

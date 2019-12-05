@@ -18,6 +18,4 @@ menuentry "os_32" {
 }
 EOF
 
-cp -a files/. isodir/
-
 grub-mkrescue -o cd.iso isodir
