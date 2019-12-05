@@ -38,16 +38,12 @@ void* get_next_block_of_size(size_t size) {
 	return 0;
 }
 
-void optimise_blocks() {
-	memory_block_t* next = &map;
-	while(next != 0) {
-		memory_block_t* n = next->next_ptr;
-		if (next->free && n->free && n->addr == (next->addr + sizeof(memory_block_t) + next->size)) {
-			next->next_ptr = n->next_ptr;
-			next->size += n->size;
-			next->size += sizeof(memory_block_t);
-		}
-		next = next->next_ptr;
+void optimise_blocks(memory_block_t* m) {
+	memory_block_t* n = m->next_ptr;
+	if (m->free && n->free && n->addr == (m->addr + sizeof(memory_block_t) + m->size)) {
+		m->next_ptr = n->next_ptr;
+		m->size += n->size;
+		m->size += sizeof(memory_block_t);
 	}
 }
 
@@ -64,13 +60,16 @@ void kfree(void* ptr) {
 	memory_block_t* to_free = &map;
 	
 	while (to_free) {
-		if ((void*)to_free->addr == ptr)
+		if (to_free->addr == ptr)
 			break;
-		to_free = to_free->next_ptr;
+		else
+			to_free = to_free->next_ptr;
 	}
 
-	to_free->free = 1;
-	optimise_blocks();
+	if (to_free) {
+		to_free->free = 1;
+		optimise_blocks(to_free);
+	}
 }
 
 void memory_mapper_init(multiboot_info_t* mbt) {	
