@@ -30,7 +30,7 @@ void pcspkr_stop_sound() {
 void pcspkr_beep() {
 	pcspkr_play_sound(880);
 	asm("sti");
-	sleep(25);
+	sleep(100);
 	pcspkr_stop_sound();
 }
 

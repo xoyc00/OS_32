@@ -62,7 +62,7 @@ void terminal_putchar(char c) {
         for (i = 1; i < VGA_HEIGHT; i++) {
 			uint16_t* src = terminal_buffer + (i * VGA_WIDTH);
 			uint16_t* dst = terminal_buffer + ((i - 1) * VGA_WIDTH);
-			memcpy(dst, src, VGA_WIDTH);
+			memcpy(dst, src, VGA_WIDTH * 2);
 		}
 
 		// Clear the bottom line

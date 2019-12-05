@@ -4,7 +4,7 @@
 #include <assert.h>
 
 void* get_next_block_of_size(size_t size) {
-	if (map.size >= size && map.free) {
+	if (map.size >= size && map.free && map.size > 0 && map.addr > 0) {
 		memory_block_t* next = (memory_block_t*)(map.addr + size);
 		next->size = (map.size - size) - sizeof(memory_block_t);
 		next->addr = (size_t)next + sizeof(memory_block_t);
@@ -18,7 +18,7 @@ void* get_next_block_of_size(size_t size) {
 	} else {
 		memory_block_t* next = map.next_ptr;
 		while(next != 0) {
-			if (next->size >= size && next->free) {
+			if (next->size >= size && next->free && next->size > 0 && next->addr > 0) {
 				memory_block_t* n = (memory_block_t*)(next->addr + size);
 				n->size = (next->size - size) - sizeof(memory_block_t);
 				n->addr = (size_t)n + sizeof(memory_block_t);
@@ -86,8 +86,6 @@ void memory_mapper_init(multiboot_info_t* mbt) {
 				map.addr = mmap->addr + sizeof(memory_block_t);
 				map.next_ptr = 0;
 				prev = &map;
-
-				printf("Memory Map:\nFree: %i\nSize: %i\nAddress: %i\n", map.free, map.size, map.addr);
 			} else {
 				memory_block_t* next = (memory_block_t*)(mmap->addr);
 				next->free = 1;
@@ -96,8 +94,6 @@ void memory_mapper_init(multiboot_info_t* mbt) {
 				next->next_ptr = 0;
 				prev->next_ptr = next;
 				prev = next;
-
-				printf("\t Next:\n\t\t Free: %i\n\t\t Size: %i\n\t\t Address: %i\n", next->free, next->size, next->addr);
 			}
 			counter ++;
 		}		
@@ -111,7 +107,8 @@ void memory_mapper_init(multiboot_info_t* mbt) {
 void print_memory_map() {
 	memory_block_t* next = &map;
 	while(next != 0) {
-		printf("\t Next:\n\t\t Free: %i\n\t\t Size: %i\n\t\t Address: %i\n", next->free, next->size, next->addr);
+		if (next->size > 0 && next->addr > 0)
+			printf("\t Next:\n\t\t Free: %i\n\t\t Size: %fMB\n\t\t Address: %i\n", next->free, (double)next->size / 1024 / 1024, next->addr);
 
 		next = next->next_ptr;
 	}
