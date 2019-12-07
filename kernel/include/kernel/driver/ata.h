@@ -115,5 +115,7 @@ void ata_list_devices();
 
 void ata_read_sects_lba_28(int drive, uint32_t LBA, int sects, char* buf);
 void ata_write_sects_lba_28(int drive, uint32_t LBA, int sects, char* buf);
+void ata_read_sects_lba_48(int drive, uint64_t LBA, int sects, char* buf);
+void ata_write_sects_lba_48(int drive, uint64_t LBA, int sects, char* buf);
 
 #endif

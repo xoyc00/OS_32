@@ -286,3 +286,111 @@ void ata_write_sects_lba_28(int drive, uint32_t LBA, int sects, char* buf) {
 
 	asm volatile("sti");
 }
+
+void ata_read_sects_lba_48(int drive, uint64_t LBA, int sects, char* buf) {
+	asm volatile("cli");
+
+	int i, j;
+
+	if (sects <= 0) {
+		sects = 65536;
+	}
+
+	if (ata_devices[drive].drive == ATA_MASTER) {
+		outb(0x1F6, 0x40);
+	} else {
+		outb(0x1F6, 0x50);
+	}
+
+	ata_polling(ata_devices[drive].channel, 0);
+
+	outb(0x1F2, (unsigned char)sects >> 8);
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F3, (unsigned char)(LBA >> (8 * 3)));
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F4, (unsigned char)(LBA >> (8 * 4)));
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F5, (unsigned char)(LBA >> (8 * 5)));
+	ata_polling(ata_devices[drive].channel, 0);
+
+	outb(0x1F2, (unsigned char)sects);
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F3, (unsigned char)(LBA));
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F4, (unsigned char)(LBA >> (8 * 1)));
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F5, (unsigned char)(LBA >> (8 * 2)));
+	ata_polling(ata_devices[drive].channel, 0);
+
+	outb(0x1F7, ATA_CMD_READ_PIO_EXT);
+	while (ata_polling(ata_devices[drive].channel, 1) != 0);
+
+	for (i = 0; i < sects; i++) {
+		ata_polling(ata_devices[drive].channel, 0);
+
+		for (j = 0; j < 256; j++) {
+		    uint16_t in = inw(0x1F0);
+			*buf = in;
+			buf++;
+			*buf = (in >> 8) & 0xFF;
+			buf++;
+		}
+	}
+
+	ata_polling(ata_devices[drive].channel, 0);
+
+	asm volatile("sti");
+}
+
+void ata_write_sects_lba_48(int drive, uint64_t LBA, int sects, char* buf) {
+	asm volatile("cli");
+
+	int i, j;
+
+	if (sects <= 0) {
+		sects = 65536;
+	}
+
+	if (ata_devices[drive].drive == ATA_MASTER) {
+		outb(0x1F6, 0x40);
+	} else {
+		outb(0x1F6, 0x50);
+	}
+
+	ata_polling(ata_devices[drive].channel, 0);
+
+	outb(0x1F2, (unsigned char)sects >> 8);
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F3, (unsigned char)(LBA >> (8 * 3)));
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F4, (unsigned char)(LBA >> (8 * 4)));
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F5, (unsigned char)(LBA >> (8 * 5)));
+	ata_polling(ata_devices[drive].channel, 0);
+
+	outb(0x1F2, (unsigned char)sects);
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F3, (unsigned char)(LBA));
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F4, (unsigned char)(LBA >> (8 * 1)));
+	ata_polling(ata_devices[drive].channel, 0);
+	outb(0x1F5, (unsigned char)(LBA >> (8 * 2)));
+	ata_polling(ata_devices[drive].channel, 0);
+
+	for (i = 0; i < sects; i++) {
+		ata_polling(ata_devices[drive].channel, 0);
+
+		for (j = 0; j < 256; j++) {
+			outb(0x1F7, ATA_CMD_WRITE_PIO);
+			while (ata_polling(ata_devices[drive].channel, 1) != 0);
+			outw(0x1F0, (uint16_t)((*(buf+1) << 8) | (*buf & 0xFF)));
+			ata_polling(ata_devices[drive].channel, 0);
+			outb(0x1F7, ATA_CMD_CACHE_FLUSH);
+			buf += 2;
+		}
+	}
+
+	ata_polling(ata_devices[drive].channel, 0);
+
+	asm volatile("sti");
+}
