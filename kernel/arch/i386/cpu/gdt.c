@@ -23,8 +23,8 @@ void gdt_install() {
 	gp.base = (unsigned int)&gdt;
 
 	gdt_set_gate(0, 0, 0, 0, 0);
-	gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF); 
-	gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
+	gdt_set_gate(1, 0, 0xffffffff, 0x9A, 0xCF); 
+	gdt_set_gate(2, 0, 0xffffffff, 0x92, 0xCF);
 
 	gdt_flush();
 }

@@ -1,11 +1,18 @@
 #include <kernel/cpu/timer.h>
 #include <kernel/cpu/ports.h>
+#include <kernel/driver/vga/vga.h>
 #include <stdio.h>
+
+extern int display_cursor;
 
 uint32_t tick = 0;
 
 void timer_callback() {
 	tick = tick + 1;
+
+	if (tick % 20000 == 0) {
+		display_cursor = !display_cursor;
+	}
 }
 
 void timer_init(uint32_t freq) {
@@ -20,4 +27,8 @@ void timer_init(uint32_t freq) {
 void sleep(uint32_t ms) {
 	uint32_t end = tick + ms;
 	while(tick < end) {asm("nop");}
+}
+
+uint32_t timer_get_ticks() {
+	return tick;
 }

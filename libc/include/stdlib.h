@@ -13,6 +13,7 @@ void abort(void);
 
 char* itoa(long long int value, char* str, int base);
 char* ftoa(double value, char* str, int precision);
+int atoi(const char* str);
 
 // Memory functions
 void* malloc(size_t size);

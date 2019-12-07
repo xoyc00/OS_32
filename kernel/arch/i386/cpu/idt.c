@@ -2,6 +2,7 @@
 #include <kernel/cpu/ports.h>
 #include <kernel/cpu/timer.h>
 #include <kernel/driver/keyboard.h>
+#include <kernel/driver/mouse.h>
 #include <stdio.h>
 #include <assert.h>
 
@@ -234,6 +235,8 @@ void irq11_handler(void) {
 void irq12_handler(void) {
     outb(0xA0, 0x20);
     outb(0x20, 0x20); //EOI
+
+	mouse_handler();
 }
  
 void irq13_handler(void) {

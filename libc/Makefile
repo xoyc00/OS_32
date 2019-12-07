@@ -53,6 +53,7 @@ stdio/puts.o \
 stdlib/abort.o \
 stdlib/itoa.o \
 stdlib/ftoa.o \
+stdlib/atoi.o \
 stdlib/malloc.o \
 stdlib/free.o \
 string/memcmp.o \

@@ -2,6 +2,7 @@
 #include <kernel/cpu/ports.h>
 #include <kernel/cpu/idt.h>
 #include <kernel/tty.h>
+#include <kernel/driver/vga/vga.h>
 #include <kernel/shell.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,6 +17,8 @@ static char key_buffer[512];
 
 int shifted = 0;
 int caps = 0;
+
+extern int vga_drvr_enabled;
 
 #define SC_MAX 57
 const char *sc_name[] = { "ERROR", "Esc", "1", "2", "3", "4", "5", "6", 
@@ -45,7 +48,11 @@ void keyboard_callback() {
     uint8_t scancode = inb(0x60);
 	if (scancode == BACKSPACE) {
 		backspace(key_buffer);
-		terminal_backspace();
+		if (vga_drvr_enabled) {
+			vga_terminal_backspace();
+		} else {
+			terminal_backspace();
+		}
 	} else if (scancode == ENTER) {
 		printf("\n");
 		process_input(key_buffer);

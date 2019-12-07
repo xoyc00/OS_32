@@ -4,7 +4,7 @@
 #include <assert.h>
 
 void* get_next_block_of_size(size_t size) {
-	if (map.size >= size && map.free && map.size > 0 && map.addr > 0) {
+	if (map.size >= size + sizeof(memory_block_t)  && map.free && map.size > 0 && map.addr > 0) {
 		memory_block_t* next = (memory_block_t*)(map.addr + size);
 		next->size = (map.size - size) - sizeof(memory_block_t);
 		next->addr = (size_t)next + sizeof(memory_block_t);
@@ -18,7 +18,7 @@ void* get_next_block_of_size(size_t size) {
 	} else {
 		memory_block_t* next = map.next_ptr;
 		while(next != 0) {
-			if (next->size >= size && next->free && next->size > 0 && next->addr > 0) {
+			if (next->size >= size + sizeof(memory_block_t) && next->free && next->size > 0 && next->addr > 0) {
 				memory_block_t* n = (memory_block_t*)(next->addr + size);
 				n->size = (next->size - size) - sizeof(memory_block_t);
 				n->addr = (size_t)n + sizeof(memory_block_t);
@@ -48,12 +48,7 @@ void optimise_blocks(memory_block_t* m) {
 }
 
 void* kmalloc(size_t size) {
-	void* out_ptr = get_next_block_of_size(size);	
-	if (out_ptr == 0) {
-		return 0;
-	}
-
-	return out_ptr;
+	return get_next_block_of_size(size);
 }
 
 void kfree(void* ptr) {
@@ -108,8 +103,7 @@ void print_memory_map() {
 	memory_block_t* next = &map;
 	while(next != 0) {
 		if (next->size > 0 && next->addr > 0)
-			printf("\t Next:\n\t\t Free: %i\n\t\t Size: %fMB\n\t\t Address: %i\n", next->free, (double)next->size / 1024 / 1024, next->addr);
-
+			printf("\t Next:\n\t\t Free: %i\n\t\t Size: %fMB\n\t\t Address: %i\n\t\t Next_ptr: %i\n", next->free, (double)next->size / 1024 / 1024, next->addr, next->next_ptr);
 		next = next->next_ptr;
 	}
 }
