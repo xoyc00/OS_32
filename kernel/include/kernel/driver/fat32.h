@@ -17,7 +17,7 @@ typedef struct BPB {
 	uint16_t heads;
 	uint32_t hidden_sector_count;
 	uint32_t large_sector_count;
-} __attribute((packed)) BPD_t;
+} __attribute__((packed)) BPD_t;
 
 typedef struct EBR {
 	uint32_t sectors_per_fat;
@@ -35,7 +35,7 @@ typedef struct EBR {
 	unsigned char system_identifier[8];
 	unsigned char boot_code[420];
 	unsigned char boot_signature[2];
-} __attribute((packed)) EBR_t;
+} __attribute__((packed)) EBR_t;
 
 typedef struct FSInfo {
 	uint32_t lead_signature;
@@ -45,7 +45,7 @@ typedef struct FSInfo {
 	uint32_t search_cluster;
 	unsigned char reserved2[12];
 	uint32_t trail_signature;
-} __attribute((packed)) FSInfo_t;
+} __attribute__((packed)) FSInfo_t;
 
 void fat32_init();
 
