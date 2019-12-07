@@ -18,4 +18,4 @@ To create an iso, run:
 		./iso.sh
 		
 You can run this iso in either VirtualBox or VMWare, most likely any other emulator or virtual machine program also.
-It will also run on physical hardware, (requires parralel ATA drives right now).
+It will also run on physical hardware, (requires PS/2 keyboard and mouse).
