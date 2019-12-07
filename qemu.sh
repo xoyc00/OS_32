@@ -1,4 +1,4 @@
 #!/bin/sh
 ./iso.sh
 
-qemu-system-i386 -cdrom cd.iso -drive file=test.img,cache=writeback -soundhw pcspk -m 512M -device VGA,vgamem_mb=64 -enable-kvm
+qemu-system-i386 -boot menu=on -cdrom cd.iso -drive file=fat:rw:test_filesystem,format=raw -soundhw pcspk -m 2G -device VGA,vgamem_mb=64 -enable-kvm

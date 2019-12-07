@@ -65,16 +65,6 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 
 	printf("Initialisation Complete!\n");
 
-	char write_buf[512];
-	for (int i = 0; i < 512; i++) {
-		write_buf[i] = 'U';
-	}
-	ata_write_sects_lba_48(0, 158, 1, write_buf);
-
-	char read_buf[512];
-	ata_read_sects_lba_48(0, 158, 1, read_buf);
-	printf("%s\n", read_buf);
-
 	printf("> ");
 
 	double fps;
