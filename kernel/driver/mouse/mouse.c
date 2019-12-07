@@ -6,8 +6,8 @@
 //License: Use as you wish, except to cause damage
 unsigned char mouse_cycle=0;     //unsigned char
 char mouse_byte[3];    //signed char
-int mouse_x=0;         //signed char
-int mouse_y=0;         //signed char
+int mouse_x=640;         //signed char
+int mouse_y=512;         //signed char
 
 //Mouse functions
 void mouse_handler()

@@ -53,6 +53,8 @@ void process_input(char* input) {
 		printf("\n");
 	} else if (strcmp(i1, "beep") == 0) {
 		pcspkr_beep();
+	} else {
+		printf("Not a known command or program!\n");
 	}
 
     printf("> ");

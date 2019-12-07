@@ -10,7 +10,7 @@ uint32_t tick = 0;
 void timer_callback() {
 	tick = tick + 1;
 
-	if (tick % 20000 == 0) {
+	if (tick % 2000 == 0) {
 		display_cursor = !display_cursor;
 	}
 }

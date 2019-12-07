@@ -1,6 +1,7 @@
 #include <kernel/driver/vga/vga.h>
 #include <kernel/driver/vga/vga_font.h>
 #include <kernel/driver/mouse.h>
+#include <kernel/driver/pcspkr.h>
 #include <kernel/cpu/timer.h>
 #include "font.c"
 
@@ -60,8 +61,8 @@ void vga_putpixel(size_t x, size_t y, unsigned char r, unsigned char g, unsigned
 }
 
 void vga_drawcursor() {
-	size_t mouse_x = 0;
-	size_t mouse_y = 0;
+	int mouse_x = 0;
+	int mouse_y = 0;
 	mouse_getposition(&mouse_x, &mouse_y);
 
 	for (int y = 0; y < 12; y++) {

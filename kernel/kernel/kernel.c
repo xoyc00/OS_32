@@ -12,6 +12,7 @@
 #include <kernel/driver/vga/vga.h>
 #include <kernel/driver/keyboard.h>
 #include <kernel/driver/mouse.h>
+#include <kernel/driver/ata.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -39,13 +40,40 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	}
 	printf("Hello, kernel World!\nCreated By Millie!\n");
 	printf("Test Number: %f\n", sin(3.14159265/4));
-	printf("Lower memory: %fmb\n", (double)mbt->mem_lower / 1024.0);
-	printf("Upper memory: %fmb\n", (double)mbt->mem_upper / 1024.0);
 
+	printf("Installing GDT... ");
 	gdt_install();
+	printf("done\n");
+
+	printf("Installing IDT... ");
 	idt_install();
+	printf("done\n");
+
+	printf("Initialising memory mapper... ");
 	memory_mapper_init(mbt);
+	printf("done\n");
+
+	printf("Initialising timer... ");
 	timer_init(100000);
+	printf("done\n");
+
+	printf("Initialising ATA... ");
+	ata_initialise(0x1F0, 0x3F6, 0x170, 0x376, 0x000);
+	printf("done\n");
+	
+	ata_list_devices();
+
+	printf("Initialisation Complete!\n");
+
+	char write_buf[512];
+	for (int i = 0; i < 512; i++) {
+		write_buf[i] = '%';
+	}
+	ata_write_sects_lba_28(0, 128, 1, write_buf);
+
+	char read_buf[512];
+	ata_read_sects_lba_28(0, 128, 1, read_buf);
+	printf("%s\n", read_buf);
 
 	printf("> ");
 

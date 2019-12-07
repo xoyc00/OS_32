@@ -69,7 +69,6 @@ void kfree(void* ptr) {
 
 void memory_mapper_init(multiboot_info_t* mbt) {	
 	memory_block_t* prev = 0;
-	int counter = 0;
 
 	multiboot_memory_map_t* mmap = (multiboot_memory_map_t*)mbt->mmap_addr;
 	while(mmap < mbt->mmap_addr + mbt->mmap_length) {
@@ -90,13 +89,10 @@ void memory_mapper_init(multiboot_info_t* mbt) {
 				prev->next_ptr = next;
 				prev = next;
 			}
-			counter ++;
 		}		
 	
 		mmap = (multiboot_memory_map_t*) ( (unsigned int)mmap + mmap->size + sizeof(mmap->size) );
 	}
-
-	printf("Found %i free memory blocks.\n", counter);
 }
 
 void print_memory_map() {
