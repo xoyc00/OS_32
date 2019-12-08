@@ -5,6 +5,7 @@
 
 #include <kernel/driver/pcspkr.h>
 #include <kernel/driver/vga/vga.h>
+#include <kernel/driver/fat32.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -53,6 +54,9 @@ void process_input(char* input) {
 		printf("\n");
 	} else if (strcmp(i1, "beep") == 0) {
 		pcspkr_beep();
+	} else if (strcmp(i1, "fat32init") == 0) {
+		int drive = atoi(iargs[0]);
+		fat32_init(drive);
 	} else {
 		printf("Not a known command or program!\n");
 	}

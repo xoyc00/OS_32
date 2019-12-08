@@ -189,8 +189,9 @@ unsigned char ata_print_error(unsigned int drive, unsigned char err) {
 void ata_list_devices() {
 	for (int i = 0; i < 4; i++)
       	if (ata_devices[i].reserved == 1) {
-         	printf("Found %s Drive %fMB - %s\n",
+         	printf("Found %s Drive number %i, %fMB - %s\n",
             	(const char *[]){"ATA", "ATAPI"}[ata_devices[i].type],         /* Type */
+				i,
             	(double)ata_devices[i].size / 1024.0 / 2.0,               /* Size */
             	ata_devices[i].model);
       	}
@@ -393,4 +394,20 @@ void ata_write_sects_lba_48(int drive, uint64_t LBA, int sects, char* buf) {
 	ata_polling(ata_devices[drive].channel, 0);
 
 	asm volatile("sti");
+}
+
+void ata_read_sects(int drive, uint64_t LBA, int sects, char* buf) {
+	if (LBA > 0xFFFFFFF || sects > 256) {
+		ata_read_sects_lba_48(drive, LBA, sects, buf);
+	} else {
+		ata_read_sects_lba_28(drive, (uint32_t)LBA, sects, buf);
+	}
+}
+
+void ata_write_sects(int drive, uint64_t LBA, int sects, char* buf) {
+	if (LBA > 0xFFFFFFF || sects > 256) {
+		ata_read_sects_lba_48(drive, LBA, sects, buf);
+	} else {
+		ata_read_sects_lba_28(drive, (uint32_t)LBA, sects, buf);
+	}
 }
