@@ -4,8 +4,6 @@
 #include <assert.h>
 
 void* get_next_block_of_size(size_t size) {
-	print_memory_map();
-
 	if (map.size > size + sizeof(memory_block_t)  && map.free && map.size > 0 && map.addr > 0) {
 		memory_block_t* next = (memory_block_t*)(map.addr + size);
 		next->size = (map.size - size) - sizeof(memory_block_t);
@@ -16,11 +14,9 @@ void* get_next_block_of_size(size_t size) {
 		map.free = 0;
 		map.size = size;
 		map.next_ptr = next;
-		print_memory_map();
 		return (void*)map.addr;
 	} else if ((map.size == size + sizeof(memory_block_t)  && map.free && map.size > 0 && map.addr > 0)) {
 		map.free = 0;
-		print_memory_map();
 		return (void*)map.addr;
 	} else {
 		memory_block_t* next = map.next_ptr;
@@ -35,11 +31,9 @@ void* get_next_block_of_size(size_t size) {
 				next->free = 0;
 				next->size = size;
 				next->next_ptr = n;
-				print_memory_map();
 				return (void*)next->addr;
 			} else if (next->size == size + sizeof(memory_block_t) && next->free && next->size > 0 && next->addr > 0) {
 				next->free = 0;
-				print_memory_map();
 				return (void*)next->addr;
 			} else {
 				next = next->next_ptr;

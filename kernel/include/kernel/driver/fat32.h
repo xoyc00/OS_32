@@ -48,13 +48,13 @@ typedef struct FSInfo {
 
 typedef struct lfn_entry {
 	unsigned char order;
-	uint16_t bytes0[5];
+	unsigned char bytes0[10];
 	unsigned char attribute;
 	unsigned char entry_type;
 	unsigned char checksum;
-	uint16_t bytes1[6];
+	unsigned char bytes1[12];
 	unsigned char zero[2];
-	uint16_t bytes2[1];
+	unsigned char bytes2[2];
 } __attribute__((packed)) lfn_entry_t;
 
 typedef struct directory {
@@ -71,6 +71,7 @@ typedef struct directory {
 	uint16_t first_cluster_low;
 	uint32_t file_size;
 
+	int has_long_filename;
 	lfn_entry_t lfn;
 } __attribute__((packed)) directory_t;
 

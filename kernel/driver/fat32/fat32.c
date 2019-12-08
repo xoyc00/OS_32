@@ -56,8 +56,13 @@ void fat32_init(int drive) {
 	fat_drive[i].root_cluster = fat_drive[i].ebr->root_directory_cluster;
 	fat_drive[i].sectors_per_cluster = (fat_drive[i].bpb->sectors_per_cluster != 0)? fat_drive[i].bpb->sectors_per_cluster : 8;
 
-	fat_drive[i].root_directory = read_directory(0, fat_drive[i].root_cluster)[0];
-	printf("%s\n", fat_drive[i].root_directory.lfn.bytes0);
+	fat_drive[i].root_directory = read_directory(drive, fat_drive[i].root_cluster)[0];
+	
+
+	directory_t directory_test0 = read_directory(drive, fat_drive[i].root_directory.first_cluster_low | (fat_drive[i].root_directory.first_cluster_high << 16))[0];
+	directory_t directory_test1 = read_directory(drive, directory_test0.first_cluster_low | (directory_test0.first_cluster_high << 16))[0];
+
+	printf("%s\n", directory_test0.lfn.bytes0);
 
 	printf("done\n");
 }
@@ -69,31 +74,68 @@ char* read_cluster(int drive, uint32_t cluster) {
 	return buf;
 }
 
-directory_t* read_directory(int drive, uint32_t cluster) {
-	unsigned char* entry_list = read_cluster(drive, cluster);
-	lfn_entry_t* temp_lfn;
-	directory_t* out = malloc(sizeof(directory_t) * 65536);
-	while(*entry_list) {
-		if (*entry_list == 0 || *entry_list == 0xE5) {
-			entry_list += 32;
-			continue;
+uint32_t* get_cluster_chain(int drive, uint32_t start_cluster) {
+	uint32_t* out;
+	uint32_t* temp;
+	int i = 0;
+	while (1) {
+		if (i != 0)
+			temp = out;
+
+		out = malloc(sizeof(uint32_t) + sizeof(temp));
+
+		if (i != 0) {
+			memcpy(out, temp, sizeof(temp));
+			free(temp);
 		}
-	
-		if (*(entry_list + 11) == 0x0F) {
-			temp_lfn = (lfn_entry_t*)entry_list;
-			entry_list += 32;
-			continue;
+		
+		if (table_value(drive, start_cluster) == 0x0FFFFFF8) {
+			out[i] = 0;
+			break;
+		} else {
+			out[i] = table_value(drive, start_cluster);
 		}
 
-		directory_t d = *(directory_t*)entry_list;
-		if (temp_lfn) {
-			d.lfn = *temp_lfn;
-			free(temp_lfn);
-			temp_lfn = 0;
+		start_cluster = out[i];		
+		i++;
+	}
+	return out;
+}
+
+directory_t* read_directory(int drive, uint32_t cluster) {
+	lfn_entry_t* temp_lfn;
+	directory_t* out = malloc(sizeof(directory_t) * 65536);
+
+	uint32_t* clusters = get_cluster_chain(drive, cluster);
+
+	while(*clusters != 0) {
+		unsigned char* entry_list = read_cluster(drive, *clusters);
+		while(*entry_list != 0) {
+			if (*entry_list == 0xE5) {
+				entry_list += 32;
+				continue;
+			}
+		
+			if (*(entry_list + 11) == 0x0F) {
+				temp_lfn = (lfn_entry_t*)entry_list;
+				entry_list += 32;
+				continue;
+			}
+
+			directory_t d = *(directory_t*)entry_list;
+			if (temp_lfn) {
+				d.lfn = *temp_lfn;
+				d.has_long_filename = 1;
+				free(temp_lfn);
+				temp_lfn = 0;
+			} else {
+				d.has_long_filename = 0;
+			}
+			*out = d;
+			out++;
+			entry_list += 32;
 		}
-		*out = d;
-		out++;
-		entry_list += 32;
+		clusters++;
 	}
 
 	void* a = malloc(128);
