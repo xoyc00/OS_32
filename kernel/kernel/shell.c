@@ -42,8 +42,6 @@ void process_input(char* input) {
 		} else {
 			terminal_clear();
 		}
-	} else if (strcmp(i1, "memmap") == 0) {
-		print_memory_map();
 	} else if (strcmp(i1, "print") == 0) {
 		for (int i = 0; i < 256; i ++) {
 			if (iargs[i] != 0) {

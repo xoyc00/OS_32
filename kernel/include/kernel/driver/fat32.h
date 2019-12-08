@@ -46,6 +46,17 @@ typedef struct FSInfo {
 	uint32_t trail_signature;
 } __attribute__((packed)) FSInfo_t;
 
+typedef struct lfn_entry {
+	unsigned char order;
+	uint16_t bytes0[5];
+	unsigned char attribute;
+	unsigned char entry_type;
+	unsigned char checksum;
+	uint16_t bytes1[6];
+	unsigned char zero[2];
+	uint16_t bytes2[1];
+} __attribute__((packed)) lfn_entry_t;
+
 typedef struct directory {
 	unsigned char file_name[11];
 	unsigned char file_attributes;
@@ -59,18 +70,9 @@ typedef struct directory {
 	uint16_t last_modified_date;
 	uint16_t first_cluster_low;
 	uint32_t file_size;
-} __attribute__((packed)) directory_t;
 
-typedef struct lfn_entry {
-	unsigned char order;
-	uint16_t bytes0[5];
-	unsigned char attribute;
-	unsigned char entry_type;
-	unsigned char checksum;
-	uint16_t bytes1[6];
-	unsigned char zero[2];
-	uint16_t bytes2[1];
-} __attribute__((pakced)) lfn_entry_t;
+	lfn_entry_t lfn;
+} __attribute__((packed)) directory_t;
 
 typedef struct fat32 {
 	BPB_t* bpb;
@@ -89,6 +91,6 @@ typedef struct fat32 {
 
 void fat32_init(int drive);
 char* read_cluster(int drive, uint32_t cluster);
-directory_t read_directory(int drive, uint32_t cluster);
+directory_t* read_directory(int drive, uint32_t cluster);
 
 #endif

@@ -29,7 +29,7 @@ void fat32_init(int drive) {
 	char* boot_sect = malloc(512);
 	ata_read_sects(drive, 0, 1, boot_sect);
 
-	fat_drive[i].bpb = (BPB_t*)boot_sect;
+	fat_drive[i].bpb = (BPB_t*)(boot_sect + 00);
 	fat_drive[i].ebr = (EBR_t*)(boot_sect + 36);
 
 	char* FSInfo_sect = malloc(512);
@@ -56,18 +56,46 @@ void fat32_init(int drive) {
 	fat_drive[i].root_cluster = fat_drive[i].ebr->root_directory_cluster;
 	fat_drive[i].sectors_per_cluster = (fat_drive[i].bpb->sectors_per_cluster != 0)? fat_drive[i].bpb->sectors_per_cluster : 8;
 
-	fat_drive[i].root_directory = read_directory(0, root_cluster);
+	fat_drive[i].root_directory = read_directory(0, fat_drive[i].root_cluster)[0];
+	printf("%s\n", fat_drive[i].root_directory.lfn.bytes0);
 
 	printf("done\n");
 }
 
 char* read_cluster(int drive, uint32_t cluster) {
 	uint32_t start_sect = first_sect_of_cluster(drive, cluster);
-	char* buf = malloc(512 * fat_drive[i].sectors_per_cluster);
-	ata_read_sects(drive, start_sect, fat_drive[i].sectors_per_cluster, buf);
+	char* buf = malloc(512 * fat_drive[drive].sectors_per_cluster);
+	ata_read_sects(drive, start_sect, fat_drive[drive].sectors_per_cluster, buf);
 	return buf;
 }
 
-directory_t read_directory(int drive, uint32_t cluster) {
+directory_t* read_directory(int drive, uint32_t cluster) {
+	unsigned char* entry_list = read_cluster(drive, cluster);
+	lfn_entry_t* temp_lfn;
+	directory_t* out = malloc(sizeof(directory_t) * 65536);
+	while(*entry_list) {
+		if (*entry_list == 0 || *entry_list == 0xE5) {
+			entry_list += 32;
+			continue;
+		}
 	
+		if (*(entry_list + 11) == 0x0F) {
+			temp_lfn = (lfn_entry_t*)entry_list;
+			entry_list += 32;
+			continue;
+		}
+
+		directory_t d = *(directory_t*)entry_list;
+		if (temp_lfn) {
+			d.lfn = *temp_lfn;
+			free(temp_lfn);
+			temp_lfn = 0;
+		}
+		*out = d;
+		out++;
+		entry_list += 32;
+	}
+
+	void* a = malloc(128);
+	free(a);
 }
