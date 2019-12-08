@@ -5,6 +5,7 @@
 
 #include <kernel/driver/pcspkr.h>
 #include <kernel/driver/vga/vga.h>
+#include <kernel/driver/ata.h>
 #include <kernel/driver/fat32.h>
 
 #include <string.h>
@@ -56,6 +57,8 @@ void process_input(char* input) {
 	} else if (strcmp(i1, "fat32init") == 0) {
 		int drive = atoi(iargs[0]);
 		fat32_init(drive);
+	} else if (strcmp(i1, "drvls") == 0) {
+		ata_list_devices();
 	} else {
 		printf("Not a known command or program!\n");
 	}

@@ -197,7 +197,7 @@ void ata_list_devices() {
       	}
 }
 
-void ata_read_sects_lba_28(int drive, uint32_t LBA, int sects, char* buf) {
+void ata_read_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* buf) {
 	asm volatile("cli");
 
 	int i, j;
@@ -243,7 +243,7 @@ void ata_read_sects_lba_28(int drive, uint32_t LBA, int sects, char* buf) {
 	asm volatile("sti");
 }
 
-void ata_write_sects_lba_28(int drive, uint32_t LBA, int sects, char* buf) {
+void ata_write_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* buf) {
 	asm volatile("cli");
 
 	int i, j;
@@ -288,7 +288,7 @@ void ata_write_sects_lba_28(int drive, uint32_t LBA, int sects, char* buf) {
 	asm volatile("sti");
 }
 
-void ata_read_sects_lba_48(int drive, uint64_t LBA, int sects, char* buf) {
+void ata_read_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 	asm volatile("cli");
 
 	int i, j;
@@ -343,7 +343,7 @@ void ata_read_sects_lba_48(int drive, uint64_t LBA, int sects, char* buf) {
 	asm volatile("sti");
 }
 
-void ata_write_sects_lba_48(int drive, uint64_t LBA, int sects, char* buf) {
+void ata_write_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 	asm volatile("cli");
 
 	int i, j;
@@ -396,7 +396,7 @@ void ata_write_sects_lba_48(int drive, uint64_t LBA, int sects, char* buf) {
 	asm volatile("sti");
 }
 
-void ata_read_sects(int drive, uint64_t LBA, int sects, char* buf) {
+void ata_read_sects(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 	if (LBA > 0xFFFFFFF || sects > 256) {
 		ata_read_sects_lba_48(drive, LBA, sects, buf);
 	} else {
@@ -404,7 +404,7 @@ void ata_read_sects(int drive, uint64_t LBA, int sects, char* buf) {
 	}
 }
 
-void ata_write_sects(int drive, uint64_t LBA, int sects, char* buf) {
+void ata_write_sects(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 	if (LBA > 0xFFFFFFF || sects > 256) {
 		ata_read_sects_lba_48(drive, LBA, sects, buf);
 	} else {

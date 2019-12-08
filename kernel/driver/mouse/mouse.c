@@ -1,4 +1,5 @@
 #include <kernel/driver/mouse.h>
+#include <kernel/cpu/ports.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -27,11 +28,6 @@ void mouse_handler()
       mouse_x+=mouse_byte[1];
       mouse_y-=mouse_byte[2];
       mouse_cycle=0;
-
-	  if (mouse_x < 1) mouse_x = 1;
-	  if (mouse_x > 1279) mouse_x = 1279;
-	  if (mouse_y < 1) mouse_y = 1;
-	  if (mouse_y > 1023) mouse_x = 1023;
 
       break;
   }
