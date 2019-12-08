@@ -20,4 +20,5 @@ To create an img, run:
 		./img.sh
 		
 To run in qemu, run:
+		
 		./qemu.sh
