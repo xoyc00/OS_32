@@ -81,23 +81,23 @@ uint8_t mouse_read()
 
 void mouse_init()
 {
-  char _status;  //unsigned char
+  unsigned char _status;  //unsigned char
 
   //Enable the auxiliary mouse device
   mouse_wait(1);
   outb(0x64, 0xA8);
+  mouse_read();
  
   //Enable the interrupts
   mouse_wait(1);
   outb(0x64, 0x20);
   mouse_wait(0);
   _status=(inb(0x60) | 2);
+  _status=_status|(0x20 >> 5);
   mouse_wait(1);
   outb(0x64, 0x60);
   mouse_wait(1);
   outb(0x60, _status);
-  outb(0x60, 0xA8);
-  mouse_read();
  
   //Tell the mouse to use default settings
   mouse_write(0xF6);
