@@ -104,6 +104,7 @@ struct ide_device {
    	unsigned char  model[41];   // Model in string.
 };
 
+/* Initialise the ATA driver */
 void ata_initialise(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, unsigned int BAR3, unsigned int BAR4);
 
 unsigned char ata_read(unsigned char channel, unsigned char reg);
@@ -111,14 +112,26 @@ void ata_write(unsigned char channel, unsigned char reg, unsigned char data);
 void ata_read_buffer(unsigned char channel, unsigned char reg, unsigned int buffer, unsigned int quads);
 unsigned char ata_polling(unsigned char channel, unsigned int advanced_check);
 unsigned char ata_print_error(unsigned int drive, unsigned char err);
+
+/* List all ATA devices */
 void ata_list_devices();
 
+/* Read a set amount of sectors (up to 256) using 28-bit LBA mode */
 void ata_read_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* buf);
+
+/* Write a set amount of sectors (up to 256) using 28-bit LBA mode */
 void ata_write_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* buf);
+
+/* Read a set amount of sectors (up to 65536) using 48-bit LBA mode */
 void ata_read_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* buf);
+
+/* Write a set amount of sectors (up to 65536) using 48-bit LBA mode */
 void ata_write_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* buf);
 
+/* Read a set amount of sectors using the correct LBA mode */
 void ata_read_sects(int drive, uint64_t LBA, int sects, unsigned char* buf);
+
+/* Write a set amount of sectors using the correct LBA mode */
 void ata_write_sects(int drive, uint64_t LBA, int sects, unsigned char* buf);
 
 #endif

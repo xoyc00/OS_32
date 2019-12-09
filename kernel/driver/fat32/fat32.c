@@ -65,18 +65,24 @@ void fat32_init(int drive) {
 
 	directory_entry_t* test = read_directory(drive, fat_drive[i].root_cluster);
 	if (test[0].has_long_filename) {
-		const char* bytes0 = malloc(10);		
+		const char* bytes0 = malloc(10);	
 		memcpy(bytes0, test[0].lfn.bytes0, 10);
-		const char* bytes1 = malloc(12);		
+		const char* bytes1 = malloc(12);	
 		memcpy(bytes0, test[0].lfn.bytes1, 12);
-		const char* bytes2 = malloc(2);		
-		memcpy(bytes0, test[0].lfn.bytes2, 2);
+		const char* bytes2 = malloc(4);	
+		memcpy(bytes0, test[0].lfn.bytes2, 4);
 
-		print_debug(bytes0,  10);	
-		print_debug(bytes1,  12);	
-		print_debug(bytes2,  2);	
+		print_debug(bytes0,  10);
+		print_debug(bytes1,  12);
+		print_debug(bytes2,  4);
+
+		free(bytes0);
+		free(bytes1);
+		free(bytes2);
 	 } else
 		print_debug(test[0].file_name, 11);
+
+	free(test);
 
 	printf("done\n");
 }
@@ -96,7 +102,7 @@ uint32_t* get_cluster_chain(int drive, uint32_t start_cluster) {
 		if (i != 0)
 			temp = out;
 
-		out = malloc(sizeof(uint32_t) * (i+1));
+		out = malloc(sizeof(uint32_t) * (i+2));
 
 		if (i != 0) {
 			memcpy(out, temp, sizeof(uint32_t) * (i));
@@ -120,15 +126,61 @@ directory_entry_t* read_directory(int drive, uint32_t cluster) {
 	lfn_entry_t temp_lfn;
 	directory_entry_t* out = malloc(sizeof(directory_entry_t));
 	directory_entry_t* temp;
-	int i, has_temp_lfn;
+	int i = 0, has_temp_lfn = 0;
 
 	uint32_t* clusters = get_cluster_chain(drive, cluster);
 
-	printf("Start cluster: %x\n", cluster);
+	/* Check the first cluster */
+	{
+		printf("Start cluster: %x\n", cluster);
 
+		unsigned char* entry_list = read_cluster(drive, cluster);
+		print_debug(entry_list, 512*fat_drive[drive].sectors_per_cluster);
+		while(entry_list < 512*fat_drive[drive].sectors_per_cluster) {
+			if (*entry_list == 0) {
+				break;AU
+5
+
+			}
+			if (*entry_list == 0xE5) {
+				entry_list += 32;
+				continue;
+			}
+		
+			if (*(entry_list + 11) == 0x0F) {
+				temp_lfn = *(lfn_entry_t*)entry_list;
+				entry_list += 32;
+				has_temp_lfn = 1;
+				continue;
+			}
+
+			directory_entry_t d = *(directory_entry_t*)entry_list;
+			if (has_temp_lfn) {
+				d.lfn = temp_lfn;
+				d.has_long_filename = 1;
+				has_temp_lfn = 0;
+			} else {
+				d.has_long_filename = 0;
+			}
+			if (temp) {
+				free(temp);
+				temp = 0;
+			}
+			temp = out;
+			out = malloc(sizeof(directory_entry_t) * (i + 1));
+			memcpy(out, temp, sizeof(directory_entry_t) * (i));
+			out[i] = d;
+			i++;
+			entry_list += 32;
+		}
+	}
+	
+	/* Check the cluster chain */
 	while(*clusters != 0) {
+		printf("Start cluster: %x\n", *clusters);
+
 		unsigned char* entry_list = read_cluster(drive, *clusters);
-		while(*entry_list != 0) {
+		while(entry_list < 512*fat_drive[drive].sectors_per_cluster) {
 			if (*entry_list == 0xE5) {
 				entry_list += 32;
 				continue;
@@ -150,9 +202,13 @@ directory_entry_t* read_directory(int drive, uint32_t cluster) {
 			} else {
 				d.has_long_filename = 0;
 			}
+			if (temp) {
+				free(temp);
+				temp = 0;
+			}
 			temp = out;
-			out = malloc(sizeof(directory_entry_t) * (i));
-			memcpy(out, temp, sizeof(directory_entry_t) * (i-1));
+			out = malloc(sizeof(directory_entry_t) * (i + 1));
+			memcpy(out, temp, sizeof(directory_entry_t) * (i));
 			out[i] = d;
 			i++;
 			entry_list += 32;
@@ -160,7 +216,5 @@ directory_entry_t* read_directory(int drive, uint32_t cluster) {
 		clusters++;
 	}
 
-	void* a = malloc(128);
-	free(a);
 	return out;
 }
