@@ -78,7 +78,7 @@ typedef struct directory_entry {
 
 	int has_long_filename;
 	lfn_entry_t lfn;
-} /*__attribute__((packed))*/ directory_entry_t;
+} __attribute__((packed)) directory_entry_t;
 
 /* Fat32 struct for holding all the relevant information about a fat32 volume */
 typedef struct fat32 {
