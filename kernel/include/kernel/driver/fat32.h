@@ -63,7 +63,8 @@ typedef struct lfn_entry {
 
 /* Directory Entry */
 typedef struct directory_entry {
-	unsigned char file_name[11];
+	unsigned char file_name[8];
+	unsigned char extension[3];
 	unsigned char file_attributes;
 	unsigned char reserved;
 	unsigned char create_time_tenths_second;
