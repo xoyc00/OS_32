@@ -15,7 +15,7 @@ void* get_next_block_of_size(size_t size) {
 		map.size = size;
 		map.next_ptr = next;
 		return (void*)map.addr;
-	} else if ((map.size == size + sizeof(memory_block_t)  && map.free && map.size > 0 && map.addr > 0)) {
+	} else if ((map.size == size  && map.free && map.size > 0 && map.addr > 0)) {
 		map.free = 0;
 		return (void*)map.addr;
 	} else {
@@ -32,7 +32,7 @@ void* get_next_block_of_size(size_t size) {
 				next->size = size;
 				next->next_ptr = n;
 				return (void*)next->addr;
-			} else if (next->size == size + sizeof(memory_block_t) && next->free && next->size > 0 && next->addr > 0) {
+			} else if (next->size == size && next->free && next->size > 0 && next->addr > 0) {
 				next->free = 0;
 				return (void*)next->addr;
 			} else {

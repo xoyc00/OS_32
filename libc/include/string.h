@@ -15,6 +15,7 @@ void* memmove(void*, const void*, size_t);
 void* memset(void*, int, size_t);
 size_t strlen(const char*);
 int strcmp(char* s1, char* s2);
+char* strcpy(char* dst, const char* src);
 
 void append(char s[], char n);
 void backspace(char s[]);

@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <ctype.h>
 
 extern int vga_drvr_enabled;
 
@@ -54,14 +55,38 @@ void process_input(char* input) {
 		printf("\n");
 	} else if (strcmp(i1, "beep") == 0) {
 		pcspkr_beep();
-	} else if (strcmp(i1, "fat32init") == 0) {
-		int drive = atoi(iargs[0]);
-		fat32_init(drive);
 	} else if (strcmp(i1, "drvls") == 0) {
 		ata_list_devices();
+	} else if (strcmp(i1, "ls") == 0) {
+		int count;
+		directory_entry_t* d = read_directory_from_name(0, current_directory, &count);
+		for (int i = 0; i < count; i++) {
+			char* file_name = strtok(d[i].file_name, " ");
+			char* extension = strtok(0, " ");
+			printf("~%s", file_name);
+
+			if (isalpha(extension[0])) {
+				printf(".%s", extension);
+			}
+
+			printf("\n");
+		}
+	} else if (strcmp(i1, "cd") == 0) {
+		char* path = iargs[0];
+		printf("%s\n", path);
+
+		if (path[0] != '/') {
+			printf("Not a valid path!\n");
+		} else {
+			free(current_directory);
+
+			current_directory = malloc(strlen(path));
+			strcpy(current_directory, path);
+			current_directory[strlen(path)] = '\0';
+		}
 	} else {
 		printf("Not a known command or program!\n");
 	}
 
-    printf("> ");
+    printf("%s> ", current_directory);
 }

@@ -3,16 +3,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-char* strcpy(char* dest, const char* src) {
-	if (sizeof(dest) < sizeof(src))
-		return NULL;
-	for (int i = 0; i < strlen(src); i++) {
-		dest[i] = src[i];
-	}
-
-	return dest;
-}
-
 char* strtok(char* str, char* tokens) { 
 	static char* temp;
 	static char* old_temp;

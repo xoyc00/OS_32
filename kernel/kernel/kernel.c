@@ -13,6 +13,7 @@
 #include <kernel/driver/keyboard.h>
 #include <kernel/driver/mouse.h>
 #include <kernel/driver/ata.h>
+#include <kernel/driver/fat32.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -63,9 +64,13 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	
 	ata_list_devices();
 
+	printf("Initialising FAT32... ");
+	fat32_init(0);
+	printf("done\n");
+
 	printf("Initialisation Complete!\n");
 
-	printf("> ");
+	printf("%s> ", current_directory);
 
 	double fps;
 
@@ -74,7 +79,7 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 			uint32_t start = timer_get_ticks();
 
 			// Update the screen
-			vga_clearscreen(48, 48, 48);
+			vga_clearscreen(255, 255, 255);
 			vga_terminal_draw();
 
 			char* fpsstr;

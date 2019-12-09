@@ -63,8 +63,7 @@ typedef struct lfn_entry {
 
 /* Directory Entry */
 typedef struct directory_entry {
-	unsigned char file_name[8];
-	unsigned char extension[3];
+	unsigned char file_name[11];
 	unsigned char file_attributes;
 	unsigned char reserved;
 	unsigned char create_time_tenths_second;
@@ -95,6 +94,8 @@ typedef struct fat32 {
 	uint8_t sectors_per_cluster;
 } fat32_t;
 
+char* current_directory;
+
 /* Initialise a fat32 drive */
 void fat32_init(int drive);
 
@@ -102,6 +103,12 @@ void fat32_init(int drive);
 unsigned char* read_cluster(int drive, uint32_t cluster);
 
 /* Read a directory */
-directory_entry_t* read_directory(int drive, uint32_t cluster);
+directory_entry_t* read_directory(int drive, uint32_t cluster, int* count);
+
+/* Read a directory from a path */
+directory_entry_t* read_directory_from_name(int drive, const char* path, int* count);
+
+/* Read a file from a path */
+unsigned char* read_file(int drive, const char* path);
 
 #endif

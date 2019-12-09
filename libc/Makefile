@@ -62,6 +62,7 @@ string/memmove.o \
 string/memset.o \
 string/strlen.o \
 string/strcmp.o \
+string/strcpy.o \
 string/append.o \
 string/backspace.o \
 string/strtok.o \

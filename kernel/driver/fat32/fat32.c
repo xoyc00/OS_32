@@ -1,6 +1,8 @@
 #include <kernel/driver/fat32.h>
 #include <kernel/driver/ata.h>
 
+#include <kernel/shell.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,7 +14,7 @@ uint32_t first_sect_of_cluster(int drive, uint32_t cluster) {
 }
 
 unsigned int table_value(int drive, uint32_t active_cluster) {
-	char* fat_table = malloc(512);
+	unsigned char* fat_table = malloc(512);
 	unsigned int fat_offset = active_cluster * 4;
 	unsigned int fat_sector = fat_drive[drive].first_fat_sector + (fat_offset / 512);
 	unsigned int ent_offset = fat_offset % 512;
@@ -29,7 +31,6 @@ void print_debug(unsigned char* str, size_t size) {
 }
 
 void fat32_init(int drive) {
-	printf("Initialising fat32... ");
 
 	int i = drive;
 
@@ -63,13 +64,9 @@ void fat32_init(int drive) {
 	fat_drive[i].root_cluster = fat_drive[i].ebr.root_directory_cluster;
 	fat_drive[i].sectors_per_cluster = (fat_drive[i].bpb.sectors_per_cluster != 0)? fat_drive[i].bpb.sectors_per_cluster : 8;
 
-	directory_entry_t* test = read_directory(drive, fat_drive[i].root_cluster);
-
-	print_debug(test[1].file_name, 11);
-
-	free(test);
-
-	printf("done\n");
+	current_directory = malloc(2);
+	current_directory[0] = '/';
+	current_directory[1] = '\0';
 }
 
 unsigned char* read_cluster(int drive, uint32_t cluster) {
@@ -107,7 +104,7 @@ uint32_t* get_cluster_chain(int drive, uint32_t start_cluster) {
 	return out;
 }
 
-directory_entry_t* read_directory(int drive, uint32_t cluster) {
+directory_entry_t* read_directory(int drive, uint32_t cluster, int* count) {
 	lfn_entry_t temp_lfn;
 	directory_entry_t* out = malloc(sizeof(directory_entry_t));
 	directory_entry_t* temp;
@@ -117,11 +114,7 @@ directory_entry_t* read_directory(int drive, uint32_t cluster) {
 
 	/* Check the first cluster */
 	{
-		//printf("Start cluster: %x\n", cluster);
-
 		unsigned char* entry_list = read_cluster(drive, cluster);
-		print_debug(entry_list, 512*fat_drive[drive].sectors_per_cluster);
-		printf("\n");
 		while(*entry_list != 0) {
 			if (*entry_list == 0xE5) {
 				entry_list += 32;
@@ -146,8 +139,8 @@ directory_entry_t* read_directory(int drive, uint32_t cluster) {
 			if (temp) {
 				free(temp);
 				temp = 0;
-			}
-		
+			}		
+
 			temp = out;
 			out = malloc(sizeof(directory_entry_t) * (i + 1));
 			memcpy(out, temp, sizeof(directory_entry_t) * (i));
@@ -159,8 +152,6 @@ directory_entry_t* read_directory(int drive, uint32_t cluster) {
 	
 	/* Check the cluster chain */
 	while(*clusters != 0) {
-		printf("Start cluster: %x\n", *clusters);
-
 		unsigned char* entry_list = read_cluster(drive, *clusters);
 		while(*entry_list != 0) {
 			if (*entry_list == 0xE5) {
@@ -198,5 +189,50 @@ directory_entry_t* read_directory(int drive, uint32_t cluster) {
 		clusters++;
 	}
 
+	*count = i;
 	return out;
+}
+
+directory_entry_t* read_directory_from_name(int drive, const char* path, int* count) {
+	/*if (path[0] != '/') {
+		printf("Not a valid path!\n");
+		return 0;
+	}*/
+
+	int c;
+	directory_entry_t* root_directory = read_directory(drive, fat_drive[drive].root_cluster, &c);
+
+	if (path == "/") {
+		*count = c;
+		return root_directory;
+	}
+
+	int i = 0;
+
+	directory_entry_t* d = root_directory;
+	char* next_dir = strtok(path, "/ ");
+
+	for (i = 0; i < c; i++) {
+		if (!next_dir) {
+			break;
+		}
+		char* file_name = strtok(d[i].file_name, " ");
+		if (strcmp(file_name, next_dir) == 0) {
+			d = read_directory(drive, (d[i].first_cluster_low & 0xFF) | (d[i].first_cluster_high >> 16), &c);
+			i = 0;
+			next_dir = strtok(0, "/");
+		}
+	}
+
+	*count = i;
+	return d;
+}
+
+unsigned char* read_file(int drive, const char* path) {
+	if (path[0] != '/') {
+		printf("Not a valid path!\n");
+		return 0;
+	}
+	
+	return 0;
 }

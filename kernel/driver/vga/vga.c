@@ -183,31 +183,50 @@ void vga_terminal_drawstr(char* str, size_t size) {
 }
 
 void vga_terminal_draw() {
-	for (int x = 0; x < TERMINAL_WIDTH; x++) {
-		for (int y = 0; y < TERMINAL_HEIGHT; y++) {
+	for (int y = 0; y < TERMINAL_HEIGHT; y++) {
+		int is_hyperlink = 0;
+		for (int x = 0; x < TERMINAL_WIDTH; x++) {
 			unsigned char c = terminal_mem[x + (y * TERMINAL_WIDTH)];
-			vga_drawchar(c, x*8, y*16, 255, 255, 255);
+			if (c == '~')
+				is_hyperlink = 1;
+			else if (c == '^')
+				is_hyperlink = 0;
+			else if (is_hyperlink) {
+				vga_drawchar(c, x*8, y*16, 255, 0, 0);
+
+				if (c != ' ' && c != 0) {	// Draw underline
+					vga_putpixel(x*8+0,y*16+15, 255, 0, 0); 
+					vga_putpixel(x*8+1,y*16+15, 255, 0, 0); 
+					vga_putpixel(x*8+2,y*16+15, 255, 0, 0); 
+					vga_putpixel(x*8+3,y*16+15, 255, 0, 0); 
+					vga_putpixel(x*8+4,y*16+15, 255, 0, 0); 
+					vga_putpixel(x*8+5,y*16+15, 255, 0, 0); 
+					vga_putpixel(x*8+6,y*16+15, 255, 0, 0); 
+					vga_putpixel(x*8+7,y*16+15, 255, 0, 0); 
+				}
+			} else 
+				vga_drawchar(c, x*8, y*16, 0, 0, 255);
 		}
 	}
 
 	if (display_cursor) {
-		vga_putpixel(terminal_column*8+0,terminal_row*16+15, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+1,terminal_row*16+15, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+2,terminal_row*16+15, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+3,terminal_row*16+15, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+4,terminal_row*16+15, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+5,terminal_row*16+15, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+6,terminal_row*16+15, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+7,terminal_row*16+15, 255, 255, 255); 
+		vga_putpixel(terminal_column*8+0,terminal_row*16+15, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+1,terminal_row*16+15, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+2,terminal_row*16+15, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+3,terminal_row*16+15, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+4,terminal_row*16+15, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+5,terminal_row*16+15, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+6,terminal_row*16+15, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+7,terminal_row*16+15, 0, 0, 255); 
 
-		vga_putpixel(terminal_column*8+0,terminal_row*16+16, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+1,terminal_row*16+16, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+2,terminal_row*16+16, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+3,terminal_row*16+16, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+4,terminal_row*16+16, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+5,terminal_row*16+16, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+6,terminal_row*16+16, 255, 255, 255); 
-		vga_putpixel(terminal_column*8+7,terminal_row*16+16, 255, 255, 255); 
+		vga_putpixel(terminal_column*8+0,terminal_row*16+16, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+1,terminal_row*16+16, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+2,terminal_row*16+16, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+3,terminal_row*16+16, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+4,terminal_row*16+16, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+5,terminal_row*16+16, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+6,terminal_row*16+16, 0, 0, 255); 
+		vga_putpixel(terminal_column*8+7,terminal_row*16+16, 0, 0, 255); 
 	}
 }
 
