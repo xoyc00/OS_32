@@ -254,7 +254,7 @@ static inline struct boundary_tag* split_tag( struct boundary_tag* tag )
 
 
 
-static struct boundary_tag* allocate_new_tag( unsigned int size )
+static struct boundary_tag* allocate_new_tag( size_t size )
 {
 	unsigned int pages;
 	unsigned int usage;

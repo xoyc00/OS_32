@@ -32,7 +32,7 @@ void vga_init(size_t width, size_t height, size_t pitch, size_t bpp, size_t addr
 	vga_bpp = bpp;
 	vga_mem = (unsigned char*)addr;
 
-	memset(backbuffer_mem, 0, sizeof(backbuffer_mem));
+	memset(backbuffer_mem, 0, 1280*1024*4);
 
 	terminal_row = 0;
 	terminal_column = 0;
@@ -160,7 +160,7 @@ void vga_terminal_write(char* str, size_t size) {
 }
 
 void vga_terminal_drawcharat(unsigned char c, size_t x, size_t y) {
-	terminal_mem[(y*TERMINAL_WIDTH) + x] = c;
+	terminal_mem[x + (y*TERMINAL_WIDTH)] = c;
 }
 
 void vga_terminal_drawstr(char* str, size_t size) {

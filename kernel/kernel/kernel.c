@@ -74,8 +74,7 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 
 	double fps;
 
-	void* ptr = malloc(128);
-	free(ptr);
+	print_memory_map();
 
 	while(1) {
 		if (vga_enabled) {
