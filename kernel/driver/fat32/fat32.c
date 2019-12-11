@@ -199,10 +199,35 @@ directory_entry_t* read_directory(int drive, uint32_t cluster, int* count) {
 	return out;
 }
 
+directory_entry_t* find_next_directory_from_name(int drive, const char* next_dir, int* count, directory_entry_t* current_path) {
+	if (next_dir == 0)
+		return 0;
+
+	int c;
+
+	directory_entry_t* d;
+
+	for(int i = 0; i < *count; i++) {
+		if (strcmp(strtok(current_path[i].file_name, " "), next_dir) == 0) {
+			d = read_directory(drive, current_path[i].first_cluster_low | (current_path[i].first_cluster_high >> 16), &c);
+			*count = c;
+			return d;
+		}
+	}
+
+	return -1;
+}
+
 directory_entry_t* read_directory_from_name(int drive, const char* path, int* count) {
 	if (path[0] != '/') {
 		printf("Not a valid path!\n");
 		return 0;
+	}
+
+	char* p[128];
+	p[0] = strtok(path, "/");
+	for (int i = 1; i < 128; i++) {
+		p[i] = strtok(0, "/");
 	}
 
 	int c;
@@ -216,9 +241,24 @@ directory_entry_t* read_directory_from_name(int drive, const char* path, int* co
 	int i = 0;
 
 	directory_entry_t* d = root_directory;
-	char* next_dir = strtok(path, "/");
+	char* next_dir = p[0];
 	
 	int found = 0;
+
+	// Search each directory down the path
+	while(d != 0) {
+		directory_entry_t* next = find_next_directory_from_name(drive, next_dir, &i, d);
+		if (next == 0) {
+			found = 1;
+			break;
+		}
+		if (next == -1) {
+			break;
+		}
+		d = next;
+		i++;
+		next_dir = p[i];
+	}
 
 	if (found) {
 		*count = i;

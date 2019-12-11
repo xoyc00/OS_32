@@ -39,7 +39,7 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	} else {
 		terminal_initialize();
 	}
-	printf("Hello, kernel World!\nCreated By Millie!\n");
+	printf("Hello, kernel World!\nCreated By Millie! %c\n", 0x02);
 	printf("Test Number: %f\n", sin(3.14159265/4));
 
 	printf("Installing GDT... ");
