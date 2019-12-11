@@ -86,8 +86,8 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 
 			char* fpsstr;
 			ftoa(fps, fpsstr, 2);
-			vga_drawstr("FPS:", 1184, 0, 0, 0, 255);
-			vga_drawstr(fpsstr, 1216, 0, 0, 0, 255);
+			vga_drawstr("FPS:", 940, 0, 0, 0, 255);
+			vga_drawstr(fpsstr, 978, 0, 0, 0, 255);
 
 			vga_drawcursor();
 

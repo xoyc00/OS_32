@@ -21,6 +21,7 @@ menuentry "os_32" {
 }
 EOF
 
+mkdir -p mnt
 dd if=/dev/zero of=image.img bs=1M count=256
 mkfs.vfat -F32 image.img
 sudo mount -t vfat image.img mnt/

@@ -62,25 +62,24 @@ void process_input(char* input) {
 		ata_list_devices();
 	} else if (strcmp(i1, "ls") == 0) {
 		int count;
-		directory_entry_t* d = read_directory_from_name(0, current_directory, &count);
+		directory_entry_t* d = read_directory_from_name(0, "/", &count);
 		if (count != 0) {
-			printf("Index of %s: %i\n", current_directory, count);
+			printf("Index of %s: %i\n", "/", count);
 			for (int i = 0; i < count; i++) {
-				char* file_name = strtok(d[i].file_name, " ");
-				char* extension = strtok(0, " ");
-				printf("~%s", file_name);
+				char* file_name = d[i].file_name;
+				char* extension = d[i].file_name + 8;
 
-				if (extension) {
-					printf(".%s", extension);
+				if (isalpha(extension[0])) {
+					printf("~%s.%s", file_name, extension);
+				} else {
+					file_name = strtok(d[i].file_name, " ");
+					printf("~%s\n", file_name);
 				}
-
-				printf("\n");
 			}
 			free(d);
 		}
 	} else if (strcmp(i1, "cd") == 0) {
 		char* path = iargs[0];
-		printf("%s\n", path);
 
 		if (path[0] != '/') {
 			printf("Not a valid path!\n");
