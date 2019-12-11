@@ -2,6 +2,7 @@
 #include <kernel/driver/vga/vga_font.h>
 #include <kernel/driver/mouse.h>
 #include <kernel/driver/pcspkr.h>
+#include <kernel/driver/fat32.h>
 #include <kernel/cpu/timer.h>
 #include "font.c"
 
@@ -12,7 +13,7 @@
 
 size_t vga_width, vga_height, vga_pitch, vga_bpp;
 unsigned char* vga_mem;
-unsigned char backbuffer_mem[1280*1024*4];
+unsigned char backbuffer_mem[1024*768*4];
 
 static size_t terminal_row;
 static size_t terminal_column;
@@ -20,8 +21,8 @@ static size_t terminal_column;
 int vga_drvr_enabled = 0;
 int display_cursor = 0;
 
-#define TERMINAL_HEIGHT 64
-#define TERMINAL_WIDTH 160
+#define TERMINAL_HEIGHT 48
+#define TERMINAL_WIDTH 	128
 
 unsigned char terminal_mem[TERMINAL_HEIGHT * TERMINAL_WIDTH];
 
@@ -168,6 +169,22 @@ void vga_terminal_drawstr(char* str, size_t size) {
 		if (str[i] == '\n') {
 			terminal_column = 0;
 			terminal_row ++;
+
+			if (terminal_row == TERMINAL_HEIGHT) {
+			// scroll the screen
+			int i;
+		    	for (i = 1; i < TERMINAL_HEIGHT; i++) {
+				uint16_t* src = &terminal_mem[i * TERMINAL_WIDTH];
+				uint16_t* dst = &terminal_mem [((i - 1) * TERMINAL_WIDTH)];
+				memcpy(dst, src, TERMINAL_WIDTH);
+			}
+
+			// Clear the bottom line
+			for (i = 0; i < (int)TERMINAL_WIDTH; i++)
+				vga_terminal_drawcharat(' ', (size_t)i, TERMINAL_HEIGHT-1);
+
+			terminal_row --;
+		}
 		} else {
 			terminal_mem[(terminal_row*TERMINAL_WIDTH) + terminal_column] = str[i];
 			terminal_column++;
@@ -188,7 +205,7 @@ void vga_terminal_drawstr(char* str, size_t size) {
 			}
 
 			// Clear the bottom line
-			for (i = 0; i < (int)TERMINAL_HEIGHT; i++)
+			for (i = 0; i < (int)TERMINAL_WIDTH; i++)
 				vga_terminal_drawcharat(' ', (size_t)i, TERMINAL_HEIGHT-1);
 
 			terminal_row --;
@@ -245,7 +262,7 @@ void vga_terminal_draw() {
 }
 
 void vga_terminal_backspace() {
-	if (terminal_column <= 2) {
+	if (terminal_column <= 2 + strlen(current_directory)) {
 		pcspkr_beep();
 		return;
 	}
