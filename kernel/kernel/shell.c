@@ -62,9 +62,9 @@ void process_input(char* input) {
 		ata_list_devices();
 	} else if (strcmp(i1, "ls") == 0) {
 		int count;
-		directory_entry_t* d = read_directory_from_name(0, "/", &count);
+		directory_entry_t* d = read_directory_from_name(0, current_directory, &count);
 		if (count != 0) {
-			printf("Index of %s: %i\n", "/", count);
+			printf("Index of %s: %i\n", current_directory, count);
 			for (int i = 0; i < count; i++) {
 				char* file_name = d[i].file_name;
 				char* extension = d[i].file_name + 8;

@@ -196,7 +196,6 @@ directory_entry_t* read_directory(int drive, uint32_t cluster, int* count) {
 	}
 
 	*count = i;
-	printf("%i\n", out);
 	return out;
 }
 
@@ -209,7 +208,7 @@ directory_entry_t* read_directory_from_name(int drive, const char* path, int* co
 	int c;
 	directory_entry_t* root_directory = read_directory(drive, fat_drive[drive].root_cluster, &c);
 
-	if (path == "/") {
+	if (strcmp(path, "/") == 0) {
 		*count = c;
 		return root_directory;
 	}
@@ -218,21 +217,17 @@ directory_entry_t* read_directory_from_name(int drive, const char* path, int* co
 
 	directory_entry_t* d = root_directory;
 	char* next_dir = strtok(path, "/");
+	
+	int found = 0;
 
-	for (i = 0; i < c; i++) {
-		if (!next_dir) {
-			break;
-		}
-		char* file_name = strtok(d[i].file_name, " ");
-		if (strcmp(file_name, next_dir) == 0) {
-			d = read_directory(drive, (d[i].first_cluster_low) | (d[i].first_cluster_high << 16), &c);
-			i = 0;
-			next_dir = strtok(0, "/");
-		}
+	if (found) {
+		*count = i;
+		return d;
+	} else {
+		printf("Could not find directory %s\n", path);
+		*count = 0;
+		return 0;
 	}
-
-	*count = i;
-	return d;
 }
 
 unsigned char* read_file(int drive, const char* path) {

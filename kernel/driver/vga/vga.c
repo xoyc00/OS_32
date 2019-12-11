@@ -20,6 +20,7 @@ static size_t terminal_column;
 
 int vga_drvr_enabled = 0;
 int display_cursor = 0;
+int vga_drvr_finished = 0;
 
 #define TERMINAL_HEIGHT 48
 #define TERMINAL_WIDTH 	128
@@ -33,7 +34,7 @@ void vga_init(size_t width, size_t height, size_t pitch, size_t bpp, size_t addr
 	vga_bpp = bpp;
 	vga_mem = (unsigned char*)addr;
 
-	memset(backbuffer_mem, 0, 1280*1024*4);
+	memset(backbuffer_mem, 0, 1024*768*4);
 
 	terminal_row = 0;
 	terminal_column = 0;
@@ -271,7 +272,11 @@ void vga_terminal_backspace() {
 	terminal_column--;
 }
 
-void vga_swapbuffers() {
+void vga_swap_handler() {
+	if (!vga_drvr_finished) return;
+
+	vga_drvr_finished = 0;
+
 	unsigned int bytes_per_line = vga_width * (vga_bpp / 8);
 	uint8_t* dest = vga_mem;
 	uint8_t* src  = &backbuffer_mem[0];
@@ -281,6 +286,11 @@ void vga_swapbuffers() {
 		dest += vga_pitch;
 		src += bytes_per_line;
 	}
+}
+
+void vga_swapbuffers() {
+	vga_drvr_finished = 1;
+	vga_swap_handler();			// TODO: Vertical Sync
 }
 
 void vga_terminal_clear() {
