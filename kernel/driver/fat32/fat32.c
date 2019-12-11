@@ -224,6 +224,8 @@ directory_entry_t* read_directory_from_name(int drive, const char* path, int* co
 		return 0;
 	}
 
+	printf("Checking Path: %s\n", path);
+
 	char* p[128];
 	p[0] = strtok(path, "/");
 	for (int i = 1; i < 128; i++) {
@@ -247,7 +249,7 @@ directory_entry_t* read_directory_from_name(int drive, const char* path, int* co
 
 	// Search each directory down the path
 	while(d != 0) {
-		directory_entry_t* next = find_next_directory_from_name(drive, next_dir, &i, d);
+		directory_entry_t* next = find_next_directory_from_name(drive, next_dir, &c, d);
 		if (next == 0) {
 			found = 1;
 			break;
@@ -261,7 +263,7 @@ directory_entry_t* read_directory_from_name(int drive, const char* path, int* co
 	}
 
 	if (found) {
-		*count = i;
+		*count = c;
 		return d;
 	} else {
 		printf("Could not find directory %s\n", path);

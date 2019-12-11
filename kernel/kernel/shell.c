@@ -70,7 +70,8 @@ void process_input(char* input) {
 				char* extension = d[i].file_name + 8;
 
 				if (isalpha(extension[0])) {
-					printf("~%s.%s", file_name, extension);
+					file_name = strtok(file_name, " ");
+					printf("~%s.%s\n", file_name, extension);
 				} else {
 					file_name = strtok(d[i].file_name, " ");
 					printf("~%s\n", file_name);

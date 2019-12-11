@@ -38,12 +38,24 @@ void *mmap(void *addr, size_t len, int prot, int flags, int fildes, off_t off) {
 	return MAP_FAILED;
 }
 
+void optimise_memory_block(memory_block_t* mem) {
+	if (mem->next_ptr != 0) {
+		if (mem->next_ptr->free) {
+			if (mem->next_ptr->addr == mem->addr + mem->size + sizeof(memory_block_t)) {
+				mem->size += mem->next_ptr->size + sizeof(memory_block_t);
+				mem->next_ptr = mem->next_ptr->next_ptr;
+			}
+		}
+	}
+}
+
 /* TODO: Expand this function to take len into account */
 int munmap(void *addr, size_t len) {
 	memory_block_t* mem = &map;
 	while (mem != 0) {
 		if (mem->addr == addr) {
 			mem->free = 1;
+			optimise_memory_block(mem);
 			return 0;
 		}
 		mem = mem->next_ptr;

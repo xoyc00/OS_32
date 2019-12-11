@@ -72,29 +72,16 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 
 	printf("%s> ", current_directory);
 
-	double fps;
-
 	while(1) {
 		if (vga_enabled) {
-			uint32_t start = timer_get_ticks();
-
 			// Update the screen
 			vga_clearscreen(255, 255, 255);
 			vga_terminal_draw();
-
-			char* fpsstr;
-			ftoa(fps, fpsstr, 2);
-			vga_drawstr("FPS:", 940, 0, 0, 0, 255);
-			vga_drawstr(fpsstr, 978, 0, 0, 0, 255);
 
 			vga_drawcursor();
 
 			// Swap buffers
 			vga_swapbuffers();
-
-			uint32_t end = timer_get_ticks();
-
-			fps = 100000.0 / (end - start);
 		}
 	}
 }
