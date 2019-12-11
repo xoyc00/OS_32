@@ -81,14 +81,16 @@ uint32_t* get_cluster_chain(int drive, uint32_t start_cluster) {
 	uint32_t* temp;
 	int i = 0;
 	while (1) {
-		if (i != 0)
-			temp = out;
 
-		out = malloc(sizeof(uint32_t) * (i+2));
+		if (i != 0) {
+			free(temp);
+			temp = out;
+		}
+
+		out = malloc(sizeof(uint32_t) * (i+1));
 
 		if (i != 0) {
 			memcpy(out, temp, sizeof(uint32_t) * (i));
-			free(temp);
 		}
 		
 		if (table_value(drive, start_cluster) >= 0x0FFFFFF8) {
@@ -141,7 +143,9 @@ directory_entry_t* read_directory(int drive, uint32_t cluster, int* count) {
 				temp = 0;
 			}		
 
+			if (temp) free(temp);
 			temp = out;
+			free(out);
 			out = malloc(sizeof(directory_entry_t) * (i + 1));
 			memcpy(out, temp, sizeof(directory_entry_t) * (i));
 			out[i] = d;
@@ -179,7 +183,9 @@ directory_entry_t* read_directory(int drive, uint32_t cluster, int* count) {
 				temp = 0;
 			}
 		
+			if (temp) free(temp);
 			temp = out;
+			free(out);
 			out = malloc(sizeof(directory_entry_t) * (i + 1));
 			memcpy(out, temp, sizeof(directory_entry_t) * (i));
 			out[i] = d;
@@ -190,14 +196,15 @@ directory_entry_t* read_directory(int drive, uint32_t cluster, int* count) {
 	}
 
 	*count = i;
+	printf("%i\n", out);
 	return out;
 }
 
 directory_entry_t* read_directory_from_name(int drive, const char* path, int* count) {
-	/*if (path[0] != '/') {
+	if (path[0] != '/') {
 		printf("Not a valid path!\n");
 		return 0;
-	}*/
+	}
 
 	int c;
 	directory_entry_t* root_directory = read_directory(drive, fat_drive[drive].root_cluster, &c);
@@ -210,7 +217,7 @@ directory_entry_t* read_directory_from_name(int drive, const char* path, int* co
 	int i = 0;
 
 	directory_entry_t* d = root_directory;
-	char* next_dir = strtok(path, "/ ");
+	char* next_dir = strtok(path, "/");
 
 	for (i = 0; i < c; i++) {
 		if (!next_dir) {
@@ -218,7 +225,7 @@ directory_entry_t* read_directory_from_name(int drive, const char* path, int* co
 		}
 		char* file_name = strtok(d[i].file_name, " ");
 		if (strcmp(file_name, next_dir) == 0) {
-			d = read_directory(drive, (d[i].first_cluster_low & 0xFF) | (d[i].first_cluster_high >> 16), &c);
+			d = read_directory(drive, (d[i].first_cluster_low) | (d[i].first_cluster_high << 16), &c);
 			i = 0;
 			next_dir = strtok(0, "/");
 		}

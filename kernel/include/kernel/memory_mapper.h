@@ -15,12 +15,6 @@ typedef struct memory_block {
 /* Hold the root memory block of the linked list */
 memory_block_t map;
 
-/* Allocates a block of memory of a given size */
-void* kmalloc(size_t size);
-
-/* Frees a gfiven block of memory */
-void kfree(void* ptr);
-
 /* Initialises the memory mapper */
 void memory_mapper_init(multiboot_info_t* mbt);
 

@@ -5,14 +5,19 @@ mkdir -p isodir
 mkdir -p isodir/boot
 mkdir -p isodir/boot/grub
 
-cp sysroot/boot/os_32.kernel isodir/boot/os_32.kernel
+mkdir -p filesystem
+mkdir -p filesystem/user
+mkdir -p filesystem/bin
+
+cp sysroot/boot/os_32.ker isodir/boot/os_32.ker
+cp -r filesystem/. isodir
 cat > isodir/boot/grub/grub.cfg << EOF
 
 default=0
 timeout=30
 
 menuentry "os_32" {
-	multiboot /boot/os_32.kernel
+	multiboot /boot/os_32.ker
 }
 EOF
 

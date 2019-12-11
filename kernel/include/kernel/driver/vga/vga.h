@@ -16,10 +16,13 @@ void vga_clearscreen(unsigned char r, unsigned char g, unsigned char b);
 void vga_putpixel(size_t x, size_t y, unsigned char r, unsigned char g, unsigned char b);
 
 /* Draw a single character */
-void vga_drawchar(char c, int x, int y, char r, char g, char b);
+void vga_drawchar(char c, int x, int y, unsigned char r, unsigned char g, unsigned char b);
 
 /* Draw a string */
-void vga_drawstr(const char* str, int x, int y, char r, char g, char b);
+void vga_drawstr(const char* str, int x, int y, unsigned char r, unsigned char g, unsigned char b);
+
+/* Draw a filled rectangle of a given color in a given position */
+void vga_drawrect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b);
 
 /* Write to the VGA terminal */
 void vga_terminal_write(char* str, size_t size);

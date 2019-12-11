@@ -118,7 +118,7 @@ void vga_drawcursor() {
 	}
 }
 
-void vga_drawchar(char c, int x, int y, char r, char g, char b) {
+void vga_drawchar(char c, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
 	for (int row = 0; row < 16; row ++) {
 		unsigned char character = font.Bitmap[(int)c * 16 + row];
 		if (character & (1 << 7)) vga_putpixel(x+0, y+row, r, g, b);
@@ -132,12 +132,26 @@ void vga_drawchar(char c, int x, int y, char r, char g, char b) {
 	}
 }
 
-void vga_drawstr(const char* str, int x, int y, char r, char g, char b) {
+void vga_drawstr(const char* str, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
 	int i = 0;
 	while(*str) {
 		vga_drawchar(*str, x + i, y, r, g, b);
 		str++;
 		i = i + 8;
+	}
+}
+
+void vga_drawrect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b) {
+	unsigned char* where = backbuffer_mem + (y*vga_pitch) + x;
+	int i, j;
+
+	for (i = 0; i < h; i++) {
+		for (j = 0; j < w; j++) {
+			where[j*4+0] = b;
+			where[j*4+1] = g;
+			where[j*4+2] = r;
+		}
+		where += vga_width*(vga_bpp/8);
 	}
 }
 

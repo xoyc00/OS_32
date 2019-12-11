@@ -30,14 +30,17 @@ void process_input(char* input) {
 
     if (strcmp(i1, "shutdown") == 0) {
         printf("Stopping the CPU. It is now safe to turn off your computer.\n");
-		if (vga_drvr_enabled) {
+
+		{
+			vga_clearscreen(255, 255, 255);
 			vga_terminal_draw();
 
 			vga_drawcursor();
 
-			// Swap buffers
+			
 			vga_swapbuffers();
 		}
+
         asm volatile("hlt");
     } else if (strcmp (i1, "clear") == 0) {
 		if (vga_drvr_enabled) {
@@ -60,16 +63,20 @@ void process_input(char* input) {
 	} else if (strcmp(i1, "ls") == 0) {
 		int count;
 		directory_entry_t* d = read_directory_from_name(0, current_directory, &count);
-		for (int i = 0; i < count; i++) {
-			char* file_name = strtok(d[i].file_name, " ");
-			char* extension = strtok(0, " ");
-			printf("~%s", file_name);
+		if (count != 0) {
+			printf("Index of %s: %i\n", current_directory, count);
+			for (int i = 0; i < count; i++) {
+				char* file_name = strtok(d[i].file_name, " ");
+				char* extension = strtok(0, " ");
+				printf("~%s", file_name);
 
-			if (isalpha(extension[0])) {
-				printf(".%s", extension);
+				if (extension) {
+					printf(".%s", extension);
+				}
+
+				printf("\n");
 			}
-
-			printf("\n");
+			free(d);
 		}
 	} else if (strcmp(i1, "cd") == 0) {
 		char* path = iargs[0];
@@ -80,7 +87,7 @@ void process_input(char* input) {
 		} else {
 			free(current_directory);
 
-			current_directory = malloc(strlen(path));
+			current_directory = malloc(strlen(path)+1);
 			strcpy(current_directory, path);
 			current_directory[strlen(path)] = '\0';
 		}

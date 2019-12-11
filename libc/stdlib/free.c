@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #if defined(__is_libk)
-#include <kernel/memory_mapper.h>
+#include <kernel/liballoc.h>
 #endif
 
 void free(void* ptr) {

@@ -2,7 +2,7 @@
 #include <math.h>
 
 #include <kernel/multiboot.h>
-#include <kernel/memory_mapper.h>
+#include <kernel/liballoc.h>
 #include <kernel/tty.h>
 #include <kernel/cpu/gdt.h>
 #include <kernel/cpu/idt.h>
@@ -74,6 +74,9 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 
 	double fps;
 
+	void* ptr = malloc(128);
+	free(ptr);
+
 	while(1) {
 		if (vga_enabled) {
 			uint32_t start = timer_get_ticks();
@@ -84,8 +87,8 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 
 			char* fpsstr;
 			ftoa(fps, fpsstr, 2);
-			vga_drawstr("FPS:", 1184, 0, 255, 255, 255);
-			vga_drawstr(fpsstr, 1216, 0, 255, 255, 255);
+			vga_drawstr("FPS:", 1184, 0, 0, 0, 255);
+			vga_drawstr(fpsstr, 1216, 0, 0, 0, 255);
 
 			vga_drawcursor();
 
@@ -94,7 +97,7 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 
 			uint32_t end = timer_get_ticks();
 
-			fps = 100000.0 / (double)((end - start));
+			fps = 100000.0 / (end - start);
 		}
 	}
 }

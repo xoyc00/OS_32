@@ -20,8 +20,10 @@
 #define IRQ14 46
 #define IRQ15 47
 
+// Install the IDT
 void idt_install(void);
 
+/* Contains information about a given entry in the IDT */
 struct IDT_entry {
 	unsigned short int offset_lowerbits;
 	unsigned short int selector;

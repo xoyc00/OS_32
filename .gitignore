@@ -3,3 +3,5 @@ isodir
 sysroot
 *.img
 mnt
+filesystem
+*.vdi
