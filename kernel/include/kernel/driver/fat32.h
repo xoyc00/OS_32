@@ -52,13 +52,13 @@ typedef struct FSInfo {
 /* Long Filename Entry */
 typedef struct lfn_entry {
 	unsigned char order;
-	uint16_t bytes0[5];
+	char bytes0[10];
 	unsigned char attribute;
 	unsigned char entry_type;
 	unsigned char checksum;
-	uint16_t bytes1[6];
+	char bytes1[12];
 	unsigned char zero[2];
-	uint16_t bytes2;
+	char bytes2[2];
 } __attribute__((packed)) lfn_entry_t;
 
 /* Directory Entry */
@@ -105,8 +105,12 @@ unsigned char* read_cluster(int drive, uint32_t cluster);
 /* Read a directory */
 directory_entry_t* read_directory(int drive, uint32_t cluster, int* count);
 
+void list_directory(int drive, int tabs, int count, directory_entry_t* directory, int recursive, int max_tabs);
+
 /* Read a directory from a path */
-directory_entry_t* read_directory_from_name(int drive, const char* path, int* count);
+directory_entry_t* read_directory_from_name(int drive, char* path, int* count);
+
+void read_directory_tree(int drive);
 
 /* Read a file from a path */
 unsigned char* read_file(int drive, const char* path);

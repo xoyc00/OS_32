@@ -6,6 +6,7 @@
 char* strtok(char* str, char* tokens) { 
 	static char* temp;
 	static char* old_temp;
+	char* s;
    
     //If string passed to function is not null, copy it to our static variable
     if(str!=0)
@@ -14,6 +15,7 @@ char* strtok(char* str, char* tokens) {
         temp=(char*)malloc(strlen(str));
         strcpy(temp,str);
 		old_temp = temp;
+		s = str;
     }
 
     //If the string passed is NULL and even the copy is NULL, we are done and return NULL.
@@ -23,7 +25,7 @@ char* strtok(char* str, char* tokens) {
     //If only the string passed is NULL and the copy still has data, work with it.
     else
     {
-        str=temp;
+        s=temp;
     }
 
 	if (strlen(temp) == 0) {
@@ -42,13 +44,13 @@ char* strtok(char* str, char* tokens) {
                 if(chars==0)
                 {
                     flag=1;
-                    str++;
+                    s++;
                 }
                 else
                 {
                     temp++;
-                    str[chars]='\0';
-                    return str;
+                    s[chars]='\0';
+                    return s;
                 }
             }
         }
@@ -57,6 +59,6 @@ char* strtok(char* str, char* tokens) {
         temp++;
         flag=0;
     }
-    str[chars]='\0';
-    return str;
+    s[chars]='\0';
+    return s;
 }

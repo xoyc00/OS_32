@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 fat32_t fat_drive[4];
 
@@ -199,26 +200,64 @@ directory_entry_t* read_directory(int drive, uint32_t cluster, int* count) {
 	return out;
 }
 
-directory_entry_t* find_next_directory_from_name(int drive, const char* next_dir, int* count, directory_entry_t* current_path) {
-	if (next_dir == 0)
-		return 0;
+void list_directory(int drive, int tabs, int count, directory_entry_t* directory, int recursive, int max_tabs) {
+	if (count == 0)	return;
+	if (directory == 0) return;
+	if (tabs > max_tabs) return;
+	for(int i = 0; i < count; i++) {
+		for (int j = 0; j < tabs; j++) {
+			printf("  ");
+		}
 
-	int c;
+		if (isalpha(*(directory[i].file_name + 8))) {
+			char* file_name = malloc(9);
+			memcpy(file_name, directory[i].file_name, 8);
+			file_name[8] = '\0';
+			printf("%s.%s\n", strtok(file_name, " "), directory[i].file_name + 8);
+		} else {
+			char* file_name = malloc(9);
+			memcpy(file_name, directory[i].file_name, 8);
+			file_name[8] = '\0';
+			printf("%s\n", file_name);
+		}
 
-	directory_entry_t* d;
-
-	for(int i = 0; i < *count; i++) {
-		if (strcmp(strtok(current_path[i].file_name, " "), next_dir) == 0) {
-			d = read_directory(drive, current_path[i].first_cluster_low | (current_path[i].first_cluster_high >> 16), &c);
-			*count = c;
-			return d;
+		if (strcmp(strtok(directory[i].file_name, " "), ".") == 0 || strcmp(strtok(directory[i].file_name, " "), "..") == 0) {
+			continue;
+		}
+		if (directory[i].file_attributes & 0x10 && recursive) {
+			int c;
+			directory_entry_t* d = read_directory(drive, directory[i].first_cluster_low | (directory[i].first_cluster_high >> 16), &c);
+			list_directory(drive, tabs+1, c, d, 1, max_tabs);
+			free(d);
 		}
 	}
-
-	return -1;
 }
 
-directory_entry_t* read_directory_from_name(int drive, const char* path, int* count) {
+directory_entry_t* traverse_path(int drive, directory_entry_t* root, char** p, int p_count, int* count) {
+	if (p[0] == 0) {
+		return root;
+	}
+
+	directory_entry_t* out = root;
+	int c;
+	for (int i = 0; i < p_count; i++) {
+		if (p[i] == 0) {
+			break;
+		}
+
+		for (int j = 0; j < count; j++) {
+			if (strcmp(strtok(out[j].file_name, " "), p[i]) == 0) {
+				out = read_directory(drive, out[j].first_cluster_low | (out[j].first_cluster_high >> 16), &c);
+				*count = c;
+				break;
+			}
+		}
+	}
+	*count = c;
+	return out;
+}
+
+directory_entry_t* read_directory_from_name(int drive, char* path, int* count) {
 	if (path[0] != '/') {
 		printf("Not a valid path!\n");
 		return 0;
@@ -235,41 +274,21 @@ directory_entry_t* read_directory_from_name(int drive, const char* path, int* co
 	int c;
 	directory_entry_t* root_directory = read_directory(drive, fat_drive[drive].root_cluster, &c);
 
-	if (strcmp(path, "/") == 0) {
-		*count = c;
-		return root_directory;
-	}
+	directory_entry_t* d;
 
-	int i = 0;
+	//d = traverse_path(drive, root_directory, p, 128, &c);
 
-	directory_entry_t* d = root_directory;
-	char* next_dir = p[0];
-	
-	int found = 0;
+	*count = c;
+	return d;
+}
 
-	// Search each directory down the path
-	while(d != 0) {
-		directory_entry_t* next = find_next_directory_from_name(drive, next_dir, &c, d);
-		if (next == 0) {
-			found = 1;
-			break;
-		}
-		if (next == -1) {
-			break;
-		}
-		d = next;
-		i++;
-		next_dir = p[i];
-	}
+void read_directory_tree(int drive) {
+	int c;
+	directory_entry_t* root_directory = read_directory(drive, fat_drive[drive].root_cluster, &c);
 
-	if (found) {
-		*count = c;
-		return d;
-	} else {
-		printf("Could not find directory %s\n", path);
-		*count = 0;
-		return 0;
-	}
+	list_directory(drive, 0, c, root_directory, 1, 2);
+
+	free(root_directory);
 }
 
 unsigned char* read_file(int drive, const char* path) {

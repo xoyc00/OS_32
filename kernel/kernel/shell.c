@@ -64,19 +64,7 @@ void process_input(char* input) {
 		int count;
 		directory_entry_t* d = read_directory_from_name(0, current_directory, &count);
 		if (count != 0) {
-			printf("Index of %s: %i\n", current_directory, count);
-			for (int i = 0; i < count; i++) {
-				char* file_name = d[i].file_name;
-				char* extension = d[i].file_name + 8;
-
-				if (isalpha(extension[0])) {
-					file_name = strtok(file_name, " ");
-					printf("~%s.%s\n", file_name, extension);
-				} else {
-					file_name = strtok(d[i].file_name, " ");
-					printf("~%s\n", file_name);
-				}
-			}
+			list_directory(0, 0, count, d, 0, 1);
 			free(d);
 		}
 	} else if (strcmp(i1, "cd") == 0) {
@@ -91,6 +79,8 @@ void process_input(char* input) {
 			strcpy(current_directory, path);
 			current_directory[strlen(path)] = '\0';
 		}
+	} else if (strcmp(i1,"dir") == 0) {
+		read_directory_tree(0);
 	} else {
 		printf("Not a known command or program!\n");
 	}
