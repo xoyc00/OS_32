@@ -274,9 +274,14 @@ directory_entry_t* read_directory_from_name(int drive, char* path, int* count) {
 	int c;
 	directory_entry_t* root_directory = read_directory(drive, fat_drive[drive].root_cluster, &c);
 
+	if (strcmp(path, "/") == 0) {
+		*count = c;
+		return root_directory;
+	}
+	
 	directory_entry_t* d;
 
-	//d = traverse_path(drive, root_directory, p, 128, &c);
+	d = traverse_path(drive, root_directory, p, 128, &c);
 
 	*count = c;
 	return d;

@@ -67,56 +67,72 @@ void vga_drawcursor() {
 	int mouse_y = 0;
 	mouse_getposition(&mouse_x, &mouse_y);
 
-	for (int y = 0; y < 12; y++) {
-		if (font_cursor[(y*12)+0] == 'X')
+	for (int y = 0; y < 16; y++) {
+		if (font_cursor[(y*16)+0] == 'X')
 			vga_putpixel(mouse_x+0, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+1] == 'X')
+		if (font_cursor[(y*16)+1] == 'X')
 			vga_putpixel(mouse_x+1, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+2] == 'X')
+		if (font_cursor[(y*16)+2] == 'X')
 			vga_putpixel(mouse_x+2, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+3] == 'X')
+		if (font_cursor[(y*16)+3] == 'X')
 			vga_putpixel(mouse_x+3, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+4] == 'X')
+		if (font_cursor[(y*16)+4] == 'X')
 			vga_putpixel(mouse_x+4, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+5] == 'X')
+		if (font_cursor[(y*16)+5] == 'X')
 			vga_putpixel(mouse_x+5, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+6] == 'X')
+		if (font_cursor[(y*16)+6] == 'X')
 			vga_putpixel(mouse_x+6, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+7] == 'X')
+		if (font_cursor[(y*16)+7] == 'X')
 			vga_putpixel(mouse_x+7, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+8] == 'X')
+		if (font_cursor[(y*16)+8] == 'X')
 			vga_putpixel(mouse_x+8, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+9] == 'X')
+		if (font_cursor[(y*16)+9] == 'X')
 			vga_putpixel(mouse_x+9, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+10] == 'X')
+		if (font_cursor[(y*16)+10] == 'X')
 			vga_putpixel(mouse_x+10, mouse_y+y, 255, 255, 255);
-		if (font_cursor[(y*12)+11] == 'X')
+		if (font_cursor[(y*16)+11] == 'X')
 			vga_putpixel(mouse_x+11, mouse_y+y, 255, 255, 255);
+		if (font_cursor[(y*16)+12] == 'X')
+			vga_putpixel(mouse_x+10, mouse_y+y, 255, 255, 255);
+		if (font_cursor[(y*16)+13] == 'X')
+			vga_putpixel(mouse_x+13, mouse_y+y, 255, 255, 255);
+		if (font_cursor[(y*16)+14] == 'X')
+			vga_putpixel(mouse_x+14, mouse_y+y, 255, 255, 255);
+		if (font_cursor[(y*16)+15] == 'X')
+			vga_putpixel(mouse_x+15, mouse_y+y, 255, 255, 255);
 
-		if (font_cursor[(y*12)+0] == 'b')
+		if (font_cursor[(y*16)+0] == 'b')
 			vga_putpixel(mouse_x+0, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+1] == 'b')
+		if (font_cursor[(y*16)+1] == 'b')
 			vga_putpixel(mouse_x+1, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+2] == 'b')
+		if (font_cursor[(y*16)+2] == 'b')
 			vga_putpixel(mouse_x+2, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+3] == 'b')
+		if (font_cursor[(y*16)+3] == 'b')
 			vga_putpixel(mouse_x+3, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+4] == 'b')
+		if (font_cursor[(y*16)+4] == 'b')
 			vga_putpixel(mouse_x+4, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+5] == 'b')
+		if (font_cursor[(y*16)+5] == 'b')
 			vga_putpixel(mouse_x+5, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+6] == 'b')
+		if (font_cursor[(y*16)+6] == 'b')
 			vga_putpixel(mouse_x+6, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+7] == 'b')
+		if (font_cursor[(y*16)+7] == 'b')
 			vga_putpixel(mouse_x+7, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+8] == 'b')
+		if (font_cursor[(y*16)+8] == 'b')
 			vga_putpixel(mouse_x+8, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+9] == 'b')
+		if (font_cursor[(y*16)+9] == 'b')
 			vga_putpixel(mouse_x+9, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+10] == 'b')
+		if (font_cursor[(y*16)+10] == 'b')
 			vga_putpixel(mouse_x+10, mouse_y+y, 0, 0, 0);
-		if (font_cursor[(y*12)+11] == 'b')
+		if (font_cursor[(y*16)+11] == 'b')
 			vga_putpixel(mouse_x+11, mouse_y+y, 0, 0, 0);
+		if (font_cursor[(y*16)+12] == 'b')
+			vga_putpixel(mouse_x+12, mouse_y+y, 0, 0, 0);
+		if (font_cursor[(y*16)+13] == 'b')
+			vga_putpixel(mouse_x+13, mouse_y+y, 0, 0, 0);
+		if (font_cursor[(y*16)+14] == 'b')
+			vga_putpixel(mouse_x+14, mouse_y+y, 0, 0, 0);
+		if (font_cursor[(y*16)+15] == 'b')
+			vga_putpixel(mouse_x+15, mouse_y+y, 0, 0, 0);
 	}
 }
 
