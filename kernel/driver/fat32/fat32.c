@@ -359,7 +359,7 @@ unsigned char* read_file(int drive, const char* path) {
 
 		return buf;
 	} else {
-		printf("Could not find the requested file!\n");
+		printf("Could not find file %s\n", path);
 		return 0;
 	}
 }
