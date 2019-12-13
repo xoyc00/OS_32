@@ -15,7 +15,8 @@ char* strtok(char* str, char* tokens) {
         temp=(char*)malloc(strlen(str));
         strcpy(temp,str);
 		old_temp = temp;
-		s = str;
+		s = malloc(strlen(str));
+		strcpy(s, str);
     }
 
     //If the string passed is NULL and even the copy is NULL, we are done and return NULL.

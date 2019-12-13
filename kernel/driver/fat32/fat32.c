@@ -247,6 +247,7 @@ directory_entry_t* traverse_path(int drive, directory_entry_t* root, char** p, i
 
 		for (int j = 0; j < count; j++) {
 			if (strcmp(strtok(out[j].file_name, " "), p[i]) == 0) {
+				free(out);
 				out = read_directory(drive, out[j].first_cluster_low | (out[j].first_cluster_high >> 16), &c);
 				*count = c;
 				break;
@@ -265,8 +266,11 @@ directory_entry_t* read_directory_from_name(int drive, char* path, int* count) {
 
 	printf("Checking Path: %s\n", path);
 
+	char* path_copy = malloc(strlen(path));
+	strcpy(path_copy, path);
+
 	char* p[128];
-	p[0] = strtok(path, "/");
+	p[0] = strtok(path_copy, "/");
 	for (int i = 1; i < 128; i++) {
 		p[i] = strtok(0, "/");
 	}
@@ -282,6 +286,8 @@ directory_entry_t* read_directory_from_name(int drive, char* path, int* count) {
 	directory_entry_t* d;
 
 	d = traverse_path(drive, root_directory, p, 128, &c);
+
+	free(path_copy);
 
 	*count = c;
 	return d;
