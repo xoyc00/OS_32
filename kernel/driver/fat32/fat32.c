@@ -27,7 +27,7 @@ unsigned int table_value(int drive, uint32_t active_cluster) {
 
 void print_debug(unsigned char* str, size_t size) {
 	for (int i = 0; i < size; i++) {
-		printf("%c", str[i]);
+		printf("0x%x ", str[i]);
 	}
 }
 
@@ -222,6 +222,7 @@ void list_directory(int drive, int tabs, int count, directory_entry_t* directory
 			file_name[8] = '\0';
 			printf("%s\n", file_name);
 		}
+		printf("First Cluster: %d\n", (directory[i].first_cluster_low | (directory[i].first_cluster_high >> 16)));
 
 		if (strcmp(strtok(directory[i].file_name, " "), ".") == 0 || strcmp(strtok(directory[i].file_name, " "), "..") == 0) {
 			continue;
@@ -253,20 +254,6 @@ directory_entry_t* traverse_path(int drive, directory_entry_t* root, char** p, i
 				out = read_directory(drive, out[j].first_cluster_low | (out[j].first_cluster_high >> 16), &c);
 				*count = c;
 				break;
-			} else {
-				if (isalpha(*(out[j].file_name + 8))) {
-					char* file_name = malloc(9);
-					memcpy(file_name, out[j].file_name, 8);
-					file_name[8] = '\0';
-					file_name = strtok(file_name, " ");
-					if (strcmp(file_name, strtok(p[i], ".")) == 0) {
-						if (strcmp(out[j].file_name + 8, strtok(0, ".")) == 0) {
-							out = &out[j];
-							*count = 1;
-							return out;
-						}
-					}
-				}
 			}
 		}
 	}
@@ -318,51 +305,30 @@ void read_directory_tree(int drive) {
 	free(root_directory);
 }
 
-unsigned char* read_file(int drive, const char* path) {
-	if (path[0] != '/') {
-		printf("Not a valid path!\n");
-		return 0;
-	}
-
-	char* path_copy = malloc(strlen(path));
-	strcpy(path_copy, path);
-
-	char* p[128];
-	p[0] = strtok(path_copy, "/");
-	for (int i = 1; i < 128; i++) {
-		p[i] = strtok(0, "/");
-	}
-
-	int c;
-	directory_entry_t* root_directory = read_directory(drive, fat_drive[drive].root_cluster, &c);
-	directory_entry_t* d = traverse_path(drive, root_directory, p, 128, &c);
-
-	{
-		int cluster_count;
-		uint32_t* cluster_chain = get_cluster_chain(drive, d[0].first_cluster_low | (d[0].first_cluster_high >> 16), &cluster_count);
-		unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)) + 1);
-		printf("Output buffer: %d\n", buf);	
-		if (buf != 0) {
-			int i = 0;
-			{		// Read the first cluster
-					unsigned char* cluster = read_cluster(drive, d[0].first_cluster_low | (d[0].first_cluster_high >> 16));
-					memcpy(buf + i, cluster, (512*fat_drive[drive].sectors_per_cluster));
-					free(cluster);
-					i += (512*fat_drive[drive].sectors_per_cluster);
-			}
-
-			for (int j = 0; j < cluster_count; j++) {
-				unsigned char* cluster = read_cluster(drive, cluster_chain[j]);
+unsigned char* read_file(int drive, uint32_t cluster) {
+	cluster = fat_drive[drive].root_cluster;
+	int cluster_count;
+	uint32_t* cluster_chain = get_cluster_chain(drive, cluster, &cluster_count);
+	unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)) + 1);	
+	if (buf != 0) {
+		int i = 0;
+		{		// Read the first cluster
+				unsigned char* cluster = read_cluster(drive, cluster);
 				memcpy(buf + i, cluster, (512*fat_drive[drive].sectors_per_cluster));
+				print_debug(cluster, (512*fat_drive[drive].sectors_per_cluster));
 				free(cluster);
 				i += (512*fat_drive[drive].sectors_per_cluster);
-			}
-
-			buf[(cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)] = '\0';
 		}
 
-		free(path_copy);
+		for (int j = 0; j < cluster_count; j++) {
+			unsigned char* cluster = read_cluster(drive, cluster_chain[j]);
+			memcpy(buf + i, cluster, (512*fat_drive[drive].sectors_per_cluster));
+			free(cluster);
+			i += (512*fat_drive[drive].sectors_per_cluster);
+		}
 
-		return buf;
+		buf[(cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)] = '\0';
 	}
+
+	return buf;
 }

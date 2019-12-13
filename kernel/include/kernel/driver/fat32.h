@@ -112,7 +112,7 @@ directory_entry_t* read_directory_from_name(int drive, char* path, int* count);
 
 void read_directory_tree(int drive);
 
-/* Read a file from a path */
-unsigned char* read_file(int drive, const char* path);
+/* Read a file */
+unsigned char* read_file(int drive, uint32_t cluster);
 
 #endif

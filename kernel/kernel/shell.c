@@ -82,9 +82,9 @@ void process_input(char* input) {
 	} else if (strcmp(i1,"dir") == 0) {
 		read_directory_tree(0);
 	} else if (strcmp(i1,"read") == 0) {
-		unsigned char* buf = read_file(0, iargs[0]);
+		unsigned char* buf = read_file(0, atoi(iargs[0]));
 		if (buf != 0) {
-			//printf("%s\n", buf);
+			printf("%s\n", buf);
 			free(buf);
 		}
 	} else {
