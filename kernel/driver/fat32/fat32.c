@@ -104,6 +104,7 @@ uint32_t* get_cluster_chain(int drive, uint32_t start_cluster, int* count) {
 		start_cluster = out[i];		
 		i++;
 	}
+	*count = i;
 	return out;
 }
 
@@ -253,7 +254,7 @@ directory_entry_t* traverse_path(int drive, directory_entry_t* root, char** p, i
 				*count = c;
 				break;
 			} else {
-				if (isalpha(*(out[i].file_name + 8))) {
+				if (isalpha(*(out[j].file_name + 8))) {
 					char* file_name = malloc(9);
 					memcpy(file_name, out[j].file_name, 8);
 					file_name[8] = '\0';
@@ -336,30 +337,32 @@ unsigned char* read_file(int drive, const char* path) {
 	directory_entry_t* root_directory = read_directory(drive, fat_drive[drive].root_cluster, &c);
 	directory_entry_t* d = traverse_path(drive, root_directory, p, 128, &c);
 
-	if (c == 1) {
+	{
 		int cluster_count;
 		uint32_t* cluster_chain = get_cluster_chain(drive, d[0].first_cluster_low | (d[0].first_cluster_high >> 16), &cluster_count);
-		unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)) + 1);	
-		int i = 0;
-		{		// Read the first cluster
-				unsigned char* cluster = read_cluster(drive, d[0].first_cluster_low | (d[0].first_cluster_high >> 16));
+		unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)) + 1);
+		printf("Output buffer: %d\n", buf);	
+		if (buf != 0) {
+			int i = 0;
+			{		// Read the first cluster
+					unsigned char* cluster = read_cluster(drive, d[0].first_cluster_low | (d[0].first_cluster_high >> 16));
+					memcpy(buf + i, cluster, (512*fat_drive[drive].sectors_per_cluster));
+					free(cluster);
+					i += (512*fat_drive[drive].sectors_per_cluster);
+			}
+
+			for (int j = 0; j < cluster_count; j++) {
+				unsigned char* cluster = read_cluster(drive, cluster_chain[j]);
 				memcpy(buf + i, cluster, (512*fat_drive[drive].sectors_per_cluster));
 				free(cluster);
 				i += (512*fat_drive[drive].sectors_per_cluster);
+			}
+
+			buf[(cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)] = '\0';
 		}
 
-		for (int j = 0; j < cluster_count; j++) {
-			unsigned char* cluster = read_cluster(drive, cluster_chain[j]);
-			memcpy(buf + i, cluster, (512*fat_drive[drive].sectors_per_cluster));
-			free(cluster);
-			i += (512*fat_drive[drive].sectors_per_cluster);
-		}
-
-		buf[(cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)] = '\0';
+		free(path_copy);
 
 		return buf;
-	} else {
-		printf("Could not find file %s\n", path);
-		return 0;
 	}
 }
