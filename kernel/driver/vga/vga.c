@@ -188,23 +188,44 @@ void vga_terminal_drawstr(char* str, size_t size) {
 			terminal_row ++;
 
 			if (terminal_row == TERMINAL_HEIGHT) {
-			// scroll the screen
-			int i;
+				// scroll the screen
+				int i;
 		    	for (i = 1; i < TERMINAL_HEIGHT; i++) {
-				uint16_t* src = &terminal_mem[i * TERMINAL_WIDTH];
-				uint16_t* dst = &terminal_mem [((i - 1) * TERMINAL_WIDTH)];
-				memcpy(dst, src, TERMINAL_WIDTH);
+					uint16_t* src = &terminal_mem[i * TERMINAL_WIDTH];
+					uint16_t* dst = &terminal_mem [((i - 1) * TERMINAL_WIDTH)];
+					memcpy(dst, src, TERMINAL_WIDTH);
+				}
+
+				// Clear the bottom line
+				for (i = 0; i < (int)TERMINAL_WIDTH; i++)
+					vga_terminal_drawcharat(' ', (size_t)i, TERMINAL_HEIGHT-1);
+
+				terminal_row --;
 			}
-
-			// Clear the bottom line
-			for (i = 0; i < (int)TERMINAL_WIDTH; i++)
-				vga_terminal_drawcharat(' ', (size_t)i, TERMINAL_HEIGHT-1);
-
-			terminal_row --;
-		}
 		} else {
 			terminal_mem[(terminal_row*TERMINAL_WIDTH) + terminal_column] = str[i];
 			terminal_column++;
+
+			if (terminal_column == TERMINAL_WIDTH) {
+				terminal_column = 0;
+				terminal_row ++;
+			}
+
+			if (terminal_row == TERMINAL_HEIGHT) {
+				// scroll the screen
+				int i;
+		    	for (i = 1; i < TERMINAL_HEIGHT; i++) {
+					uint16_t* src = &terminal_mem[i * TERMINAL_WIDTH];
+					uint16_t* dst = &terminal_mem [((i - 1) * TERMINAL_WIDTH)];
+					memcpy(dst, src, TERMINAL_WIDTH);
+				}
+
+				// Clear the bottom line
+				for (i = 0; i < (int)TERMINAL_WIDTH; i++)
+					vga_terminal_drawcharat(' ', (size_t)i, TERMINAL_HEIGHT-1);
+
+				terminal_row --;
+			}
 		}	
 
 		if (terminal_column == TERMINAL_WIDTH) {
