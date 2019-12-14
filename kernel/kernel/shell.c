@@ -8,6 +8,8 @@
 #include <kernel/driver/ata.h>
 #include <kernel/driver/fat32.h>
 
+#include <kernel/system/window_manage.h>
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,12 +34,12 @@ void process_input(char* input) {
         printf("Stopping the CPU. It is now safe to turn off your computer.\n");
 
 		{
-			vga_clearscreen(255, 255, 255);
+			vga_clearscreen(0, 0, 0);
 			vga_terminal_draw();
+	
+			wm_draw();
 
 			vga_drawcursor();
-
-			
 			vga_swapbuffers();
 		}
 

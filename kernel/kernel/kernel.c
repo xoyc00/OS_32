@@ -81,7 +81,7 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	while(1) {
 		if (vga_enabled) {
 			// Update the screen
-			vga_clearscreen(255, 255, 255);
+			vga_clearscreen(0, 0, 0);
 			vga_terminal_draw();
 
 			wm_draw();
