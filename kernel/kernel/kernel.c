@@ -15,6 +15,8 @@
 #include <kernel/driver/ata.h>
 #include <kernel/driver/fat32.h>
 
+#include <kernel/system/window_manage.h>
+
 #include <assert.h>
 #include <stdlib.h>
 
@@ -68,6 +70,10 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	fat32_init(0);
 	printf("done\n");
 
+	printf("Initialising window manager... ");
+	wm_init();
+	printf("done\n");
+
 	printf("Initialisation Complete!\n");
 
 	printf("%s> ", current_directory);
@@ -78,10 +84,13 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 			vga_clearscreen(255, 255, 255);
 			vga_terminal_draw();
 
-			vga_drawcursor();
+			wm_draw();
 
-			// Swap buffers
+			// Draw the cursor then swap buffers
+			vga_drawcursor();
 			vga_swapbuffers();
+
+			mouse_update();
 		}
 	}
 }

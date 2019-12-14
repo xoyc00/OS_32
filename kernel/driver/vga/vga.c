@@ -13,7 +13,7 @@
 
 size_t vga_width, vga_height, vga_pitch, vga_bpp;
 unsigned char* vga_mem;
-unsigned char backbuffer_mem[1024*768*4];
+unsigned char backbuffer_mem[1280*1024*4];
 
 static size_t terminal_row;
 static size_t terminal_column;
@@ -22,8 +22,8 @@ int vga_drvr_enabled = 0;
 int display_cursor = 0;
 int vga_drvr_finished = 0;
 
-#define TERMINAL_HEIGHT 48
-#define TERMINAL_WIDTH 	128
+#define TERMINAL_HEIGHT 64
+#define TERMINAL_WIDTH 	160
 
 unsigned char terminal_mem[TERMINAL_HEIGHT * TERMINAL_WIDTH];
 
@@ -152,19 +152,21 @@ void vga_drawchar(char c, int x, int y, unsigned char r, unsigned char g, unsign
 
 void vga_drawstr(const char* str, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
 	int i = 0;
-	while(*str) {
-		vga_drawchar(*str, x + i, y, r, g, b);
-		str++;
-		i = i + 8;
+	while(str[i] != '\0') {
+		vga_drawchar(str[i], x + (i * 8), y, r, g, b);
+		i ++;
 	}
 }
 
-void vga_drawrect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b) {
-	unsigned char* where = backbuffer_mem + (y*vga_pitch) + x;
+void vga_drawrect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b, int rounded) {
+	unsigned char* where = backbuffer_mem + (y*vga_width*(vga_bpp/8)) + (x*(vga_bpp/8));
 	int i, j;
 
 	for (i = 0; i < h; i++) {
 		for (j = 0; j < w; j++) {
+			if (rounded) {
+				if ((j < 1 || j > w-2) && (i < 1 || i > h-2)) continue;
+			}
 			where[j*4+0] = b;
 			where[j*4+1] = g;
 			where[j*4+2] = r;
@@ -320,4 +322,11 @@ void vga_terminal_clear() {
 			vga_terminal_drawcharat(' ', x, y);
 		}
 	}
+}
+
+void vga_drawwindow(window_t window) {
+	vga_drawrect(window.x, window.y + window.tb_h - 2, window.w, window.h, window.bg_r, window.bg_g, window.bg_b, window.rounded);
+	vga_drawrect(window.x, window.y, window.w, window.tb_h, 0, 0, 175, window.rounded);
+	vga_drawstr(window.title, window.x + 1, window.y + 1, 255, 255, 255);
+	vga_drawrect(window.x + window.w - 16, window.y + 2, 14, 14, 255, 0, 0, 0);
 }

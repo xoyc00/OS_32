@@ -10,4 +10,6 @@ void mouse_init();
 /* Puts the mouse position into x and y */
 void mouse_getposition(int* x, int* y);
 
+void mouse_update();
+
 #endif

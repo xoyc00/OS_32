@@ -1,6 +1,8 @@
 #ifndef _VGA_H
 #define _VGA_H
 
+#include <kernel/system/window_manage.h>
+
 #include <stddef.h>
 
 /* Initialise the screen */
@@ -22,7 +24,7 @@ void vga_drawchar(char c, int x, int y, unsigned char r, unsigned char g, unsign
 void vga_drawstr(const char* str, int x, int y, unsigned char r, unsigned char g, unsigned char b);
 
 /* Draw a filled rectangle of a given color in a given position */
-void vga_drawrect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b);
+void vga_drawrect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b, int rounded);
 
 /* Write to the VGA terminal */
 void vga_terminal_write(char* str, size_t size);
@@ -44,5 +46,8 @@ void vga_terminal_clear();
 
 /* Swap the VGA buffers */
 void vga_swapbuffers();
+
+
+void vga_drawwindow(window_t window);
 
 #endif

@@ -15,7 +15,9 @@ uint32_t first_sect_of_cluster(int drive, uint32_t cluster) {
 }
 
 unsigned int table_value(int drive, uint32_t active_cluster) {
-	unsigned char* fat_table = malloc(512);
+	static unsigned char* fat_table;
+	if (fat_table) free(fat_table);
+	fat_table = malloc(512);
 	unsigned int fat_offset = active_cluster * 4;
 	unsigned int fat_sector = fat_drive[drive].first_fat_sector + (fat_offset / 512);
 	unsigned int ent_offset = fat_offset % 512;
@@ -120,6 +122,7 @@ directory_entry_t* read_directory(int drive, uint32_t cluster, int* count) {
 	/* Check the first cluster */
 	{
 		unsigned char* entry_list = read_cluster(drive, cluster);
+		print_debug(entry_list, (512*fat_drive[drive].sectors_per_cluster));
 		while(*entry_list != 0) {
 			if (*entry_list == 0xE5) {
 				entry_list += 32;
@@ -306,11 +309,13 @@ void read_directory_tree(int drive) {
 }
 
 unsigned char* read_file(int drive, uint32_t cluster) {
-	cluster = fat_drive[drive].root_cluster;
 	int cluster_count;
 	uint32_t* cluster_chain = get_cluster_chain(drive, cluster, &cluster_count);
 	unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)) + 1);
+	memset(buf, 'T', ((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)));
+	print_debug(buf, ((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)));
 	printf("Output buffer: %d\n", buf);	
+	return;
 	if (buf != 0) {
 		int i = 0;
 		{		// Read the first cluster
@@ -323,8 +328,8 @@ unsigned char* read_file(int drive, uint32_t cluster) {
 
 		for (int j = 0; j < cluster_count; j++) {
 			unsigned char* cluster = read_cluster(drive, cluster_chain[j]);
-			memcpy(buf + i, cluster, (512*fat_drive[drive].sectors_per_cluster));
 			print_debug(cluster, (512*fat_drive[drive].sectors_per_cluster));
+			memcpy(buf + i, cluster, (512*fat_drive[drive].sectors_per_cluster));
 			free(cluster);
 			i += (512*fat_drive[drive].sectors_per_cluster);
 		}

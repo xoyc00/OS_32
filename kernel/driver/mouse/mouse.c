@@ -1,5 +1,6 @@
 #include <kernel/driver/mouse.h>
 #include <kernel/cpu/ports.h>
+#include <kernel/system/window_manage.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -9,6 +10,7 @@ unsigned char mouse_cycle=0;     //unsigned char
 char mouse_byte[3];    //signed char
 int mouse_x=640;         //signed char
 int mouse_y=512;         //signed char
+char prev_mouse_byte_0;
 
 //Mouse functions
 void mouse_handler()
@@ -28,6 +30,11 @@ void mouse_handler()
       mouse_x+=mouse_byte[1];
       mouse_y-=mouse_byte[2];
       mouse_cycle=0;
+
+	  if (mouse_x < 1) mouse_x = 1;
+	  if (mouse_x > 1279) mouse_x = 1279;
+	  if (mouse_y < 1) mouse_y = 1;
+	  if (mouse_y > 1023) mouse_y = 1023;
 
       break;
   }
@@ -106,6 +113,66 @@ void mouse_init()
   //Enable the mouse
   mouse_write(0xF4);
   mouse_read();  //Acknowledge
+}
+
+void left_button_down_event() {
+	wm_mouse_button_down(0, mouse_x, mouse_y);
+}
+
+void left_button_up_event() {
+	wm_mouse_button_up(0, mouse_x, mouse_y);
+}
+
+void right_button_down_event() {
+	wm_mouse_button_down(1, mouse_x, mouse_y);
+}
+
+void right_button_up_event() {
+	wm_mouse_button_up(1, mouse_x, mouse_y);
+}
+
+void middle_button_down_event() {
+	wm_mouse_button_down(2, mouse_x, mouse_y);
+}
+
+void middle_button_up_event() {
+	wm_mouse_button_up(2, mouse_x, mouse_y);
+}
+
+void mouse_update() {
+	int mouse_button_left 	= (mouse_byte[0] << 0) & 0xF;
+	int mouse_button_right 	= (mouse_byte[0] << 1) & 0xF;
+	int mouse_button_middle = (mouse_byte[0] << 2) & 0xF;
+
+	int prev_mouse_button_left 	 = (prev_mouse_byte_0 << 0) & 0xF;
+	int prev_mouse_button_right  = (prev_mouse_byte_0 << 1) & 0xF;
+	int prev_mouse_button_middle = (prev_mouse_byte_0 << 2) & 0xF;
+
+	if (mouse_button_left && !prev_mouse_button_left) {		// The mouse was just pressed
+		left_button_down_event();
+	}
+
+	if (mouse_button_right && !prev_mouse_button_right) {
+		right_button_down_event();
+	}
+
+	if (mouse_button_middle && !prev_mouse_button_middle) {
+		middle_button_down_event();
+	}
+
+	if (!mouse_button_left && prev_mouse_button_left) {		// The mouse was just pressed
+		left_button_up_event();
+	}
+
+	if (!mouse_button_right && prev_mouse_button_right) {
+		right_button_up_event();
+	}
+
+	if (!mouse_button_middle && prev_mouse_button_middle) {
+		middle_button_up_event();
+	}
+
+	prev_mouse_byte_0 = mouse_byte[0];
 }
 
 void mouse_getposition(int* x, int* y) {
