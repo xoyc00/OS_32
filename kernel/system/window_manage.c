@@ -5,20 +5,35 @@
 #include <stdlib.h>
 
 window_t* m_windows = 0;
+window_t* drag_window = 0;
+int drag_offset_x, drag_offset_y;
 int window_count = 0;
 
-void quick_sort_windows(window_t* low, window_t* high) {
-	
-}
+extern int mouse_x;
+extern int mouse_y;
 
-void process_left_mouse(int x, int y) {
-	
+void process_left_mouse(int on, int x, int y) {
+	if (on == 0) {
+		if (drag_window != 0) {
+			drag_window = 0;
+		}
+	} else {
+		for (int i = 0; i < window_count; i++) {
+			if (x >= m_windows[i].x && x <= m_windows[i].x + m_windows[i].w) {
+				if (y >= m_windows[i].y && y <= m_windows[i].y + m_windows[i].tb_h) {
+					drag_window = &m_windows[i];
+					drag_offset_x = m_windows[i].x - x;
+					drag_offset_y = m_windows[i].y - y;
+				}
+			}
+ 		}
+	}
 }
 
 void wm_mouse_button_down(int button, int x, int y) {
 	switch(button) {
 	case 0:
-		process_left_mouse(x, y);
+		process_left_mouse(1, x, y);
 		break;
 	default:
 		break;
@@ -26,7 +41,13 @@ void wm_mouse_button_down(int button, int x, int y) {
 }
 
 void wm_mouse_button_up(int button, int x, int y) {
-	// TODO: implement mouse buttons
+	switch(button) {
+	case 0:
+		process_left_mouse(0, x, y);
+		break;
+	default:
+		break;
+	}
 }
 
 void wm_init() {
@@ -38,6 +59,11 @@ void wm_init() {
 }
 
 void wm_draw() {
+	if (drag_window != 0) {
+		drag_window->x = mouse_x + drag_offset_x;
+		drag_window->y = mouse_y + drag_offset_y;
+	}
+
 	for (int i = 0; i < window_count; i++) {
 		vga_drawwindow(m_windows[i]);
 	}

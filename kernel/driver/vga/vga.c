@@ -163,7 +163,12 @@ void vga_drawrect(int x, int y, int w, int h, unsigned char r, unsigned char g, 
 	int i, j;
 
 	for (i = 0; i < h; i++) {
+		if (i+y > vga_height) break;
+		if (i+y < 0) continue;
 		for (j = 0; j < w; j++) {
+			if (j+x > vga_width) continue;
+			if (j+x < 0) continue;
+
 			if (rounded) {
 				if ((j < 1 || j > w-2) && (i < 1 || i > h-2)) continue;
 			}

@@ -1,8 +1,11 @@
 #include <kernel/driver/mouse.h>
+
 #include <kernel/cpu/ports.h>
 #include <kernel/system/window_manage.h>
+
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 
 //Mouse.inc by SANiK
 //License: Use as you wish, except to cause damage
@@ -27,8 +30,8 @@ void mouse_handler()
       break;
     case 2:
       mouse_byte[2]=inb(0x60);
-      mouse_x+=mouse_byte[1];
-      mouse_y-=mouse_byte[2];
+      mouse_x+=(mouse_byte[1]);
+      mouse_y-=(mouse_byte[2]);
       mouse_cycle=0;
 
 	  if (mouse_x < 1) mouse_x = 1;
@@ -140,13 +143,13 @@ void middle_button_up_event() {
 }
 
 void mouse_update() {
-	int mouse_button_left 	= (mouse_byte[0] << 0) & 0xF;
-	int mouse_button_right 	= (mouse_byte[0] << 1) & 0xF;
-	int mouse_button_middle = (mouse_byte[0] << 2) & 0xF;
+	int mouse_button_left 	= (mouse_byte[0] << 0) & 0x1;
+	int mouse_button_right 	= (mouse_byte[0] << 1) & 0x1;
+	int mouse_button_middle = (mouse_byte[0] << 2) & 0x1;
 
-	int prev_mouse_button_left 	 = (prev_mouse_byte_0 << 0) & 0xF;
-	int prev_mouse_button_right  = (prev_mouse_byte_0 << 1) & 0xF;
-	int prev_mouse_button_middle = (prev_mouse_byte_0 << 2) & 0xF;
+	int prev_mouse_button_left 	 = (prev_mouse_byte_0 << 0) & 0x1;
+	int prev_mouse_button_right  = (prev_mouse_byte_0 << 1) & 0x1;
+	int prev_mouse_button_middle = (prev_mouse_byte_0 << 2) & 0x1;
 
 	if (mouse_button_left && !prev_mouse_button_left) {		// The mouse was just pressed
 		left_button_down_event();
