@@ -13,11 +13,11 @@ int window_count = 0;
 extern int mouse_x;
 extern int mouse_y;
 
-window_t* sorted_by_depth() {
-	window_t* out = malloc(sizeof(window_t) * window_count);
+window_t** sorted_by_depth() {
+	window_t** out = malloc(sizeof(window_t*) * window_count);
 
 	for (int i = 0; i < window_count; i++) {
-		out[m_windows[i].depth] = m_windows[i];
+		out[m_windows[i].depth] = &m_windows[i];
 	}
 
 	return out;
@@ -38,18 +38,36 @@ void process_left_mouse(int on, int x, int y) {
 	if (on == 0) {
 		if (drag_window != 0) {
 			drag_window = 0;
+		} else {
+			// TODO: send mouse released message to the window's task
 		}
 	} else {
-		for (int i = 0; i < window_count; i++) {
-			if (x >= m_windows[i].x && x <= m_windows[i].x + m_windows[i].w) {
-				if (y >= m_windows[i].y && y <= m_windows[i].y + m_windows[i].tb_h) {
-					drag_window = &m_windows[i];
-					drag_offset_x = m_windows[i].x - x;
-					drag_offset_y = m_windows[i].y - y;
-					bring_to_foreground(m_windows[i]);
+		window_t** sorted_windows = sorted_by_depth();
+		for (int i = window_count - 1; i >= 0; i--) {
+			if (x >= sorted_windows[i]->x && x <= sorted_windows[i]->x + sorted_windows[i]->w) {
+				if (y >= sorted_windows[i]->y && y <= sorted_windows[i]->y + sorted_windows[i]->tb_h) {
+					drag_window = sorted_windows[i];
+					drag_offset_x = sorted_windows[i]->x - x;
+					drag_offset_y = sorted_windows[i]->y - y;
+					bring_to_foreground(*sorted_windows[i]);
+					break;
+				}
+			}
+			if (x >= sorted_windows[i]->x && x <= sorted_windows[i]->x + sorted_windows[i]->w) {
+				if (y >= sorted_windows[i]->y + sorted_windows[i]->tb_h && y <= sorted_windows[i]->h + sorted_windows[i]->tb_h + sorted_windows[i]->y) {
+					bring_to_foreground(*sorted_windows[i]);
+					// TODO: send window clicked message tot he window's task
+					break;
+				}
+			}
+			if (x >= (i*96)+64 && x <= ((i+1)*96)+64) {
+				if (y >= 1024-32 && y <= 1024) {
+					bring_to_foreground(*sorted_windows[i]);
+					break;
 				}
 			}
  		}
+		free(sorted_windows);
 	}
 }
 
@@ -78,24 +96,42 @@ void wm_init() {
 	term->bg_r = 32;
 	term->bg_g = 32;
 	term->bg_b = 32;
+	term->tid = 0;
 	window_register(term);
 
 	window_t* t = window_create(128, 128, "Test");
 	t->x = 900;
+	t->tid = 0;
 	window_register(t);
+
+	window_t* r = window_create(128, 128, "A Test Window");
+	r->y = 700;
+	r->tid = 0;
+	window_register(r);
 }
 
 void wm_draw() {
 	{		// Draw the task bar
-		vga_drawrect(0, 1023-32, 1279, 32, 32, 32, 255, 0);
-		vga_drawrect(0, 1023-32, 64, 32, 0, 156, 0, 1);
-		vga_drawstr("Start", 4, 1023-24, 255, 255, 255);
+		vga_drawrect(0, 1024-32, 1279, 32, 32, 32, 255, 0);
+		vga_drawrect(0, 1024-32, 64, 32, 0, 156, 0, 1);
+		vga_drawstr("Start", 4, 1024-24, 255, 255, 255);
 
 		for (int i = 0; i < window_count; i++) {				// Draw the window titles in the task bar
 			int col = 48;
 			if (m_windows[i].depth == window_count - 1) col = 64;
 			vga_drawrect(64 + (96*i), 1023-32, 96, 32, col, col, 255, 0);
-			vga_drawstr(m_windows[i].title, 64 + (96*i) + 2, 1023-24, 255, 255, 255);
+			if (strlen(m_windows[i].title) <= 8) {
+				vga_drawstr(m_windows[i].title, 64 + (96*i) + 2, 1023-24, 255, 255, 255);
+			} else {
+				/*char* buf = malloc(12));
+				memcpy(buf, m_windows[i].title, 8);
+				buf[8]  = '.';
+				buf[9]  = '.';
+				buf[10] = '.';
+				buf[11] = '\0';
+				vga_drawstr(buf, 64 + (96*i) + 2, 1023-24, 255, 255, 255);
+				free(buf);*/
+			}
 		}
 	}
 
@@ -104,9 +140,9 @@ void wm_draw() {
 		drag_window->y = mouse_y + drag_offset_y;
 	}
 
-	window_t* sorted_windows = sorted_by_depth();
+	window_t** sorted_windows = sorted_by_depth();
 	for (int i = 0; i < window_count; i++) {
-		vga_drawwindow(sorted_windows[i]);
+		vga_drawwindow(*sorted_windows[i]);
 	}
 	free(sorted_windows);
 }
@@ -148,8 +184,8 @@ window_t* window_create(int w, int h, char* title) {
 	out->border_radius = 1;
 	out->rounded = 1;
 	out->bg_r = 255;
-	out->bg_r = 128;
-	out->bg_r = 128;
+	out->bg_r = 200;
+	out->bg_r = 200;
 	out->title = title;
 	return out;
 }
