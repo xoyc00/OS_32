@@ -60,10 +60,9 @@ void process_left_mouse(int on, int x, int y) {
 					break;
 				}
 			}
-			if (x >= (i*96)+64 && x <= ((i+1)*96)+64) {
+			if (x >= 64 + (96*i) && x <= 64 + 96 + (96*i)) {
 				if (y >= 1024-32 && y <= 1024) {
 					bring_to_foreground(*sorted_windows[i]);
-					break;
 				}
 			}
  		}
@@ -123,14 +122,7 @@ void wm_draw() {
 			if (strlen(m_windows[i].title) <= 8) {
 				vga_drawstr(m_windows[i].title, 64 + (96*i) + 2, 1023-24, 255, 255, 255);
 			} else {
-				/*char* buf = malloc(12));
-				memcpy(buf, m_windows[i].title, 8);
-				buf[8]  = '.';
-				buf[9]  = '.';
-				buf[10] = '.';
-				buf[11] = '\0';
-				vga_drawstr(buf, 64 + (96*i) + 2, 1023-24, 255, 255, 255);
-				free(buf);*/
+				vga_drawstr("...", 64 + (96*i) + 2, 1023-24, 255, 255, 255);
 			}
 		}
 	}
