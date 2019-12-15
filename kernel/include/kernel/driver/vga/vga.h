@@ -47,7 +47,10 @@ void vga_terminal_clear();
 /* Swap the VGA buffers */
 void vga_swapbuffers();
 
+/* Blit a framebuffer onto the backbuffer */
+void vga_blit_buffer(unsigned char* buffer, int x, int y, int w, int h);
 
+/* Draw a framebuffer */
 void vga_drawwindow(window_t window);
 
 #endif

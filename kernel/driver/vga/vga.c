@@ -329,10 +329,21 @@ void vga_terminal_clear() {
 	}
 }
 
+void vga_blit_buffer(unsigned char* buffer, int x, int y, int w, int h) {
+	for (int i = 0; i < w; i++) {
+		for (int j = 0; j < h; j++) {
+			if (buffer[x*4+y*w + 3] > 127) vga_putpixel(i+x, j+y, buffer[x*4+y*w + 0], buffer[x*4+y*w + 1], buffer[x*4+y*w + 2]);
+		}
+	}
+}
+
 void vga_drawwindow(window_t window) {
 	vga_drawrect(window.x - window.border_radius, window.y - window.border_radius, window.w + (window.border_radius * 2), window.h + (window.tb_h - 2) + (window.border_radius * 2), 32, 32, 255, window.rounded);
 	vga_drawrect(window.x, window.y + window.tb_h - 2, window.w, window.h, window.bg_r, window.bg_g, window.bg_b, window.rounded);
 	vga_drawrect(window.x, window.y, window.w, window.tb_h, 32, 32, 255, window.rounded);
 	vga_drawstr(window.title, window.x + 1, window.y + 1, 255, 255, 255);
 	vga_drawrect(window.x + window.w - 16, window.y + 2, 14, 14, 255, 0, 0, 0);
+
+	// Draw the framebuffer
+	vga_blit_buffer(window.framebuffer, window.x, window.y + window.tb_h - 2, window.w, window.h);
 }

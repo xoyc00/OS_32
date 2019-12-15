@@ -15,6 +15,8 @@ typedef struct window {
 	unsigned char bg_r, bg_g, bg_b;		// background rgb
 
 	char* title;						// title
+
+	unsigned char* framebuffer;
 } window_t;
 
 void wm_mouse_button_down(int button, int x, int y);

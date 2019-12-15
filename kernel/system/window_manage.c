@@ -178,6 +178,7 @@ window_t* window_create(int w, int h, char* title) {
 	out->bg_r = 255;
 	out->bg_r = 200;
 	out->bg_r = 200;
+	out->framebuffer = malloc(w*h*4);
 	out->title = title;
 	return out;
 }
