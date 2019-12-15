@@ -163,18 +163,18 @@ void vga_drawrect(int x, int y, int w, int h, unsigned char r, unsigned char g, 
 	int i, j;
 
 	for (i = 0; i < h; i++) {
-		if (i+y > vga_height) break;
-		if (i+y < 0) continue;
-		for (j = 0; j < w; j++) {
-			if (j+x > vga_width) continue;
-			if (j+x < 0) continue;
-
-			if (rounded) {
-				if ((j < 1 || j > w-2) && (i < 1 || i > h-2)) continue;
+		if (i+y > 0 && i+y < vga_height) {
+			for (j = 0; j < w; j++) {
+				if (j+x > 0 && j+x < vga_width) {
+					if (rounded) {
+						if ((j < 1 || j > w-2) && (i < 1 || i > h-2)) continue;
+					}
+					
+					where[j*4+0] = b;
+					where[j*4+1] = g;
+					where[j*4+2] = r;
+				}
 			}
-			where[j*4+0] = b;
-			where[j*4+1] = g;
-			where[j*4+2] = r;
 		}
 		where += vga_width*(vga_bpp/8);
 	}
@@ -330,8 +330,9 @@ void vga_terminal_clear() {
 }
 
 void vga_drawwindow(window_t window) {
+	vga_drawrect(window.x - window.border_radius, window.y - window.border_radius, window.w + (window.border_radius * 2), window.h + (window.tb_h - 2) + (window.border_radius * 2), 32, 32, 255, window.rounded);
 	vga_drawrect(window.x, window.y + window.tb_h - 2, window.w, window.h, window.bg_r, window.bg_g, window.bg_b, window.rounded);
-	vga_drawrect(window.x, window.y, window.w, window.tb_h, 0, 0, 175, window.rounded);
+	vga_drawrect(window.x, window.y, window.w, window.tb_h, 32, 32, 255, window.rounded);
 	vga_drawstr(window.title, window.x + 1, window.y + 1, 255, 255, 255);
 	vga_drawrect(window.x + window.w - 16, window.y + 2, 14, 14, 255, 0, 0, 0);
 }

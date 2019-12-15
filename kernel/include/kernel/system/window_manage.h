@@ -8,6 +8,7 @@ typedef struct window {
 	int x, y;							// x and y position
 	int w, h;							// width and height
 	int tb_h;							// title bar height
+	int border_radius;					// How many pixels should the border be?
 	int rounded;						// should the window have rounded edges?
 	int depth;
 

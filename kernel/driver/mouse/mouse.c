@@ -30,8 +30,8 @@ void mouse_handler()
       break;
     case 2:
       mouse_byte[2]=inb(0x60);
-      mouse_x+=(mouse_byte[1]);
-      mouse_y-=(mouse_byte[2]);
+      mouse_x+=((unsigned char)mouse_byte[1] - ((mouse_byte[0] << 4) & 0x100));
+      mouse_y-=((unsigned char)mouse_byte[2] - ((mouse_byte[0] << 3) & 0x100));
       mouse_cycle=0;
 
 	  if (mouse_x < 1) mouse_x = 1;
