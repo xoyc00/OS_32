@@ -6,6 +6,8 @@
 #include <kernel/cpu/timer.h>
 #include "font.c"
 
+#include <kernel/system/window_manage.h>
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,7 +36,7 @@ void vga_init(size_t width, size_t height, size_t pitch, size_t bpp, size_t addr
 	vga_bpp = bpp;
 	vga_mem = (unsigned char*)addr;
 
-	memset(backbuffer_mem, 0, 1024*768*4);
+	memset(backbuffer_mem, 0, 1280*1024*4);
 
 	terminal_row = 0;
 	terminal_column = 0;
@@ -332,7 +334,7 @@ void vga_terminal_clear() {
 void vga_blit_buffer(unsigned char* buffer, int x, int y, int w, int h) {
 	for (int i = 0; i < w; i++) {
 		for (int j = 0; j < h; j++) {
-			if (buffer[x*4+y*w + 3] > 127) vga_putpixel(i+x, j+y, buffer[x*4+y*w + 0], buffer[x*4+y*w + 1], buffer[x*4+y*w + 2]);
+			if (buffer[x*4+y*w + 3] > 127) vga_putpixel(i+x, j+y, buffer[x*4+y*w*4 + 2], buffer[x*4+y*w*4 + 1], buffer[x*4+y*w*4 + 0]);
 		}
 	}
 }
@@ -346,4 +348,26 @@ void vga_drawwindow(window_t window) {
 
 	// Draw the framebuffer
 	vga_blit_buffer(window.framebuffer, window.x, window.y + window.tb_h - 2, window.w, window.h);
+}
+
+void wm_putchar(window_t* w, unsigned char c, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
+	for (int row = 0; row < 16; row ++) {
+		unsigned char character = font.Bitmap[(int)c * 16 + row];
+		if (character & (1 << 7)) wm_putpixel(w, x+0, y+row, r, g, b, 255);
+		if (character & (1 << 6)) wm_putpixel(w, x+1, y+row, r, g, b, 255);
+		if (character & (1 << 5)) wm_putpixel(w, x+2, y+row, r, g, b, 255);
+		if (character & (1 << 4)) wm_putpixel(w, x+3, y+row, r, g, b, 255);
+		if (character & (1 << 3)) wm_putpixel(w, x+4, y+row, r, g, b, 255);
+		if (character & (1 << 2)) wm_putpixel(w, x+5, y+row, r, g, b, 255);
+		if (character & (1 << 1)) wm_putpixel(w, x+6, y+row, r, g, b, 255);
+		if (character & (1 << 0)) wm_putpixel(w, x+7, y+row, r, g, b, 255);
+	}
+}
+
+void wm_putstr(window_t* w, unsigned char* str, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
+	int i = 0;
+	while(str[i] != '\0') {
+		wm_putchar(w, str[i], x + (i * 8), y, r, g, b);
+		i ++;
+	}
 }

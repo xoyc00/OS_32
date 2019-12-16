@@ -29,5 +29,12 @@ void wm_init();
 void wm_draw();
 
 window_t* window_create(int w, int h, char* title);
+void window_register(window_t* w);
+void window_deregister(window_t* w);
+
+void wm_clearwindow(window_t* w);
+void wm_putpixel(window_t* w, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+void wm_putchar(window_t* w, unsigned char c, int x, int y, unsigned char r, unsigned char g, unsigned char b);				// implemented in vga.c
+void wm_putstr(window_t* w, unsigned char* str, int x, int y, unsigned char r, unsigned char g, unsigned char b);			// implemented in vga.c
 
 #endif

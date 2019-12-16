@@ -96,6 +96,7 @@ void wm_init() {
 	term->bg_g = 32;
 	term->bg_b = 32;
 	term->tid = 0;
+	wm_putstr(term, "Hello, World!", 10, 10, 0, 255, 0);
 	window_register(term);
 
 	window_t* t = window_create(128, 128, "Test");
@@ -181,4 +182,28 @@ window_t* window_create(int w, int h, char* title) {
 	out->framebuffer = malloc(w*h*4);
 	out->title = title;
 	return out;
+}
+
+void wm_clearwindow(window_t* w) {
+	for (int x = 0; x < w->w; x++) {
+		for (int y = 0; y < w->h; y++) {
+			wm_putpixel(w, x, y, 0, 0, 0, 0);
+		}
+	}
+}
+
+void wm_putpixel(window_t* w, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+	if (x < 0) return;
+	if (x > w->w) return;
+	if (y < 0) return;
+	if (y > w->h) return;
+
+	unsigned int bytes_per_line = w->w * 4;
+
+	printf("%d\n", w->framebuffer);
+
+	w->framebuffer[(y * bytes_per_line) + (x * 4) + 0] = b;
+	w->framebuffer[(y * bytes_per_line) + (x * 4) + 1] = g;
+	w->framebuffer[(y * bytes_per_line) + (x * 4) + 2] = r;
+	w->framebuffer[(y * bytes_per_line) + (x * 4) + 3] = a;
 }
