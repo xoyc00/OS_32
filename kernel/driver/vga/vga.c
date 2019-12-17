@@ -331,10 +331,10 @@ void vga_terminal_clear() {
 	}
 }
 
-void vga_blit_buffer(unsigned char* buffer, int x, int y, int w, int h) {
+void vga_blit_buffer(const unsigned char* buffer, int x, int y, int w, int h) {
 	for (int i = 0; i < w; i++) {
 		for (int j = 0; j < h; j++) {
-			if (buffer[x*4+y*w + 3] > 127) vga_putpixel(i+x, j+y, buffer[x*4+y*w*4 + 2], buffer[x*4+y*w*4 + 1], buffer[x*4+y*w*4 + 0]);
+			vga_putpixel(i+x, j+y, buffer[i*4+j*w*4 + 2], buffer[i*4+j*w*4 + 1], buffer[i*4+j*w*4 + 0]);
 		}
 	}
 }

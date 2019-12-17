@@ -91,12 +91,13 @@ void wm_mouse_button_up(int button, int x, int y) {
 }
 
 void wm_init() {
-	window_t* term = window_create(512, 384, "Terminal");
+	window_t* term = window_create(128, 128, "Terminal");
 	term->bg_r = 32;
 	term->bg_g = 32;
 	term->bg_b = 32;
 	term->tid = 0;
-	wm_putstr(term, "Hello, World!", 10, 10, 0, 255, 0);
+	wm_clearwindow(term);
+	wm_putstr(term, "Hello, World!", 0, 0, 0, 255, 0);
 	window_register(term);
 
 	window_t* t = window_create(128, 128, "Test");
@@ -177,8 +178,8 @@ window_t* window_create(int w, int h, char* title) {
 	out->border_radius = 1;
 	out->rounded = 1;
 	out->bg_r = 255;
-	out->bg_r = 200;
-	out->bg_r = 200;
+	out->bg_g = 200;
+	out->bg_b = 200;
 	out->framebuffer = malloc(w*h*4);
 	out->title = title;
 	return out;
@@ -187,12 +188,13 @@ window_t* window_create(int w, int h, char* title) {
 void wm_clearwindow(window_t* w) {
 	for (int x = 0; x < w->w; x++) {
 		for (int y = 0; y < w->h; y++) {
-			wm_putpixel(w, x, y, 0, 0, 0, 0);
+			wm_putpixel(w, x, y, w->bg_r, w->bg_g, w->bg_b, 255);
 		}
 	}
 }
 
 void wm_putpixel(window_t* w, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+	if (w->framebuffer <= 0) return;	
 	if (x < 0) return;
 	if (x > w->w) return;
 	if (y < 0) return;
