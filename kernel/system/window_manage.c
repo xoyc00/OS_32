@@ -200,8 +200,6 @@ void wm_putpixel(window_t* w, int x, int y, unsigned char r, unsigned char g, un
 
 	unsigned int bytes_per_line = w->w * 4;
 
-	printf("%d\n", w->framebuffer);
-
 	w->framebuffer[(y * bytes_per_line) + (x * 4) + 0] = b;
 	w->framebuffer[(y * bytes_per_line) + (x * 4) + 1] = g;
 	w->framebuffer[(y * bytes_per_line) + (x * 4) + 2] = r;
