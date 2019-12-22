@@ -99,11 +99,6 @@ void wm_init() {
 	wm_clearwindow(term);
 	wm_putstr(term, "Hello, World!", 4, 4, 255, 255, 255);
 	window_register(term);
-
-	window_t* t = window_create(512, 386, "Terminal2");
-	wm_clearwindow(t);
-	wm_putstr(t, "Hello, World!", 4, 4, 255, 255, 255);
-	window_register(t);
 }
 
 void wm_draw() {

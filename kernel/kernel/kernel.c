@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include <kernel/multiboot.h>
+#include <kernel/memory_mapper.h>
 #include <kernel/liballoc.h>
 #include <kernel/tty.h>
 #include <kernel/cpu/gdt.h>

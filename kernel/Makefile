@@ -25,7 +25,6 @@ SYSTEMDIR=system/
 
 include $(ARCHDIR)/make.config
 include $(DRIVERDIR)/make.config
-include $(SYSDIR)/make.config
 include $(SYSTEMDIR)/make.config
 
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
@@ -36,7 +35,6 @@ LIBS:=$(LIBS) $(KERNEL_ARCH_LIBS)
 KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 $(KERNEL_DRIVER_OBJS) \
-$(KERNEL_SYS_OBJS) \
 $(KERNEL_SYSTEM_OBJS) \
 kernel/kernel.o \
 kernel/shell.o \

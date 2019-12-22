@@ -56,3 +56,63 @@ void print_memory_map() {
 		next = next->next_ptr;
 	}
 }
+
+/* TODO: Expand this function to do more than just map memory based off of len */
+void *mem_map(size_t len, int prot, int flags) {
+	if (len <= 0) {
+		return MAP_FAILED;
+	}
+
+	void* pa;
+
+	memory_block_t* next = &map;
+	while(next != 0) {
+		if (next->size >= (len + sizeof(memory_block_t)) && next->free) {
+			pa = next->addr;
+			
+			memory_block_t* n = next->addr + len;
+			n->free = 1;
+			n->size = next->size - sizeof(memory_block_t) - len;
+			n->addr = next->addr + len + sizeof(memory_block_t);
+			n->next_ptr = next->next_ptr;
+
+			next->next_ptr = n;
+			next->free = 0;
+			next->size = len;
+	
+			return pa;
+		}
+		next = next->next_ptr;
+	}
+
+	(void)prot;
+	(void)flags;
+
+	return MAP_FAILED;
+}
+
+void optimise_memory_block(memory_block_t* mem) {
+	if (mem->next_ptr != 0) {
+		if (mem->next_ptr->free) {
+			if (mem->next_ptr->addr == mem->addr + mem->size + sizeof(memory_block_t)) {
+				mem->size += mem->next_ptr->size + sizeof(memory_block_t);
+				mem->next_ptr = mem->next_ptr->next_ptr;
+			}
+		}
+	}
+}
+
+/* TODO: Expand this function to take len into account */
+int mem_unmap(void *addr) {
+	memory_block_t* mem = &map;
+	while (mem != 0) {
+		if (mem->addr == addr) {
+			mem->free = 1;
+			optimise_memory_block(mem);
+			return 0;
+		}
+		mem = mem->next_ptr;
+	}
+
+	return -1;
+}

@@ -11,7 +11,7 @@ char* strtok(char* str, char* tokens) {
     //If string passed to function is not null, copy it to our static variable
     if(str!=0)
     {
-		if (temp!=0) { free(old_temp); temp = 0; }
+		if (temp!=0) { free(old_temp); }
         temp=(char*)malloc(strlen(str));
         strcpy(temp,str);
 		old_temp = temp;

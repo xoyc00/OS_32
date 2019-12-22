@@ -33,7 +33,7 @@ static int l_initialized = 1;			//< Flag to indicate initialization.
 static int l_pageSize  = 4096;			//< Individual page size
 static int l_pageCount = 16;			//< Minimum number of pages to allocate.
 
-#include <kernel/sys/mman.h>
+#include <kernel/memory_mapper.h>
 
 int liballoc_lock() {
 	return 0;
@@ -46,13 +46,13 @@ int liballoc_unlock() {
 void* liballoc_alloc(int pages) {
 	unsigned int size = pages * l_pageSize;
 
-	char* p2 = (char*)mmap(0, size, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE, -1, 0);
+	char* p2 = (char*)mem_map(size, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_FLAG_NONE);
 	if (p2 == MAP_FAILED) return 0;
 	return p2;
 }
 
 int liballoc_free(void* ptr,int pages) {
-	return munmap(ptr, pages * l_pageSize);
+	return mem_unmap(ptr);
 }
 
 // ***********   HELPER FUNCTIONS  *******************************

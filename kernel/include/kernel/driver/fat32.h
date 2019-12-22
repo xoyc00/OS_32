@@ -63,7 +63,8 @@ typedef struct lfn_entry {
 
 /* Directory Entry */
 typedef struct directory_entry {
-	unsigned char file_name[11];
+	unsigned char file_name[8];
+	unsigned char extension[3];
 	unsigned char file_attributes;
 	unsigned char reserved;
 	unsigned char create_time_tenths_second;
@@ -82,6 +83,8 @@ typedef struct directory_entry {
 
 /* Fat32 struct for holding all the relevant information about a fat32 volume */
 typedef struct fat32 {
+	uint32_t volume_start_sect;
+
 	BPB_t bpb;
 	EBR_t ebr;
 	FSInfo_t* fsinfo;
@@ -93,6 +96,27 @@ typedef struct fat32 {
 	uint32_t root_cluster;
 	uint8_t sectors_per_cluster;
 } fat32_t;
+
+typedef struct part_table {
+	unsigned char active;
+	unsigned char start_head;
+	unsigned char start_sector;
+	unsigned char start_cylinder;
+	unsigned char system_ID;
+	unsigned char end_head;
+	unsigned char end_sector;
+	unsigned char end_cylinder;
+	uint32_t lba_start_sector;
+	uint32_t sectors_total;
+} __attribute__((packed)) part_table_t;
+
+typedef struct boot_sect {
+	unsigned char boot_code[446];
+	part_table_t part_1;
+	part_table_t part_2;
+	part_table_t part_3;
+	part_table_t part_4;
+} __attribute__((packed)) boot_sect_t;
 
 char* current_directory;
 
@@ -114,5 +138,7 @@ void read_directory_tree(int drive);
 
 /* Read a file */
 unsigned char* read_file(int drive, uint32_t cluster);
+
+unsigned char* read_file_from_name(int drive, char* path);
 
 #endif

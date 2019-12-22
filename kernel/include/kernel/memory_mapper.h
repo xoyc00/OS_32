@@ -21,4 +21,17 @@ void memory_mapper_init(multiboot_info_t* mbt);
 /* Print the memory map to the terminal */
 void print_memory_map();
 
+#define PROT_NONE 	0
+#define PROT_EXEC 	1
+#define PROT_READ 	1<<1
+#define PROT_WRITE 	1<<2
+
+#define MAP_FLAG_NONE 0
+#define MAP_FLAG_PURGEABLE 1
+
+#define MAP_FAILED (void*)0
+
+void *mem_map(size_t len, int prot, int flags);
+int mem_unmap(void *addr);
+
 #endif
