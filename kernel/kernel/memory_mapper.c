@@ -5,6 +5,8 @@
 #include <assert.h>
 #include <string.h>
 
+extern void* endkernel;
+
 void memory_mapper_init(multiboot_info_t* mbt) {	
 	memory_block_t* prev = 0;
 
@@ -12,17 +14,31 @@ void memory_mapper_init(multiboot_info_t* mbt) {
 	while(mmap < mbt->mmap_addr + mbt->mmap_length) {
 		if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
 			// The memory is available for use
-			if (prev == 0) {
+			if (prev == 0 && mmap->addr > endkernel) {
 				map.free = 1;
-				map.size = (size_t)mmap->len - sizeof(memory_block_t);
-				map.addr = mmap->addr + sizeof(memory_block_t);
+				map.size = (size_t)mmap->len;
+				map.addr = mmap->addr;
 				map.next_ptr = 0;
 				prev = &map;
-			} else {
+			} else if (prev == 0 && mmap->addr + mmap->len > endkernel)  {
+				map.free = 1;
+				map.size = (size_t)mmap->len - (size_t)(mmap->addr - (size_t)endkernel);
+				map.addr = endkernel;
+				map.next_ptr = 0;
+				prev = &map;
+			} else if (mmap->addr > endkernel) {
 				memory_block_t* next = (memory_block_t*)(mmap->addr);
 				next->free = 1;
 				next->size = (size_t)mmap->len - sizeof(memory_block_t);
 				next->addr = mmap->addr + sizeof(memory_block_t);
+				next->next_ptr = 0;
+				prev->next_ptr = next;
+				prev = next;
+			} else if (mmap->addr + mmap->len > endkernel)  {
+				memory_block_t* next = (memory_block_t*)(endkernel);
+				next->free = 1;
+				next->size = (size_t)mmap->len - sizeof(memory_block_t) - (size_t)(mmap->addr - (size_t)endkernel);
+				next->addr = endkernel + sizeof(memory_block_t);
 				next->next_ptr = 0;
 				prev->next_ptr = next;
 				prev = next;

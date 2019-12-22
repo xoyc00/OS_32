@@ -11,7 +11,7 @@ void *mmap(void *addr, size_t len, int prot, int flags, int fildes, off_t off) {
 
 	memory_block_t* next = &map;
 	while(next != 0) {
-		if (next->size >= (len + sizeof(memory_block_t))) {
+		if (next->size >= (len + sizeof(memory_block_t)) && next->free) {
 			pa = next->addr;
 			
 			memory_block_t* n = next->addr + len;

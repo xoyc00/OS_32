@@ -1,7 +1,8 @@
 .global gdt_flush
-.extern gp
+
 gdt_flush:
-	lgdt (gp)
+	mov 4(%esp), %eax
+	lgdt (%eax)
 	mov $0x10, %ax
 	mov %ax, %ds	
 	mov %ax, %es

@@ -1,12 +1,14 @@
 #ifndef _WINDOW_MANAGE_H
 #define _WINDOW_MANAGE_H
 
+#include <stddef.h>
+
 typedef struct window {
 	int wid;							// window ID
 	int tid;							// parent task ID
 
 	int x, y;							// x and y position
-	int w, h;							// width and height
+	size_t w, h;						// width and height
 	int tb_h;							// title bar height
 	int border_radius;					// How many pixels should the border be?
 	int rounded;						// should the window have rounded edges?
@@ -28,7 +30,7 @@ void wm_init();
 // Draw the windows to the screen
 void wm_draw();
 
-window_t* window_create(int w, int h, char* title);
+window_t* window_create(size_t w, size_t h, char* title);
 void window_register(window_t* w);
 void window_deregister(window_t* w);
 

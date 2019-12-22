@@ -24,7 +24,7 @@ int vga_drvr_enabled = 0;
 int display_cursor = 0;
 int vga_drvr_finished = 0;
 
-#define TERMINAL_HEIGHT 64
+#define TERMINAL_HEIGHT 60
 #define TERMINAL_WIDTH 	160
 
 unsigned char terminal_mem[TERMINAL_HEIGHT * TERMINAL_WIDTH];
@@ -37,6 +37,7 @@ void vga_init(size_t width, size_t height, size_t pitch, size_t bpp, size_t addr
 	vga_mem = (unsigned char*)addr;
 
 	memset(backbuffer_mem, 0, 1280*1024*4);
+	memset(terminal_mem, 0, TERMINAL_HEIGHT * TERMINAL_WIDTH);
 
 	terminal_row = 0;
 	terminal_column = 0;
@@ -334,17 +335,16 @@ void vga_terminal_clear() {
 void vga_blit_buffer(const unsigned char* buffer, int x, int y, int w, int h) {
 	for (int i = 0; i < w; i++) {
 		for (int j = 0; j < h; j++) {
-			vga_putpixel(i+x, j+y, buffer[i*4+j*w*4 + 2], buffer[i*4+j*w*4 + 1], buffer[i*4+j*w*4 + 0]);
+			vga_putpixel(i+x, j+y, buffer[(i*4)+(j*w*4) + 2], buffer[(i*4)+(j*w*4) + 1], buffer[(i*4)+(j*w*4) + 0]);
 		}
 	}
 }
 
 void vga_drawwindow(window_t window) {
 	vga_drawrect(window.x - window.border_radius, window.y - window.border_radius, window.w + (window.border_radius * 2), window.h + (window.tb_h - 2) + (window.border_radius * 2), 32, 32, 255, window.rounded);
-	vga_drawrect(window.x, window.y + window.tb_h - 2, window.w, window.h, window.bg_r, window.bg_g, window.bg_b, window.rounded);
 	vga_drawrect(window.x, window.y, window.w, window.tb_h, 32, 32, 255, window.rounded);
 	vga_drawstr(window.title, window.x + 1, window.y + 1, 255, 255, 255);
-	vga_drawrect(window.x + window.w - 16, window.y + 2, 14, 14, 255, 0, 0, 0);
+	vga_drawrect(window.x + window.w - 16, window.y + 1, 14, 14, 255, 0, 0, 0);
 
 	// Draw the framebuffer
 	vga_blit_buffer(window.framebuffer, window.x, window.y + window.tb_h - 2, window.w, window.h);

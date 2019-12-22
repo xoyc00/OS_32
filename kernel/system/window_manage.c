@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-window_t* m_windows = 0;
+window_t** m_windows = 0;
 window_t* drag_window = 0;
 int drag_offset_x, drag_offset_y;
 int window_count = 0;
@@ -17,7 +17,7 @@ window_t** sorted_by_depth() {
 	window_t** out = malloc(sizeof(window_t*) * window_count);
 
 	for (int i = 0; i < window_count; i++) {
-		out[m_windows[i].depth] = &m_windows[i];
+		out[m_windows[i]->depth] = m_windows[i];
 	}
 
 	return out;
@@ -25,11 +25,11 @@ window_t** sorted_by_depth() {
 
 void bring_to_foreground(window_t w) {
 	for (int i = 0; i < window_count; i++) {
-		if (m_windows[i].depth > w.depth) {
-			m_windows[i].depth--;
+		if (m_windows[i]->depth > w.depth) {
+			m_windows[i]->depth--;
 		}
-		if (w.wid == m_windows[i].wid) {
-			m_windows[i].depth = window_count - 1;
+		if (w.wid == m_windows[i]->wid) {
+			m_windows[i]->depth = window_count - 1;
 		}
 	}
 }
@@ -91,24 +91,19 @@ void wm_mouse_button_up(int button, int x, int y) {
 }
 
 void wm_init() {
-	window_t* term = window_create(128, 128, "Terminal");
+	window_t* term = window_create(512, 386, "Terminal");
 	term->bg_r = 32;
 	term->bg_g = 32;
 	term->bg_b = 32;
 	term->tid = 0;
 	wm_clearwindow(term);
-	wm_putstr(term, "Hello, World!", 0, 0, 0, 255, 0);
+	wm_putstr(term, "Hello, World!", 4, 4, 255, 255, 255);
 	window_register(term);
 
-	window_t* t = window_create(128, 128, "Test");
-	t->x = 900;
-	t->tid = 0;
+	window_t* t = window_create(512, 386, "Terminal2");
+	wm_clearwindow(t);
+	wm_putstr(t, "Hello, World!", 4, 4, 255, 255, 255);
 	window_register(t);
-
-	window_t* r = window_create(128, 128, "A Test Window");
-	r->y = 700;
-	r->tid = 0;
-	window_register(r);
 }
 
 void wm_draw() {
@@ -119,12 +114,12 @@ void wm_draw() {
 
 		for (int i = 0; i < window_count; i++) {				// Draw the window titles in the task bar
 			int col = 48;
-			if (m_windows[i].depth == window_count - 1) col = 64;
-			vga_drawrect(64 + (96*i), 1023-32, 96, 32, col, col, 255, 0);
-			if (strlen(m_windows[i].title) <= 8) {
-				vga_drawstr(m_windows[i].title, 64 + (96*i) + 2, 1023-24, 255, 255, 255);
+			if (m_windows[i]->depth == window_count - 1) col = 64;
+			vga_drawrect(64 + (96*i), 1024-32, 96, 32, col, col, 255, 0);
+			if (strlen(m_windows[i]->title) <= 8) {
+				vga_drawstr(m_windows[i]->title, 64 + (96*i) + 2, 1024-24, 255, 255, 255);
 			} else {
-				vga_drawstr("...", 64 + (96*i) + 2, 1023-24, 255, 255, 255);
+				vga_drawstr("...", 64 + (96*i) + 2, 1024-24, 255, 255, 255);
 			}
 		}
 	}
@@ -147,13 +142,13 @@ void window_register(window_t* w) {
 
 	if (window_count == 0) {
 		m_windows = malloc(sizeof(window_t));
-		m_windows[0] = *w;
+		m_windows[0] = w;
 		window_count++;
 	} else {
 		window_count++;
-		window_t* new_m_windows = malloc(window_count * sizeof(window_t));
+		window_t** new_m_windows = malloc(window_count * sizeof(window_t));
 		memcpy(new_m_windows, m_windows, (window_count-1)*sizeof(window_t));
-		new_m_windows[window_count-1] = *w;
+		new_m_windows[window_count-1] = w;
 		free(m_windows);
 		m_windows = new_m_windows;
 	}
@@ -167,7 +162,7 @@ void window_deregister(window_t* w) {
 	}
 }
 
-window_t* window_create(int w, int h, char* title) {
+window_t* window_create(size_t w, size_t h, char* title) {
 	window_t* out = malloc(sizeof(window_t));
 	assert(out != 0);
 	out->x = 100;
@@ -180,7 +175,7 @@ window_t* window_create(int w, int h, char* title) {
 	out->bg_r = 255;
 	out->bg_g = 200;
 	out->bg_b = 200;
-	out->framebuffer = malloc(w*h*4);
+	out->framebuffer = malloc(out->w*out->h*4U);
 	out->title = title;
 	return out;
 }
@@ -194,13 +189,11 @@ void wm_clearwindow(window_t* w) {
 }
 
 void wm_putpixel(window_t* w, int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
-	if (w->framebuffer <= 0) return;	
-	if (x < 0) return;
-	if (x > w->w) return;
-	if (y < 0) return;
-	if (y > w->h) return;
-
 	unsigned int bytes_per_line = w->w * 4;
+
+	if ((y * bytes_per_line) + (x * 4) + 3 > w->w*w->h*4U) {
+		return;
+	}
 
 	w->framebuffer[(y * bytes_per_line) + (x * 4) + 0] = b;
 	w->framebuffer[(y * bytes_per_line) + (x * 4) + 1] = g;
