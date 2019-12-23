@@ -13,6 +13,9 @@ int window_count = 0;
 extern int mouse_x;
 extern int mouse_y;
 
+unsigned char* wallpaper;
+int wallpaper_w = 0, wallpaper_h = 0, wallpaper_bpp = 0;
+
 window_t** sorted_by_depth() {
 	window_t** out = malloc(sizeof(window_t*) * window_count);
 
@@ -99,9 +102,17 @@ void wm_init() {
 	wm_clearwindow(term);
 	wm_putstr(term, "Hello, World!", 4, 4, 255, 255, 255);
 	window_register(term);
+
+	wallpaper = vga_load_bitmap_to_buffer("/USER/WALLPA~1BMP", &wallpaper_w, &wallpaper_h, &wallpaper_bpp);
+	printf("Width: %d\n", wallpaper_w);
 }
 
 void wm_draw() {
+	vga_clearscreen(0, 0, 0);
+	vga_blit_buffer(wallpaper, 0, 0, wallpaper_w, wallpaper_h, wallpaper_bpp);
+
+	vga_terminal_draw();
+
 	{		// Draw the task bar
 		vga_drawrect(0, 1024-32, 1279, 32, 32, 32, 255, 0);
 		vga_drawrect(0, 1024-32, 64, 32, 0, 156, 0, 1);

@@ -332,10 +332,12 @@ void vga_terminal_clear() {
 	}
 }
 
-void vga_blit_buffer(const unsigned char* buffer, int x, int y, int w, int h) {
+void vga_blit_buffer(const unsigned char* buffer, int x, int y, int w, int h, int bpp) {
+	bpp /= 8;
+
 	for (int i = 0; i < w; i++) {
 		for (int j = 0; j < h; j++) {
-			vga_putpixel(i+x, j+y, buffer[(i*4)+(j*w*4) + 2], buffer[(i*4)+(j*w*4) + 1], buffer[(i*4)+(j*w*4) + 0]);
+			vga_putpixel(i+x, j+y, buffer[(i*bpp)+(j*w*bpp) + 2], buffer[(i*bpp)+(j*w*bpp) + 1], buffer[(i*bpp)+(j*w*bpp) + 0]);
 		}
 	}
 }
@@ -347,7 +349,7 @@ void vga_drawwindow(window_t window) {
 	vga_drawrect(window.x + window.w - 16, window.y + 1, 14, 14, 255, 0, 0, 0);
 
 	// Draw the framebuffer
-	vga_blit_buffer(window.framebuffer, window.x, window.y + window.tb_h - 2, window.w, window.h);
+	vga_blit_buffer(window.framebuffer, window.x, window.y + window.tb_h - 2, window.w, window.h, 32);
 }
 
 void wm_putchar(window_t* w, unsigned char c, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
@@ -370,4 +372,24 @@ void wm_putstr(window_t* w, unsigned char* str, int x, int y, unsigned char r, u
 		wm_putchar(w, str[i], x + (i * 8), y, r, g, b);
 		i ++;
 	}
+}
+
+unsigned char* vga_load_bitmap_to_buffer(char* path, int *w, int *h, int *bpp) {
+	int size;
+
+	directory_entry_t* d = read_directory_from_name(0, path, &size);
+
+	unsigned char* bmp_total = read_file(0, d->first_cluster_low | (d->first_cluster_high >> 16));
+
+	BMP_header_t header = *(BMP_header_t*)(bmp_total);
+	BMP_info_header_t info_header = *(BMP_info_header_t*)(bmp_total + 14);
+
+	if (info_header.compression != 0) return 0;
+
+	unsigned char* out = (bmp_total + header.offset);
+	*w = info_header.width;
+	*h = info_header.height;
+	*bpp = info_header.bits;
+
+	return out;
 }

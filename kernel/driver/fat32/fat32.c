@@ -266,7 +266,12 @@ directory_entry_t* traverse_path(int drive, directory_entry_t* root, char** p, i
 				*count = c;
 				found_next = 1;
 				break;
-			}
+			} else if (strcmp(file_name, p[i]) == 0) {
+				free(out);
+				out = &out[j];
+				*count = 1;
+				return out;
+			} 
 		}
 
 		if (found_next == 0) {
@@ -326,7 +331,6 @@ unsigned char* read_file(int drive, uint32_t cluster) {
 	uint32_t* cluster_chain = get_cluster_chain(drive, cluster, &cluster_count);
 	unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)) + 1);
 	memset(buf, 'T', ((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)));;
-	printf("Output buffer: %d\n", buf);	
 	return;
 	if (buf != 0) {
 		int i = 0;

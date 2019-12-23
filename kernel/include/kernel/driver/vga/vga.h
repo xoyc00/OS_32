@@ -4,6 +4,26 @@
 #include <kernel/system/window_manage.h>
 
 #include <stddef.h>
+#include <stdint.h>
+
+typedef struct {
+   uint16_t type;                 		/* Magic identifier            */
+   uint32_t size;                       /* File size in bytes          */
+   uint16_t reserved1, reserved2;
+   uint32_t offset;                     /* Offset to image data, bytes */
+} __attribute__((packed)) BMP_header_t;
+
+typedef struct {
+   uint32_t size;               /* Header size in bytes      */
+   uint32_t width,height;                /* Width and height of image */
+   uint16_t planes;       /* Number of colour planes   */
+   uint16_t bits;         /* Bits per pixel            */
+   uint32_t compression;        /* Compression type          */
+   uint32_t imagesize;          /* Image size in bytes       */
+   uint32_t xresolution,yresolution;     /* Pixels per meter          */
+   uint32_t ncolours;           /* Number of colours         */
+   uint32_t importantcolours;   /* Important colours         */
+} __attribute__((packed)) BMP_info_header_t;
 
 /* Initialise the screen */
 void vga_init(size_t width, size_t height, size_t pitch, size_t bpp, size_t addr);
@@ -48,9 +68,11 @@ void vga_terminal_clear();
 void vga_swapbuffers();
 
 /* Blit a framebuffer onto the backbuffer */
-void vga_blit_buffer(const unsigned char* buffer, int x, int y, int w, int h);
+void vga_blit_buffer(const unsigned char* buffer, int x, int y, int w, int h, int bpp);
 
 /* Draw a framebuffer */
 void vga_drawwindow(window_t window);
+
+unsigned char* vga_load_bitmap_to_buffer(char* path, int *w, int *h, int *bpp);
 
 #endif
