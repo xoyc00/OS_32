@@ -11,10 +11,12 @@
 fat32_t fat_drive[4];
 boot_sect_t bs;
 
+/* Calculates the first disk sector of a given cluster. */
 uint64_t first_sect_of_cluster(int drive, uint32_t cluster) {
 	return (cluster - 2)*fat_drive[drive].sectors_per_cluster + fat_drive[drive].first_data_sector + fat_drive[drive].volume_start_sect;
 }
 
+/* Gets the FAT table value for the given cluster. This points to the next cluster in the chain. */
 unsigned int table_value(int drive, uint32_t active_cluster) {
 	static unsigned char* fat_table;
 	if (fat_table) { free(fat_table); fat_table = 0; };
@@ -28,12 +30,14 @@ unsigned int table_value(int drive, uint32_t active_cluster) {
 	return *(unsigned int*)&fat_table[ent_offset] & 0x0FFFFFFF;
 }
 
+/* Prints a string of a given size. Useful for debugging as printf only prints until it hits a NULL character. */
 void print_debug(unsigned char* str, size_t size) {
 	for (int i = 0; i < size; i++) {
 		printf("%c", str[i]);
 	}
 }
 
+/* Initialises a FAT partition on a given drive. Currently only checks first partition, eventually will support multiple partitions per drive. */
 void fat32_init(int drive) {
 
 	int i = drive;
@@ -84,6 +88,7 @@ void fat32_init(int drive) {
 	current_directory[1] = '\0';
 }
 
+/* Read a single cluster from disk */
 unsigned char* read_cluster(int drive, uint32_t cluster) {
 	uint64_t start_sect = first_sect_of_cluster(drive, cluster);
 	unsigned char* buf = malloc(512 * fat_drive[drive].sectors_per_cluster);
@@ -91,6 +96,7 @@ unsigned char* read_cluster(int drive, uint32_t cluster) {
 	return buf;
 }
 
+/* Returns an array of size count holding all the clusters in the cluster chain. (Does not include the first cluster) */
 uint32_t* get_cluster_chain(int drive, uint32_t start_cluster, int* count) {
 	uint32_t* out;
 	uint32_t* temp;
@@ -122,6 +128,7 @@ uint32_t* get_cluster_chain(int drive, uint32_t start_cluster, int* count) {
 	return out;
 }
 
+/* Reads a directory entr's sub-directories. */
 directory_entry_t* read_directory(int drive, uint32_t cluster, int* count) {
 	lfn_entry_t temp_lfn;
 	directory_entry_t* out = malloc(sizeof(directory_entry_t));
@@ -214,6 +221,7 @@ directory_entry_t* read_directory(int drive, uint32_t cluster, int* count) {
 	return out;
 }
 
+/* Lists a directories sub-directories. */
 void list_directory(int drive, int tabs, int count, directory_entry_t* directory, int recursive, int max_tabs) {
 	if (count == 0)	return;
 	if (directory == 0) return;
@@ -241,6 +249,7 @@ void list_directory(int drive, int tabs, int count, directory_entry_t* directory
 	}
 }
 
+/* Finds a directory entry with a given path. */
 directory_entry_t* traverse_path(int drive, directory_entry_t* root, char** p, int p_count, int* count) {
 	if (p[0] == 0) {
 		return root;
@@ -283,6 +292,7 @@ directory_entry_t* traverse_path(int drive, directory_entry_t* root, char** p, i
 	return out;
 }
 
+/* Reads a list of a directory with a given name's sub-directories. */
 directory_entry_t* read_directory_from_name(int drive, char* path, int* count) {
 	if (path[0] != '/') {
 		printf("Not a valid path!\n");
@@ -317,6 +327,7 @@ directory_entry_t* read_directory_from_name(int drive, char* path, int* count) {
 	return d;
 }
 
+/* Lists the directory tree, 1 tab deep. */
 void read_directory_tree(int drive) {
 	int c;
 	directory_entry_t* root_directory = read_directory(drive, fat_drive[drive].root_cluster, &c);
@@ -326,6 +337,7 @@ void read_directory_tree(int drive) {
 	free(root_directory);
 }
 
+/* Reads the file at a given cluster. */
 unsigned char* read_file(int drive, uint32_t cluster) {
 	int cluster_count;
 	uint32_t* cluster_chain = get_cluster_chain(drive, cluster, &cluster_count);
@@ -351,6 +363,7 @@ unsigned char* read_file(int drive, uint32_t cluster) {
 	return buf;
 }
 
+/* Reads a file with a given path */
 unsigned char* read_file_from_name(int drive, char* path) {
 	if (path[0] != '/') {
 		printf("Not a valid path!\n");

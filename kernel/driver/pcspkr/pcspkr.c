@@ -5,6 +5,7 @@
 
 #include <assert.h>
 
+/* Plays a sound of a given frequency from the pc speaker. */
 void pcspkr_play_sound(uint32_t freq) {
 	uint32_t Div;
  	uint8_t tmp;
@@ -22,11 +23,13 @@ void pcspkr_play_sound(uint32_t freq) {
  	}
 }
 
+/* Stops the currently playing sound. */
 void pcspkr_stop_sound() {
 	uint8_t tmp = inb(0x61) & 0xFC;
  	outb(0x61, tmp);
 }
 
+/* Plays a beep from the pc speaker. */
 void pcspkr_beep() {
 	pcspkr_play_sound(880);
 	asm("sti");

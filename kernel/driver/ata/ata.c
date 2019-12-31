@@ -15,6 +15,7 @@ static unsigned char atapi_packet[12] = {0xA8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 struct ide_device ata_devices[4];
 
+/* Detects and initialises ATA drives. */
 void ata_initialise(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, unsigned int BAR3, unsigned int BAR4) {
 	int i, j, k, count = 0;
 
@@ -91,6 +92,7 @@ void ata_initialise(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, uns
 	}
 }
 
+/* Reads data from the ATA registers. */
 unsigned char ata_read(unsigned char channel, unsigned char reg) {
 	unsigned char result;
 	if (reg > 0x07 && reg < 0x0C)
@@ -108,6 +110,7 @@ unsigned char ata_read(unsigned char channel, unsigned char reg) {
 	return result;
 }
 
+/* Writes data from the ATA registers. */
 void ata_write(unsigned char channel, unsigned char reg, unsigned char data) {
 	if (reg > 0x07 && reg < 0x0C)
 		ata_write(channel, ATA_REG_CONTROL, 0x80 | channels[channel].nIEN);
@@ -123,6 +126,7 @@ void ata_write(unsigned char channel, unsigned char reg, unsigned char data) {
 		ata_write(channel, ATA_REG_CONTROL, channels[channel].nIEN);
 }
 
+/* Reads a buffer from the ATA registers. */
 void ata_read_buffer(unsigned char channel, unsigned char reg, unsigned int buffer, unsigned int quads) {
 	if (reg > 0x07 && reg < 0x0C)
 		ata_write(channel, ATA_REG_CONTROL, 0x80 | channels[channel].nIEN);
@@ -140,6 +144,7 @@ void ata_read_buffer(unsigned char channel, unsigned char reg, unsigned int buff
 		ata_write(channel, ATA_REG_CONTROL, channels[channel].nIEN);
 }
 
+/* Polls the ATA drive. Waits until the drive is ready before returning. */
 unsigned char ata_polling(unsigned char channel, unsigned int advanced_check) {
 	for (int i = 0; i < 4; i++)
 		ata_read(channel, ATA_REG_ALTSTATUS);
@@ -162,6 +167,7 @@ unsigned char ata_polling(unsigned char channel, unsigned int advanced_check) {
 	return 0;
 }
 
+/* Prints an error code */
 unsigned char ata_print_error(unsigned int drive, unsigned char err) {
 	if (err == 0)
 		return err;
@@ -186,10 +192,12 @@ unsigned char ata_print_error(unsigned int drive, unsigned char err) {
       	ata_devices[drive].model);
 }
 
+
+/* Prints a list of all ATA drives found in the system */
 void ata_list_devices() {
 	for (int i = 0; i < 4; i++)
       	if (ata_devices[i].reserved == 1) {
-         	printf("Found %s Drive number %i, %fMB - %s\n",
+         	printf("Found %s Drive number %i, %fMiB - %s\n",
             	(const char *[]){"ATA", "ATAPI"}[ata_devices[i].type],         /* Type */
 				i,
             	(double)ata_devices[i].size / 1024.0 / 2.0,               /* Size */
@@ -197,6 +205,7 @@ void ata_list_devices() {
       	}
 }
 
+/* Read a given number of sectors using 28-bit logical block addressing in PIO mode. */
 void ata_read_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* buf) {
 	asm volatile("cli");
 
@@ -245,6 +254,8 @@ void ata_read_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* bu
 	asm volatile("sti");
 }
 
+
+/* Write a given number of sectors using 28-bit logical block addressing in PIO mode. */
 void ata_write_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* buf) {
 	asm volatile("cli");
 
@@ -292,6 +303,7 @@ void ata_write_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* b
 	asm volatile("sti");
 }
 
+/* Read a given number of sectors using 48-bit logical block addressing in PIO mode. */
 void ata_read_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 	asm volatile("cli");
 
@@ -349,6 +361,7 @@ void ata_read_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* bu
 	asm volatile("sti");
 }
 
+/* Writes a given number of sectors using 48-bit logical block addressing in PIO mode. */
 void ata_write_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 	asm volatile("cli");
 
@@ -404,6 +417,7 @@ void ata_write_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* b
 	asm volatile("sti");
 }
 
+/* Selects the appropriate LBA mode and then reads a given number of sects from the disk. */
 void ata_read_sects(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 	if (LBA > 0xFFFFFFF || sects > 256) {
 		ata_read_sects_lba_48(drive, LBA, sects, buf);
@@ -412,6 +426,7 @@ void ata_read_sects(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 	}
 }
 
+/* Selects the appropriate LBA mode and then writes a given number of sects to the disk. */
 void ata_write_sects(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 	if (LBA > 0xFFFFFFF || sects > 256) {
 		ata_read_sects_lba_48(drive, LBA, sects, buf);

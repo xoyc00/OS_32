@@ -30,6 +30,7 @@ int vga_drvr_finished = 0;
 
 unsigned char terminal_mem[TERMINAL_HEIGHT * TERMINAL_WIDTH];
 
+/* Initiliases the VGA driver. */
 void vga_init(size_t width, size_t height, size_t pitch, size_t bpp, size_t addr) {
 	vga_width = width;
 	vga_height = height;
@@ -45,6 +46,7 @@ void vga_init(size_t width, size_t height, size_t pitch, size_t bpp, size_t addr
 	vga_drvr_enabled = 1;
 }
 
+/* Clears the back buffer. */
 void vga_clearscreen(unsigned char r, unsigned char g, unsigned char b) {
 	for (size_t x = 0; x < vga_width; x++) {
 		for (size_t y = 0; y < vga_height; y++) {
@@ -53,6 +55,7 @@ void vga_clearscreen(unsigned char r, unsigned char g, unsigned char b) {
 	}
 }
 
+/* Puts a single pixel to the back buffer. */
 void vga_putpixel(size_t x, size_t y, unsigned char r, unsigned char g, unsigned char b) {
 	if (x < 0) return;
 	if (x > vga_width) return;
@@ -66,6 +69,7 @@ void vga_putpixel(size_t x, size_t y, unsigned char r, unsigned char g, unsigned
 	*(backbuffer_mem + (y * bytes_per_line) + (x * (vga_bpp / 8)) + 2) = r;
 }
 
+/* Draws the mouse cursor to the back buffer. */
 void vga_drawcursor() {
 	int mouse_x = 0;
 	int mouse_y = 0;
@@ -140,6 +144,7 @@ void vga_drawcursor() {
 	}
 }
 
+/* Draws a single character to the back buffer. */
 void vga_drawchar(char c, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
 	for (int row = 0; row < 16; row ++) {
 		unsigned char character = font.Bitmap[(int)c * 16 + row];
@@ -154,6 +159,7 @@ void vga_drawchar(char c, int x, int y, unsigned char r, unsigned char g, unsign
 	}
 }
 
+/* Draws a string of characters to the back buffer. */
 void vga_drawstr(const char* str, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
 	int i = 0;
 	while(str[i] != '\0') {
@@ -162,6 +168,7 @@ void vga_drawstr(const char* str, int x, int y, unsigned char r, unsigned char g
 	}
 }
 
+/* Draws a rectangle with optionally rounded edges to the back buffer. */
 void vga_drawrect(int x, int y, int w, int h, unsigned char r, unsigned char g, unsigned char b, int rounded) {
 	unsigned char* where = backbuffer_mem + (y*vga_width*(vga_bpp/8)) + (x*(vga_bpp/8));
 	int i, j;
@@ -184,14 +191,17 @@ void vga_drawrect(int x, int y, int w, int h, unsigned char r, unsigned char g, 
 	}
 }
 
+/* Writes a string of a given length to the terminal. */
 void vga_terminal_write(char* str, size_t size) {
 	vga_terminal_drawstr(str, size);
 }
 
+/* Writes a character to the terminal at a given location. */
 void vga_terminal_drawcharat(unsigned char c, size_t x, size_t y) {
 	terminal_mem[x + (y*TERMINAL_WIDTH)] = c;
 }
 
+/* Writes a string to the terminal. */
 void vga_terminal_drawstr(char* str, size_t size) {
 	for (int i = 0; i < size; i++) {
 		if (str[i] == '\n') {
@@ -262,6 +272,7 @@ void vga_terminal_drawstr(char* str, size_t size) {
 	}
 }
 
+/* Draws the terminal to the back buffer. */
 void vga_terminal_draw() {
 	for (int y = 0; y < TERMINAL_HEIGHT; y++) {
 		for (int x = 0; x < TERMINAL_WIDTH; x++) {
@@ -291,6 +302,7 @@ void vga_terminal_draw() {
 	}
 }
 
+/* Processes a backspace in the terminal. */
 void vga_terminal_backspace() {
 	if (terminal_column <= 2 + strlen(current_directory)) {
 		pcspkr_beep();
@@ -301,6 +313,8 @@ void vga_terminal_backspace() {
 	terminal_column--;
 }
 
+/* TODO: vertical sync */
+/* Handles swapping the VGA buffers (front and back buffer) to the screen when V-Sync is finished. */
 void vga_swap_handler() {
 	if (!vga_drvr_finished) return;
 
@@ -317,11 +331,13 @@ void vga_swap_handler() {
 	}
 }
 
+/* Swaps the VGA buffers. */
 void vga_swapbuffers() {
 	vga_drvr_finished = 1;
 	vga_swap_handler();			// TODO: Vertical Sync
 }
 
+/* Clears the terminal. */
 void vga_terminal_clear() {
 	terminal_column = 0;
 	terminal_row = 0;
@@ -333,6 +349,7 @@ void vga_terminal_clear() {
 	}
 }
 
+/* Blits a memory buffer onto the screen. */
 void vga_blit_buffer(const unsigned char* buffer, int x, int y, int w, int h, int bpp) {
 	bpp /= 8;
 
@@ -343,6 +360,7 @@ void vga_blit_buffer(const unsigned char* buffer, int x, int y, int w, int h, in
 	}
 }
 
+/* Draws a window defined by the window manager. */
 void vga_drawwindow(window_t window) {
 	vga_drawrect(window.x - window.border_radius, window.y - window.border_radius, window.w + (window.border_radius * 2), window.h + (window.tb_h - 2) + (window.border_radius * 2), 32, 32, 255, window.rounded);
 	vga_drawrect(window.x, window.y, window.w, window.tb_h, 32, 32, 255, window.rounded);
@@ -353,6 +371,7 @@ void vga_drawwindow(window_t window) {
 	vga_blit_buffer(window.framebuffer, window.x, window.y + window.tb_h - 2, window.w, window.h, 32);
 }
 
+/* Puts a character into a window at a given location. */
 void wm_putchar(window_t* w, unsigned char c, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
 	for (int row = 0; row < 16; row ++) {
 		unsigned char character = font.Bitmap[(int)c * 16 + row];
@@ -367,6 +386,7 @@ void wm_putchar(window_t* w, unsigned char c, int x, int y, unsigned char r, uns
 	}
 }
 
+/* Puts a string into a window at a given location. */
 void wm_putstr(window_t* w, unsigned char* str, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
 	int i = 0;
 	while(str[i] != '\0') {
@@ -375,6 +395,7 @@ void wm_putstr(window_t* w, unsigned char* str, int x, int y, unsigned char r, u
 	}
 }
 
+/* Loads a .BMP image to a memory buffer. */
 unsigned char* vga_load_bitmap_to_buffer(char* path, int *w, int *h, int *bpp) {
 	int size;
 

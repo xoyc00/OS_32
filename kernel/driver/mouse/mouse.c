@@ -142,6 +142,7 @@ void middle_button_up_event() {
 	wm_mouse_button_up(2, mouse_x, mouse_y);
 }
 
+/* Updates the mouse buttons. Checks whether or not any buttons have been pressed or released, and then notifies the window manager. */
 void mouse_update() {
 	int mouse_button_left 	= (mouse_byte[0] << 0) & 0x1;
 	int mouse_button_right 	= (mouse_byte[0] << 1) & 0x1;
