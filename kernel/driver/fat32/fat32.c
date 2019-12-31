@@ -11,13 +11,13 @@
 fat32_t fat_drive[4];
 boot_sect_t bs;
 
-uint32_t first_sect_of_cluster(int drive, uint32_t cluster) {
-	return ((cluster - 2) * fat_drive[drive].bpb.sectors_per_cluster) + fat_drive[drive].first_data_sector + fat_drive[drive].volume_start_sect;
+uint64_t first_sect_of_cluster(int drive, uint32_t cluster) {
+	return (cluster - 2)*fat_drive[drive].sectors_per_cluster + fat_drive[drive].first_data_sector + fat_drive[drive].volume_start_sect;
 }
 
 unsigned int table_value(int drive, uint32_t active_cluster) {
 	static unsigned char* fat_table;
-	if (fat_table) free(fat_table);
+	if (fat_table) { free(fat_table); fat_table = 0; };
 	fat_table = malloc(512);
 	unsigned int fat_offset = active_cluster * 4;
 	unsigned int fat_sector = fat_drive[drive].first_fat_sector + (fat_offset / 512) + fat_drive[drive].volume_start_sect;
@@ -30,7 +30,7 @@ unsigned int table_value(int drive, uint32_t active_cluster) {
 
 void print_debug(unsigned char* str, size_t size) {
 	for (int i = 0; i < size; i++) {
-		printf("0x%x ", str[i]);
+		printf("%c", str[i]);
 	}
 }
 
@@ -85,7 +85,7 @@ void fat32_init(int drive) {
 }
 
 unsigned char* read_cluster(int drive, uint32_t cluster) {
-	uint32_t start_sect = first_sect_of_cluster(drive, cluster);
+	uint64_t start_sect = first_sect_of_cluster(drive, cluster);
 	unsigned char* buf = malloc(512 * fat_drive[drive].sectors_per_cluster);
 	ata_read_sects(drive, start_sect, fat_drive[drive].sectors_per_cluster, buf);
 	return buf;
@@ -224,7 +224,7 @@ void list_directory(int drive, int tabs, int count, directory_entry_t* directory
 		}
 
 		if (isalpha(*(directory[i].extension))) {
-			printf("%s.%s\n", strtok(directory[i].file_name, " "), directory[i].extension);
+			printf("%s.%s - %dB\n", strtok(directory[i].file_name, " "), directory[i].extension, directory[i].file_size);
 		} else {
 			printf("%s\n", directory[i].file_name);
 		}
@@ -329,28 +329,23 @@ void read_directory_tree(int drive) {
 unsigned char* read_file(int drive, uint32_t cluster) {
 	int cluster_count;
 	uint32_t* cluster_chain = get_cluster_chain(drive, cluster, &cluster_count);
-	unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)) + 1);
-	memset(buf, 'T', ((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)));;
-	return;
+	unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)));
 	if (buf != 0) {
-		int i = 0;
+		uint64_t i = 0;
 		{		// Read the first cluster
-				unsigned char* cluster = read_cluster(drive, cluster);
-				print_debug(cluster, (512*fat_drive[drive].sectors_per_cluster));
-				memcpy(buf + i, cluster, (512*fat_drive[drive].sectors_per_cluster));
-				free(cluster);
-				i += (512*fat_drive[drive].sectors_per_cluster);
+				unsigned char* start_cluster = read_cluster(drive, cluster);
+				memcpy(buf, start_cluster, (512*fat_drive[drive].sectors_per_cluster));
+				free(start_cluster);
+				i += (fat_drive[drive].sectors_per_cluster);
 		}
 
-		for (int j = 0; j < cluster_count; j++) {
-			unsigned char* cluster = read_cluster(drive, cluster_chain[j]);
-			print_debug(cluster, (512*fat_drive[drive].sectors_per_cluster));
-			memcpy(buf + i, cluster, (512*fat_drive[drive].sectors_per_cluster));
+		while (*cluster_chain != 0) {
+			unsigned char* cluster = read_cluster(drive, *cluster_chain);
+			memcpy(buf + (512*i), cluster, (512*fat_drive[drive].sectors_per_cluster));
 			free(cluster);
-			i += (512*fat_drive[drive].sectors_per_cluster);
+			i += (fat_drive[drive].sectors_per_cluster);
+			cluster_chain++;
 		}
-
-		buf[(cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)] = '\0';
 	}
 
 	return buf;
@@ -362,14 +357,14 @@ unsigned char* read_file_from_name(int drive, char* path) {
 		return 0;
 	}
 
-	char* path_copy = malloc(strlen(path));
-	strcpy(path_copy, path);
+	printf("Reading file %s:\n", path);
 
-	char* p[128];
-	p[0] = strtok(path_copy, "/");
-	for (int i = 1; i < 128; i++) {
-		p[i] = strtok(0, "/");
-	}
+	int size;
 
-	free(path_copy);
+	directory_entry_t* d = read_directory_from_name(drive, path, &size);
+	if (size != 1) return 0;
+
+	unsigned char* out = read_file(0, d->first_cluster_low | (d->first_cluster_high << 16));
+
+	return out;
 }

@@ -94,22 +94,15 @@ void wm_mouse_button_up(int button, int x, int y) {
 }
 
 void wm_init() {
-	window_t* term = window_create(512, 386, "Terminal");
-	term->bg_r = 32;
-	term->bg_g = 32;
-	term->bg_b = 32;
-	term->tid = 0;
-	wm_clearwindow(term);
-	wm_putstr(term, "Hello, World!", 4, 4, 255, 255, 255);
-	window_register(term);
-
 	wallpaper = vga_load_bitmap_to_buffer("/USER/WALLPA~1BMP", &wallpaper_w, &wallpaper_h, &wallpaper_bpp);
-	printf("Width: %d\n", wallpaper_w);
 }
 
 void wm_draw() {
 	vga_clearscreen(0, 0, 0);
-	vga_blit_buffer(wallpaper, 0, 0, wallpaper_w, wallpaper_h, wallpaper_bpp);
+
+	if (wallpaper != 0) {
+		vga_blit_buffer(wallpaper, 0, 0, 1280, 1024, wallpaper_bpp);
+	}
 
 	vga_terminal_draw();
 
@@ -201,8 +194,8 @@ void wm_putpixel(window_t* w, int x, int y, unsigned char r, unsigned char g, un
 		return;
 	}
 
-	w->framebuffer[(y * bytes_per_line) + (x * 4) + 0] = b;
-	w->framebuffer[(y * bytes_per_line) + (x * 4) + 1] = g;
 	w->framebuffer[(y * bytes_per_line) + (x * 4) + 2] = r;
+	w->framebuffer[(y * bytes_per_line) + (x * 4) + 1] = g;
+	w->framebuffer[(y * bytes_per_line) + (x * 4) + 0] = b;
 	w->framebuffer[(y * bytes_per_line) + (x * 4) + 3] = a;
 }

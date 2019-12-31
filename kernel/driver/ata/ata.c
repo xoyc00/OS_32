@@ -206,6 +206,8 @@ void ata_read_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* bu
 		sects = 256;
 	}
 
+	ata_polling(ata_devices[drive].channel, 0);
+
 	if (ata_devices[drive].drive == ATA_MASTER) {
 		outb(0x1F6, 0xE0 | ((LBA >> 24) & 0x0F));
 	} else {
@@ -231,7 +233,7 @@ void ata_read_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* bu
 
 		for (j = 0; j < 256; j++) {
 		    uint16_t in = inw(0x1F0);
-			*buf = in;
+			*buf = in & 0xFF;
 			buf++;
 			*buf = (in >> 8) & 0xFF;
 			buf++;
@@ -251,6 +253,8 @@ void ata_write_sects_lba_28(int drive, uint32_t LBA, int sects, unsigned char* b
 	if (sects <= 0) {
 		sects = 256;
 	}
+
+	ata_polling(ata_devices[drive].channel, 0);
 
 	if (ata_devices[drive].drive == ATA_MASTER) {
 		outb(0x1F6, 0xE0 | ((LBA >> 24) & 0x0F));
@@ -297,6 +301,8 @@ void ata_read_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* bu
 		sects = 65536;
 	}
 
+	ata_polling(ata_devices[drive].channel, 0);
+
 	if (ata_devices[drive].drive == ATA_MASTER) {
 		outb(0x1F6, 0x40);
 	} else {
@@ -331,7 +337,7 @@ void ata_read_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* bu
 
 		for (j = 0; j < 256; j++) {
 		    uint16_t in = inw(0x1F0);
-			*buf = in;
+			*buf = in & 0xFF;
 			buf++;
 			*buf = (in >> 8) & 0xFF;
 			buf++;
@@ -351,6 +357,8 @@ void ata_write_sects_lba_48(int drive, uint64_t LBA, int sects, unsigned char* b
 	if (sects <= 0) {
 		sects = 65536;
 	}
+
+	ata_polling(ata_devices[drive].channel, 0);
 
 	if (ata_devices[drive].drive == ATA_MASTER) {
 		outb(0x1F6, 0x40);

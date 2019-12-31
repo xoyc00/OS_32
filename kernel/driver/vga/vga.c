@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 
 size_t vga_width, vga_height, vga_pitch, vga_bpp;
 unsigned char* vga_mem;
@@ -377,19 +378,30 @@ void wm_putstr(window_t* w, unsigned char* str, int x, int y, unsigned char r, u
 unsigned char* vga_load_bitmap_to_buffer(char* path, int *w, int *h, int *bpp) {
 	int size;
 
-	directory_entry_t* d = read_directory_from_name(0, path, &size);
+	unsigned char* bmp_total = read_file_from_name(0, path);
 
-	unsigned char* bmp_total = read_file(0, d->first_cluster_low | (d->first_cluster_high >> 16));
+	// Data read from the header of the BMP file
+	unsigned int dataPos;     // Position in the file where the actual data begins
+	unsigned int width, height;
+	unsigned int imageSize;   // = width*height*3
+	// Actual RGB data
+	unsigned char * data;
 
-	BMP_header_t header = *(BMP_header_t*)(bmp_total);
-	BMP_info_header_t info_header = *(BMP_info_header_t*)(bmp_total + 14);
+	if (bmp_total[0] != 'B' || bmp_total[1] != 'M') {
+		printf("WARNING: Not a BMP file!");
+	}
 
-	if (info_header.compression != 0) return 0;
+	dataPos    = *(int*)&(bmp_total[0x0A]);
+	imageSize  = *(int*)&(bmp_total[0x22]);
+	width      = *(int*)&(bmp_total[0x12]);
+	height     = *(int*)&(bmp_total[0x16]);
+	if (imageSize==0)    imageSize=width*height*3; // 3 : one byte for each Red, Green and Blue component
+	if (dataPos==0)      dataPos=54; // The BMP header is done that way
 
-	unsigned char* out = (bmp_total + header.offset);
-	*w = info_header.width;
-	*h = info_header.height;
-	*bpp = info_header.bits;
+	data = (unsigned char*)((uint32_t)bmp_total + dataPos);
 
-	return out;
+	*w = width;
+	*h = height;
+	*bpp = 24;
+	return data;
 }
