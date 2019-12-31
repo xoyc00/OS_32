@@ -232,7 +232,11 @@ void list_directory(int drive, int tabs, int count, directory_entry_t* directory
 		}
 
 		if (isalpha(*(directory[i].extension))) {
-			printf("%s.%s - %dB\n", strtok(directory[i].file_name, " "), directory[i].extension, directory[i].file_size);
+			char* file_name = malloc(9);
+			strncpy(file_name, directory[i].file_name, 8);
+			file_name[8] = '\0';
+			printf("%s.%s - %dB\n", strtok(file_name, " "), directory[i].extension, directory[i].file_size);
+			free(file_name);
 		} else {
 			printf("%s\n", directory[i].file_name);
 		}
@@ -268,7 +272,9 @@ directory_entry_t* traverse_path(int drive, directory_entry_t* root, char** p, i
 		found_next = 0;
 
 		for (int j = 0; j < *count; j++) {
-			char* file_name = strtok(out[j].file_name, " ");
+			char* file_name;
+			strncpy(file_name, out[j].file_name, 8);
+			file_name = strtok(file_name, " ");
 			if (strcmp(file_name, p[i]) == 0 && out[j].file_attributes & 0x10) {
 				free(out);
 				out = read_directory(drive, out[j].first_cluster_low | (out[j].first_cluster_high >> 16), &c);

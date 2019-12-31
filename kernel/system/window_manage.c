@@ -94,7 +94,7 @@ void wm_mouse_button_up(int button, int x, int y) {
 }
 
 void wm_init() {
-	wallpaper = vga_load_bitmap_to_buffer("/USER/WALLPA~1BMP", &wallpaper_w, &wallpaper_h, &wallpaper_bpp);
+	wallpaper = vga_load_bitmap_to_buffer("/USER/WALLPA~1", &wallpaper_w, &wallpaper_h, &wallpaper_bpp);
 }
 
 void wm_draw() {
@@ -107,7 +107,7 @@ void wm_draw() {
 	vga_terminal_draw();
 
 	{		// Draw the task bar
-		vga_drawrect(0, 1024-32, 1279, 32, 32, 32, 255, 0);
+		vga_drawrect(0, 1024-32, 1280, 32, 32, 32, 255, 0);
 		vga_drawrect(0, 1024-32, 64, 32, 0, 156, 0, 1);
 		vga_drawstr("Start", 4, 1024-24, 255, 255, 255);
 
