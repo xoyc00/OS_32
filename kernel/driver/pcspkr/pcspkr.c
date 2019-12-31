@@ -21,6 +21,9 @@ void pcspkr_play_sound(uint32_t freq) {
   	if (tmp != (tmp | 3)) {
  		outb(0x61, tmp | 3);
  	}
+
+		// Enable interrupts
+	asm("sti");
 }
 
 /* Stops the currently playing sound. */
@@ -31,9 +34,7 @@ void pcspkr_stop_sound() {
 
 /* Plays a beep from the pc speaker. */
 void pcspkr_beep() {
-	pcspkr_play_sound(880);
-	asm("sti");
-	sleep(100);
+	pcspkr_play_sound(440);
+	sleep(500);
 	pcspkr_stop_sound();
 }
-

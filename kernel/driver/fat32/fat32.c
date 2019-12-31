@@ -370,8 +370,6 @@ unsigned char* read_file_from_name(int drive, char* path) {
 		return 0;
 	}
 
-	printf("Reading file %s:\n", path);
-
 	int size;
 
 	directory_entry_t* d = read_directory_from_name(drive, path, &size);

@@ -18,7 +18,7 @@
 
 extern int vga_drvr_enabled;
 
-void process_input(char* input) {
+void process_input(char* input, int add_path) {
 	char* i1 = strtok(input, " ");
 	char* iargs[256];
 	for (int i = 0; i < 256; i++) {
@@ -84,14 +84,43 @@ void process_input(char* input) {
 	} else if (strcmp(i1,"dir") == 0) {
 		read_directory_tree(0);
 	} else if (strcmp(i1,"read") == 0) {
+		printf("Reading file %s:\n", iargs[0]);
 		unsigned char* buf = read_file_from_name(0, iargs[0]);
 		if (buf) {
 			printf("%s\n", buf);
 			free(buf);
 		}
 	} else {
-		printf("Not a known command or program!\n");
+		// Read a scr file
+		unsigned char* buf = read_file_from_name(0, i1);
+		if (buf) {
+			int done = 0;
+			char* commands[1024];
+			int i = 0;
+			commands[i] = strtok(buf, "\n");
+			i++;
+			while (done == 0) {
+				char* cmd = strtok(0, "\n");
+				if (cmd == 0) {
+					done = 1;
+					commands[i] = 0;
+					i++;
+					break;
+				}
+				commands[i] = cmd;
+				i++;
+			}
+			i = 0;
+			while (commands[i] != 0) {
+				process_input(commands[i], 0);
+				i++;
+			}
+
+			free(buf);
+		} else {
+			printf("Not a known command or program!\n");
+		}
 	}
 
-    printf("%s> ", current_directory);
+    if (add_path) printf("%s> ", current_directory);
 }

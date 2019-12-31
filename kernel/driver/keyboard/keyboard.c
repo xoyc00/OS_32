@@ -57,7 +57,7 @@ void keyboard_callback() {
 		}
 	} else if (scancode == ENTER) {
 		printf("\n");
-		process_input(key_buffer);
+		process_input(key_buffer, 1);
 		key_buffer[0] = '\0';
 	} else if (scancode == SHIFT_PRESS) {
 		shifted = 1;
