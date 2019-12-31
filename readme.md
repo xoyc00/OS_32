@@ -8,6 +8,11 @@ To build a GCC cross-compiler, follow the steps here: https://wiki.osdev.org/GCC
 
 Note that in order to use the included makefiles you should export TARGET=1386-elf rather then TARGET=1686-elf.
 
+# Adding files
+To add files to the operating system's filesystem, create a folder called "filesystem" (without the quotations) and add any files you need to that.
+
+Note that the desktop wallpaper is loaded from the file /user/wallpaper.bmp.
+
 # Compiling
 The system can be compiled via the following commands:
 	
