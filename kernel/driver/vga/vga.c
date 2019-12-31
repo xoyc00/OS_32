@@ -384,6 +384,7 @@ unsigned char* vga_load_bitmap_to_buffer(char* path, int *w, int *h, int *bpp) {
 	int size;
 
 	unsigned char* bmp_total = read_file_from_name(0, path);
+	if (bmp_total == 0) return 0;
 
 	// Data read from the header of the BMP file
 	unsigned int dataPos;     // Position in the file where the actual data begins

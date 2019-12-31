@@ -13,7 +13,7 @@ int window_count = 0;
 extern int mouse_x;
 extern int mouse_y;
 
-unsigned char* wallpaper;
+unsigned char* wallpaper = 0;
 int wallpaper_w = 0, wallpaper_h = 0, wallpaper_bpp = 0;
 
 window_t** sorted_by_depth() {
@@ -94,7 +94,7 @@ void wm_mouse_button_up(int button, int x, int y) {
 }
 
 void wm_init() {
-	wallpaper = vga_load_bitmap_to_buffer("/USER/WALLPA~1", &wallpaper_w, &wallpaper_h, &wallpaper_bpp);
+	wallpaper = vga_load_bitmap_to_buffer("/USER/WALLPA~1.BMP", &wallpaper_w, &wallpaper_h, &wallpaper_bpp);
 }
 
 void wm_draw() {

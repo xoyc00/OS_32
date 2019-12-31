@@ -272,16 +272,20 @@ directory_entry_t* traverse_path(int drive, directory_entry_t* root, char** p, i
 		found_next = 0;
 
 		for (int j = 0; j < *count; j++) {
-			char* file_name;
+			char* file_name = malloc(9);
 			strncpy(file_name, out[j].file_name, 8);
 			file_name = strtok(file_name, " ");
-			if (strcmp(file_name, p[i]) == 0 && out[j].file_attributes & 0x10) {
+			file_name[8] = 0;
+			
+			char* p_current = strtok(p[i], ".");
+			char* e_current = strtok(0, ".");
+			if (strcmp(file_name, (char*)p[i]) == 0 && out[j].file_attributes & 0x10) {
 				free(out);
 				out = read_directory(drive, out[j].first_cluster_low | (out[j].first_cluster_high >> 16), &c);
 				*count = c;
 				found_next = 1;
 				break;
-			} else if (strcmp(file_name, p[i]) == 0) {
+			} else if (strcmp(file_name, p_current) == 0 && out[j].extension[0] == e_current[0] && out[j].extension[1] == e_current[1] && out[j].extension[2] == e_current[2]) {	// strcmp() does not work for the extension as it is not null terminated.
 				free(out);
 				out = &out[j];
 				*count = 1;
