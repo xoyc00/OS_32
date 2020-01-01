@@ -1,6 +1,7 @@
 #include <kernel/interp/interp.h>
 
 #include <kernel/shell.h>
+#include <kernel/kernel.h>
 
 #include <string.h>
 #include <stdlib.h>

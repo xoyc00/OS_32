@@ -28,6 +28,19 @@ size_t vga_pitch = 0;
 size_t vga_bpp = 0;
 size_t vga_addr = 0;
 
+void update_screen() {
+	if (vga_enabled) {
+		// Update the screen
+		wm_draw();
+
+		// Draw the cursor then swap buffers
+		vga_drawcursor();
+		vga_swapbuffers();
+
+		mouse_update();
+	}
+}
+
 void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	if (mbt->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_RGB) {
 		// Initialise VGA Device
@@ -84,15 +97,6 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	printf("%s> ", current_directory);
 
 	while(1) {
-		if (vga_enabled) {
-			// Update the screen
-			wm_draw();
-
-			// Draw the cursor then swap buffers
-			vga_drawcursor();
-			vga_swapbuffers();
-
-			mouse_update();
-		}
+		update_screen();
 	}
 }
