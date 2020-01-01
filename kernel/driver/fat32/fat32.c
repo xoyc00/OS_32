@@ -96,6 +96,12 @@ unsigned char* read_cluster(int drive, uint32_t cluster) {
 	return buf;
 }
 
+void write_cluster(int drive, uint32_t cluster, unsigned char* buf) {
+	uint32_t start_sect = first_sect_of_cluster(drive, cluster);
+
+	ata_write_sects(drive, start_sect, fat_drive[drive].sectors_per_cluster, buf);
+}
+
 /* Returns an array of size count holding all the clusters in the cluster chain. (Does not include the first cluster) */
 uint32_t* get_cluster_chain(int drive, uint32_t start_cluster, int* count) {
 	uint32_t* out;
@@ -421,4 +427,8 @@ uint32_t allocate_free_fat(int drive) {
 	}
 
 	return 0;
+}
+
+uint32_t write_new_directory(int drive, directory_entry_t* dir, directory_entry_t* parent) {
+	
 }

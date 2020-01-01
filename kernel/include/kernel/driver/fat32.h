@@ -126,6 +126,8 @@ void fat32_init(int drive);
 /* Read a single cluster */
 unsigned char* read_cluster(int drive, uint32_t cluster);
 
+void write_cluster(int drive, uint32_t cluster, unsigned char* buf);
+
 /* Read a directory */
 directory_entry_t* read_directory(int drive, uint32_t cluster, int* count);
 
@@ -144,5 +146,8 @@ unsigned char* read_file_from_name(int drive, char* path);
 void write_fat_entry(int drive, uint32_t cluster_num, uint32_t cluster_val);\
 
 uint32_t allocate_free_fat(int drive);
+
+/* Returns the first cluster of the new directory. */
+uint32_t write_new_directory(int drive, directory_entry_t* dir, directory_entry_t* parent);
 
 #endif
