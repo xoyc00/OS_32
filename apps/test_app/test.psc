@@ -1,0 +1,4 @@
+main:
+	ret
+
+call main

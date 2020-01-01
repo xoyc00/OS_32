@@ -16,7 +16,9 @@ int putchar(int ic) {
 		terminal_write(&c, sizeof(c));
 	}
 #else
-	// TODO: Implement stdio and the write system call.
+	asm ("mov $0b000, %%eax" ::: "eax");
+	asm ("mov %0, %%ebx" :: "r"(ic) : "ebx");
+	asm volatile ("int $0x80");
 #endif
 	return ic;
 }

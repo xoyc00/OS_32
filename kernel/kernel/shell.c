@@ -8,6 +8,8 @@
 #include <kernel/driver/ata.h>
 #include <kernel/driver/fat32.h>
 
+#include <kernel/interp/interp.h>
+
 #include <kernel/system/window_manage.h>
 
 #include <string.h>
@@ -91,31 +93,10 @@ void process_input(char* input, int add_path) {
 			free(buf);
 		}
 	} else {
-		// Read a scr file
+		// Read a psc file
 		unsigned char* buf = read_file_from_name(0, i1);
 		if (buf) {
-			int done = 0;
-			char* commands[1024];
-			int i = 0;
-			commands[i] = strtok(buf, "\n");
-			i++;
-			while (done == 0) {
-				char* cmd = strtok(0, "\n");
-				if (cmd == 0) {
-					done = 1;
-					commands[i] = 0;
-					i++;
-					break;
-				}
-				commands[i] = cmd;
-				i++;
-			}
-			i = 0;
-			while (commands[i] != 0) {
-				process_input(commands[i], 0);
-				i++;
-			}
-
+			interp(buf);
 			free(buf);
 		} else {
 			printf("Not a known command or program!\n");

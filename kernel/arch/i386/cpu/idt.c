@@ -24,6 +24,8 @@ void idt_install(void) {
     extern int irq13();
     extern int irq14();
     extern int irq15();
+
+	extern int i80();				// For system calls
  
 	unsigned long irq0_address;
     unsigned long irq1_address;
@@ -40,7 +42,8 @@ void idt_install(void) {
     unsigned long irq12_address;
     unsigned long irq13_address;
     unsigned long irq14_address;          
-    unsigned long irq15_address;         
+    unsigned long irq15_address;      
+	unsigned long i80_address;    
 	unsigned long idt_address;
 	unsigned long idt_ptr[2];
  
@@ -167,6 +170,13 @@ void idt_install(void) {
 	IDT[47].zero = 0;
 	IDT[47].type_attr = 0x8e; /* INTERRUPT_GATE */
 	IDT[47].offset_higherbits = (irq15_address & 0xffff0000) >> 16;
+
+	i80_address = (unsigned long)i80; 
+	IDT[0x80].offset_lowerbits = i80_address & 0xffff;
+	IDT[0x80].selector = 0x08; /* KERNEL_CODE_SEGMENT_OFFSET */
+	IDT[0x80].zero = 0;
+	IDT[0x80].type_attr = 0x8e; /* INTERRUPT_GATE */
+	IDT[0x80].offset_higherbits = (i80_address & 0xffff0000) >> 16;
  
 	/* fill the IDT descriptor */
 	idt_address = (unsigned long)IDT ;
@@ -252,4 +262,42 @@ void irq14_handler(void) {
 void irq15_handler(void) {
     outb(0xA0, 0x20);
     outb(0x20, 0x20); //EOI
+}
+
+struct regs {
+   	uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; /* Pushed by pusha. */
+};
+
+#include <stdio.h>
+#include <stdlib.h>
+
+void i80_handler(struct regs r) {
+	printf("Got a system call!\n");
+
+	switch(r.eax) {
+		case SYS_PUTCHAR:
+			putchar(r.ebx);
+		break;
+
+		case SYS_MALLOC: {
+			void* out = malloc(r.ebx);
+			asm ("mov %0, %%ecx" ::"r"(out) : "ebx");
+		break; }
+
+		case SYS_FREE:
+
+		break;
+
+		case SYS_CREATE_WINDOW:
+
+		break;
+
+		case SYS_REG_WINDOW:
+
+		break;
+
+		case SYS_DEREG_WINDOW:
+
+		break;
+	}
 }

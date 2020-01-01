@@ -9,6 +9,8 @@ mkdir -p filesystem
 mkdir -p filesystem/user
 mkdir -p filesystem/bin
 
+cp apps/test_app/test.psc filesystem/bin/test.psc
+
 cp sysroot/boot/os_32.ker isodir/boot/os_32.ker
 cp -r filesystem/. isodir
 cat > isodir/boot/grub/grub.cfg << EOF

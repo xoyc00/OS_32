@@ -20,12 +20,13 @@ LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
 ARCHDIR=arch/$(HOSTARCH)
 DRIVERDIR=driver/
-SYSDIR=sys/
 SYSTEMDIR=system/
+INTERPDIR=interp/
 
 include $(ARCHDIR)/make.config
 include $(DRIVERDIR)/make.config
 include $(SYSTEMDIR)/make.config
+include $(INTERPDIR)/make.config
 
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
 CPPFLAGS:=$(CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
@@ -36,6 +37,7 @@ KERNEL_OBJS=\
 $(KERNEL_ARCH_OBJS) \
 $(KERNEL_DRIVER_OBJS) \
 $(KERNEL_SYSTEM_OBJS) \
+$(KERNEL_INTERP_OBJS) \
 kernel/kernel.o \
 kernel/shell.o \
 kernel/memory_mapper.o \

@@ -71,11 +71,14 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	fat32_init(0);
 	printf("done\n");
 
-	printf("Initialising window manager... ");
-	wm_init();
-	printf("done\n");
+	if (mbt->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_RGB) {
+		printf("Initialising window manager... ");
+		wm_init();
+		printf("done\n");
+	}
 
 	printf("Initialisation Complete!\n");
+	
 
 	printf("%s> ", current_directory);
 
