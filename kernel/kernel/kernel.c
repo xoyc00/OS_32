@@ -42,8 +42,6 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	} else {
 		terminal_initialize();
 	}
-	printf("Hello, kernel World!\nCreated By Millie! %c\n", 0x02);
-	printf("Test Number: %f\n", sin(3.14159265/4));
 
 	printf("Installing GDT... ");
 	gdt_install();
@@ -78,6 +76,9 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	}
 
 	printf("Initialisation Complete!\n");
+
+	printf("\n");
+	printf("                                           _L/L\n                                          _LT/l_L_\n                                        _LLl/L_T_lL_\n                    _T/L              _LT|L/_|__L_|_L_\n                  _Ll/l_L_          _TL|_T/_L_|__T__|_l_\n                _TLl/T_l|_L_      _LL|_Tl/_|__l___L__L_|L_\n              _LT_L/L_|_L_l_L_  _'|_|_|T/_L_l__T _ l__|__|L_\n            _Tl_L|/_|__|_|__T _LlT_|_Ll/_l_ _|__[ ]__|__|_l_L_\n      __  _LT_l_l/|__|__l_T _T_L|_|_|l/___|__ | _l__|_ |__|_T_L_  __\n\n                             Pyramid OS\n\n");
 	
 
 	printf("%s> ", current_directory);

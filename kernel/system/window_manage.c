@@ -107,14 +107,15 @@ void wm_draw() {
 	vga_terminal_draw();
 
 	{		// Draw the task bar
-		vga_drawrect(0, 1024-32, 1280, 32, 32, 32, 255, 0);
-		vga_drawrect(0, 1024-32, 64, 32, 0, 156, 0, 1);
-		vga_drawstr("Start", 4, 1024-24, 255, 255, 255);
+		vga_drawrect(0, 1024-24, 1280, 24, 110, 107, 95, 0);
+		vga_drawrect(0, 1024-24, 24, 24, 75, 75, 75, 0);
+		vga_drawrect(1, 1024-23, 22, 22, 194, 188, 166, 0);
+		vga_drawstr("*", 7, 1024-16, 0, 0, 0);
 
 		for (int i = 0; i < window_count; i++) {				// Draw the window titles in the task bar
-			int col = 48;
-			if (m_windows[i]->depth == window_count - 1) col = 64;
-			vga_drawrect(64 + (96*i), 1024-32, 96, 32, col, col, 255, 0);
+			int col = 128;
+			if (m_windows[i]->depth == window_count - 1) col = 182;
+			vga_drawrect(64 + (96*i), 1024-24, 96, 24, col, col, col, 0);
 			if (strlen(m_windows[i]->title) <= 8) {
 				vga_drawstr(m_windows[i]->title, 64 + (96*i) + 2, 1024-24, 255, 255, 255);
 			} else {

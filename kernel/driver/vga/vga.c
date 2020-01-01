@@ -277,12 +277,12 @@ void vga_terminal_draw() {
 	for (int y = 0; y < TERMINAL_HEIGHT; y++) {
 		for (int x = 0; x < TERMINAL_WIDTH; x++) {
 			unsigned char c = terminal_mem[x + (y * TERMINAL_WIDTH)];
-			vga_drawchar(c, x*8, y*16, 0, 255, 0);
+			vga_drawchar(c, x*8, y*16, 194, 188, 166);
 		}
 	}
 
 	if (display_cursor) {
-		vga_drawrect((terminal_column)*8, (terminal_row)*16, 8, 16, 0, 255, 0, 0);
+		vga_drawrect((terminal_column)*8, (terminal_row)*16, 8, 16, 194, 188, 166, 0);
 	}
 }
 
@@ -346,8 +346,8 @@ void vga_blit_buffer(const unsigned char* buffer, int x, int y, int w, int h, in
 
 /* Draws a window defined by the window manager. */
 void vga_drawwindow(window_t window) {
-	vga_drawrect(window.x - window.border_radius, window.y - window.border_radius, window.w + (window.border_radius * 2), window.h + (window.tb_h - 2) + (window.border_radius * 2), 32, 32, 255, window.rounded);
-	vga_drawrect(window.x, window.y, window.w, window.tb_h, 32, 32, 255, window.rounded);
+	vga_drawrect(window.x - window.border_radius, window.y - window.border_radius, window.w + (window.border_radius * 2), window.h + (window.tb_h - 2) + (window.border_radius * 2), 194, 188, 166, window.rounded);
+	vga_drawrect(window.x, window.y, window.w, window.tb_h, 194, 188, 166, window.rounded);
 	vga_drawstr(window.title, window.x + 1, window.y + 1, 255, 255, 255);
 	vga_drawrect(window.x + window.w - 16, window.y + 1, 14, 14, 255, 0, 0, 0);
 
