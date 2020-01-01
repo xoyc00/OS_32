@@ -1,7 +1,5 @@
-# OS_32
-A simple 32-bit operating system.
-
-(Currently unnamed!)
+# Pyramid OS
+A simple 32-bit, non-unix-like, ring-0 only operating system.
 
 # Cross-compiler
 To build a GCC cross-compiler, follow the steps here: https://wiki.osdev.org/GCC_Cross-Compiler.
