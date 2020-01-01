@@ -389,3 +389,36 @@ unsigned char* read_file_from_name(int drive, char* path) {
 
 	return out;
 }
+
+/* Writes a value to the file allocation table. */
+void write_fat_entry(int drive, uint32_t cluster_num, uint32_t cluster_val) {
+	unsigned char* fat_table = malloc(512);
+	unsigned int fat_offset = cluster_num * 4;
+	unsigned int fat_sector = fat_drive[drive].first_fat_sector + (fat_offset / 512) + fat_drive[drive].volume_start_sect;
+	unsigned int ent_offset = fat_offset % 512;
+
+	ata_read_sects(drive, fat_sector, 1, fat_table);
+
+	fat_table[ent_offset] = cluster_val & 0x0FFFFFFF;
+
+	ata_write_sects(drive, fat_sector, 1, fat_table);
+}
+
+uint32_t allocate_free_fat(int drive) {
+	uint32_t cluster = 2;
+	int cluster_status = 0;
+	uint32_t total_clusters = fat_drive[drive].data_sectors / fat_drive[drive].sectors_per_cluster;
+
+	while(cluster < total_clusters) {
+		cluster_status = table_value(drive, cluster);
+
+		if (cluster_status == 0) {
+			write_fat_entry(drive, cluster, 0x0FFFFFF8);
+			return cluster;
+		}
+
+		cluster++;
+	}
+
+	return 0;
+}

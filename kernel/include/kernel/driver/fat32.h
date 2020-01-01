@@ -141,4 +141,8 @@ unsigned char* read_file(int drive, uint32_t cluster);
 
 unsigned char* read_file_from_name(int drive, char* path);
 
+void write_fat_entry(int drive, uint32_t cluster_num, uint32_t cluster_val);\
+
+uint32_t allocate_free_fat(int drive);
+
 #endif

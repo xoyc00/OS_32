@@ -10,6 +10,7 @@ mkdir -p filesystem/user
 mkdir -p filesystem/bin
 
 cp apps/test_app/test.psc filesystem/bin/test.psc
+cp apps/test_app/test2.psc filesystem/bin/test2.psc
 
 cp sysroot/boot/os_32.ker isodir/boot/os_32.ker
 cp -r filesystem/. isodir

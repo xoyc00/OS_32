@@ -184,12 +184,20 @@ void interp_process(unsigned char* cmd) {
 		}
 
 		interp_clear_args();
+	} else if (strcmp(cmd1, "include") == 0) {
+		unsigned char* buf = read_file_from_name(0, arg1);
+		if (buf) {
+				interp(buf);
+				free(buf);
+		} else {
+			printf("WARNING: could not find file: %s\n", arg1);
+		}
 	}
 }
 
 void interp(unsigned char* buf) {
 	int done = 0;
-	char* commands[1024];
+	char* commands[4096];
 	int i = 0;
 	commands[i] = strtok(buf, "\n");
 	i++;
@@ -205,7 +213,7 @@ void interp(unsigned char* buf) {
 		i++;
 	}
 	i = 0;
-	while (commands[i] != 0) {
+	while (commands[i] != 0 && i < 4096) {
 		interp_process(commands[i]);
 		i++;
 	}

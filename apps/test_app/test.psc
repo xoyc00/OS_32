@@ -19,3 +19,5 @@ call print
 
 push b
 call print
+
+include /BIN/TEST2.PSC
