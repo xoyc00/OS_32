@@ -429,8 +429,8 @@ void ata_read_sects(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 /* Selects the appropriate LBA mode and then writes a given number of sects to the disk. */
 void ata_write_sects(int drive, uint64_t LBA, int sects, unsigned char* buf) {
 	if (LBA > 0xFFFFFFF || sects > 256) {
-		ata_read_sects_lba_48(drive, LBA, sects, buf);
+		ata_write_sects_lba_48(drive, LBA, sects, buf);
 	} else {
-		ata_read_sects_lba_28(drive, (uint32_t)LBA, sects, buf);
+		ata_write_sects_lba_28(drive, (uint32_t)LBA, sects, buf);
 	}
 }

@@ -2,6 +2,7 @@
 #define _FAT32_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 /* Bios Parameter Block */
 typedef struct BPB {
@@ -126,7 +127,7 @@ void fat32_init(int drive);
 /* Read a single cluster */
 unsigned char* read_cluster(int drive, uint32_t cluster);
 
-void write_cluster(int drive, uint32_t cluster, unsigned char* buf);
+void write_cluster(int drive, uint32_t cluster, unsigned char* buf, size_t size);
 
 /* Read a directory */
 directory_entry_t* read_directory(int drive, uint32_t cluster, int* count);

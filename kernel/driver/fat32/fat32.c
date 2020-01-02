@@ -92,14 +92,20 @@ void fat32_init(int drive) {
 unsigned char* read_cluster(int drive, uint32_t cluster) {
 	uint64_t start_sect = first_sect_of_cluster(drive, cluster);
 	unsigned char* buf = malloc(512 * fat_drive[drive].sectors_per_cluster);
-	ata_read_sects(drive, start_sect, fat_drive[drive].sectors_per_cluster, buf);
+	if (buf != 0)
+		ata_read_sects(drive, start_sect, fat_drive[drive].sectors_per_cluster, buf);
 	return buf;
 }
 
-void write_cluster(int drive, uint32_t cluster, unsigned char* buf) {
+void write_cluster(int drive, uint32_t cluster, unsigned char* buf, size_t size) {
 	uint32_t start_sect = first_sect_of_cluster(drive, cluster);
 
-	ata_write_sects(drive, start_sect, fat_drive[drive].sectors_per_cluster, buf);
+	unsigned char* cluster_buf = malloc(512*fat_drive[drive].sectors_per_cluster);
+	memcpy(cluster_buf, buf, size);
+
+	ata_write_sects(drive, start_sect, fat_drive[drive].sectors_per_cluster, cluster_buf);
+
+	free(cluster_buf);
 }
 
 /* Returns an array of size count holding all the clusters in the cluster chain. (Does not include the first cluster) */
@@ -300,7 +306,6 @@ directory_entry_t* traverse_path(int drive, directory_entry_t* root, char** p, i
 		}
 
 		if (found_next == 0) {
-			printf("Could not find directory!\n");
 			return 0;
 		}
 	}
@@ -357,7 +362,7 @@ void read_directory_tree(int drive) {
 unsigned char* read_file(int drive, uint32_t cluster) {
 	int cluster_count;
 	uint32_t* cluster_chain = get_cluster_chain(drive, cluster, &cluster_count);
-	unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster)));
+	unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster))+1);
 	if (buf != 0) {
 		uint64_t i = 0;
 		{		// Read the first cluster
@@ -376,6 +381,8 @@ unsigned char* read_file(int drive, uint32_t cluster) {
 		}
 	}
 
+	buf[((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster))] = '\0';
+
 	return buf;
 }
 
@@ -391,7 +398,7 @@ unsigned char* read_file_from_name(int drive, char* path) {
 	directory_entry_t* d = read_directory_from_name(drive, path, &size);
 	if (size != 1) return 0;
 
-	unsigned char* out = read_file(0, d->first_cluster_low | (d->first_cluster_high << 16));
+	unsigned char* out = read_file(drive, d->first_cluster_low | (d->first_cluster_high >> 16));
 
 	return out;
 }
@@ -430,5 +437,63 @@ uint32_t allocate_free_fat(int drive) {
 }
 
 uint32_t write_new_directory(int drive, directory_entry_t* dir, directory_entry_t* parent) {
+	uint32_t dir_start_cluster = allocate_free_fat(drive);
+	uint16_t first_cluster_low = dir_start_cluster & 0xFFFF;
+	uint16_t first_cluster_high = dir_start_cluster >> 16;
+	dir->first_cluster_low = first_cluster_low;
+	dir->first_cluster_high = first_cluster_high;
+
+
+	int c;
+	uint32_t* clusters = get_cluster_chain(drive, parent->first_cluster_low | (parent->first_cluster_low >> 16), &c);
+
+	{
+		int i = 0;
+		unsigned char* entry_list = read_cluster(drive, parent->first_cluster_low | (parent->first_cluster_low >> 16));
+		while(entry_list[i] != 0) {
+			if (entry_list[i] == 0xE5) {
+				memcpy(entry_list+i, dir, 32);
+				write_cluster(drive, parent->first_cluster_low | (parent->first_cluster_low >> 16), entry_list, 512*fat_drive[drive].sectors_per_cluster);
+				free(entry_list);
+				return dir_start_cluster;
+			}
+			i += 32;
+		}
+		free(entry_list);
+	}
 	
+	/* Check the cluster chain */
+	while(*clusters != 0) {
+		int i = 0;
+		unsigned char* entry_list = read_cluster(drive, *clusters);
+		while(*entry_list != 0) {
+			while(entry_list[i] != 0) {
+				if (entry_list[i] == 0xE5) {
+					memcpy(entry_list+i, dir, 32);
+					write_cluster(drive, parent->first_cluster_low | (parent->first_cluster_low >> 16), entry_list, 512*fat_drive[drive].sectors_per_cluster);
+					free(entry_list);
+					return dir_start_cluster;
+				}
+			}
+			i += 32;
+		}
+		clusters++;
+		free(entry_list);
+	}
+
+	// If we get to here that means there are no unused entries in the parent directory, so we need to allocate a new cluster to the directory.
+
+	uint32_t new_cluster = allocate_free_fat(drive);
+
+	clusters = get_cluster_chain(drive, parent->first_cluster_low | (parent->first_cluster_low >> 16), &c);
+
+	write_fat_entry(drive, clusters[c-1], new_cluster);
+
+	char* buf = malloc(512*fat_drive[drive].sectors_per_cluster);
+	memcpy(buf, dir, 32);
+
+	write_cluster(drive, parent->first_cluster_low | (parent->first_cluster_low >> 16), buf, 512*fat_drive[drive].sectors_per_cluster);
+
+	free(buf);
+	return dir_start_cluster;
 }

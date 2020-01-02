@@ -20,7 +20,13 @@
 
 extern int vga_drvr_enabled;
 
+int executing_file = 0;
+
 void process_input(char* input, int add_path) {
+	if (executing_file) {
+		return;
+	}
+
 	if (strcmp(input, "") != 0) {
 		char* i1 = strtok(input, " ");
 		char* iargs[256];
@@ -97,7 +103,9 @@ void process_input(char* input, int add_path) {
 			// Read a psc file
 			unsigned char* buf = read_file_from_name(0, i1);
 			if (buf) {
+				executing_file = 1;
 				interp(buf);
+				executing_file = 0;
 				free(buf);
 			} else {
 				printf("Not a known command or program!\n");
