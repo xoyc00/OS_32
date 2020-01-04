@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#define ESCAPE 0x01
 #define BACKSPACE 0x0e
 #define ENTER 0x1c
 #define SHIFT_PRESS 0x2a
@@ -19,6 +20,7 @@ int shifted = 0;
 int caps = 0;
 
 extern int vga_drvr_enabled;
+extern int program_executing;
 
 #define SC_MAX 57
 const char *sc_name[] = { "ERROR", "Esc", "1", "2", "3", "4", "5", "6", 
@@ -48,6 +50,10 @@ const char sc_ascii_std[] = { '?', '?', '1', '2', '3', '4', '5', '6',
 void keyboard_callback() {
     /* The PIC leaves us the scancode in port 0x60 */
     uint8_t scancode = inb(0x60);
+	if (scancode == ESCAPE) {
+		program_executing = 0;
+		return;
+	}
 	if (scancode == BACKSPACE) {
 		backspace(key_buffer);
 		if (vga_drvr_enabled) {

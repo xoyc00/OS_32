@@ -63,11 +63,6 @@ void process_left_mouse(int on, int x, int y) {
 					break;
 				}
 			}
-			if (x >= 64 + (96*i) && x <= 64 + 96 + (96*i)) {
-				if (y >= 1024-32 && y <= 1024) {
-					bring_to_foreground(*sorted_windows[i]);
-				}
-			}
  		}
 		free(sorted_windows);
 	}
@@ -113,13 +108,21 @@ void wm_draw() {
 		vga_drawstr("*", 7, 1024-16, 0, 0, 0);
 
 		for (int i = 0; i < window_count; i++) {				// Draw the window titles in the task bar
-			int col = 128;
-			if (m_windows[i]->depth == window_count - 1) col = 182;
-			vga_drawrect(64 + (96*i), 1024-24, 96, 24, col, col, col, 0);
-			if (strlen(m_windows[i]->title) <= 8) {
-				vga_drawstr(m_windows[i]->title, 64 + (96*i) + 2, 1024-24, 255, 255, 255);
+			int r, g, b;
+			if (m_windows[i]->depth == window_count - 1) {
+				r = 194;
+				g = 188;
+				b = 166;
 			} else {
-				vga_drawstr("...", 64 + (96*i) + 2, 1024-24, 255, 255, 255);
+				r = 110;
+				g = 107;
+				b = 95;
+			}
+			vga_drawrect(24 + (96*i), 1024-24, 96, 24, r, g, b, 0);
+			if (strlen(m_windows[i]->title) <= 8) {
+				vga_drawstr(m_windows[i]->title, 24 + (96*i) + 2, 1024-20, 0, 0, 0);
+			} else {
+				vga_drawstr("...", 24 + (96*i) + 2, 1024-20, 0, 0, 0);
 			}
 		}
 	}
@@ -158,7 +161,24 @@ void window_deregister(window_t* w) {
 	if (window_count == 0) {
 		return;
 	} else {
-		
+		if (window_count == 1) {
+			free(m_windows[0]);
+			free(m_windows[0]->framebuffer);
+			window_count = 0;
+		} else {
+			window_t** temp = malloc((window_count - 1) * sizeof(window_t*));
+			int j = 0;
+			for (int i = 0; i < window_count; i++) {
+				if (m_windows[i] != w) {
+					memcpy(temp + j, m_windows[i], sizeof(window_t*));
+					j++;
+				} else {
+					free(m_windows[i]->framebuffer);
+					free(m_windows[i]);
+				}
+			}
+			window_count --;
+		}
 	}
 }
 

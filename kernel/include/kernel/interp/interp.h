@@ -1,6 +1,10 @@
 #ifndef _INTERP_H
 #define _INTERP_H
 
+#define EQUAL_TO		0x00
+#define GREATER_THEN 	0b01
+#define LESS_THEN		0b10
+
 typedef struct variable {
 	unsigned char* name;
 	unsigned char* type;

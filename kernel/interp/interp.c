@@ -3,25 +3,31 @@
 #include <kernel/shell.h>
 #include <kernel/kernel.h>
 #include <kernel/driver/fat32.h>
+#include <kernel/system/window_manage.h>
+#include <kernel/cpu/timer.h>
 
 #include <string.h>
 #include <stdlib.h>
 
 variable_t** array_args = 0;
-int array_args_count;
+int array_args_count = 0;
+int pops = 0;
 
 variable_t** variables = 0;
-int variable_count;
+int variable_count = 0;
 
 label_t** labels = 0;
-int label_count;
+int label_count = 0;
 
 int* stack = 0;
-int stack_count;
+int stack_count = 0;
 
 int should_execute = 1;
+int program_executing = 0;
 
 char input_buf[1024];
+
+int comparison = EQUAL_TO;
 
 variable_t* interp_process_variable(unsigned char* buf) {
 	variable_t* var = malloc(sizeof(variable_t));
@@ -56,30 +62,68 @@ variable_t* interp_process_variable(unsigned char* buf) {
 	return 0;
 }
 
-void interp_clear_args() {
+void interp_clear_args_hard() {
 	if (array_args_count != 0) {
+		for (int i = 0; i < array_args_count; i++) {
+			if (array_args[i]->name == 0) {
+				free(array_args[i]->name);
+				free(array_args[i]->type);
+				free(array_args[i]->data);
+				free(array_args[i]);
+			}
+		}
 		array_args_count = 0;
 		free(array_args);
 	}
+	pops = 0;
+}
+
+void interp_clear_args() {
+	interp_clear_args_hard();
 }
 
 void interp_clear_vars() {
 	if (variable_count != 0) {
+		for (int i = 0; i < variable_count; i++) {
+			free(variables[i]->name);
+			free(variables[i]->type);
+			free(variables[i]->data);
+			free(variables[i]);
+		}
 		variable_count = 0;
 		free(variables);
 	}
 }
 
+void interp_clear_labels() {
+	if (label_count != 0) {
+		for (int i = 0; i < label_count; i++) {
+			free(labels[i]);
+		}
+		label_count = 0;
+		free(labels);
+	}
+}
+
+void interp_clear_stack() {
+	free(stack);
+	stack_count = 0;
+}
+
 int interp_process(unsigned char* cmd, int x) {
+	if (strlen(cmd) == 0) {
+		return x + 1;
+	}
+
 	char* cmd1 = strtok(cmd, " ");
 	char* arg1 = strtok(0, "");
 
-	if (cmd1[0] == '#') {
-		return;
-	}
-
 	while (*cmd1 == '\t') cmd1++;
 	while (*cmd1 == 0xA0) cmd1++;
+
+	if (*cmd == '#') {
+		return x+1;
+	}
 
 	if (strcmp(cmd1, "print") == 0 && should_execute) {
 		variable_t* var_arg = interp_process_variable(arg1);
@@ -92,6 +136,8 @@ int interp_process(unsigned char* cmd, int x) {
 		} else if (strcmp(var_arg->type, "PTR") == 0) {
 			printf("%d\n", *(int*)var_arg->data);
 		}
+
+		free(var_arg);
 
 		interp_clear_args();
 	} else if (strcmp(cmd1, "push") == 0 && should_execute) {
@@ -108,6 +154,17 @@ int interp_process(unsigned char* cmd, int x) {
 			temp[array_args_count] = var_arg;
 			array_args = temp;
 			array_args_count ++;
+		}
+	} else if (strcmp(cmd1, "pop") == 0 && should_execute) {
+		if (array_args_count != 0) {
+			variable_t* var_arg = interp_process_variable(arg1);
+			var_arg->data = array_args[array_args_count - 1]->data;
+			array_args_count--;
+			if (array_args_count == 0) {
+				array_args_count = pops+1;
+				interp_clear_args();
+			}
+			pops ++;
 		}
 	} else if (strcmp(cmd1, "string") == 0 && should_execute) {
 		if (variable_count == 0) {
@@ -169,7 +226,19 @@ int interp_process(unsigned char* cmd, int x) {
 			}
 		}
 		if (var != 0) {
-			var->data = array_args[0]->data;
+			if (strcmp(var->type, "STRING") == 0) {
+				var->data = array_args[0]->data;
+			} else if (strcmp(var->type, "FLOAT") == 0) {		// Copy the value
+				float* dat = malloc(sizeof(float));
+				
+				*dat = *(float*)array_args[0]->data;
+				var->data = dat;
+			} else if (strcmp(var->type, "PTR") == 0) {			// Copy the value
+				int* dat = malloc(sizeof(int));
+				
+				*dat = *(int*)array_args[0]->data;
+				var->data = dat;
+			}
 		}
 
 		interp_clear_args();
@@ -317,7 +386,7 @@ int interp_process(unsigned char* cmd, int x) {
 			label_t** temp = malloc(sizeof(label_t*) * (label_count+1));
 			memcpy(temp, labels, label_count*sizeof(label_t*));
 			free(labels);
-			temp[variable_count] = l;
+			temp[label_count] = l;
 			labels = temp;
 			label_count++;
 		}
@@ -332,6 +401,7 @@ int interp_process(unsigned char* cmd, int x) {
 				free(stack);
 				stack = test;
 			} else free(stack);
+
 			stack_count--;
 			return next_line;
 		} else {
@@ -356,7 +426,7 @@ int interp_process(unsigned char* cmd, int x) {
 				return labels[i]->line+1;
 			}
 		}
-		printf("Could not find label!");
+		printf("Could not find label!\n");
 	} else if (strcmp(cmd1, "goto") == 0 && should_execute) {
 		label_t* l = 0;
 		for (int i = 0; i < label_count; i++) {
@@ -364,14 +434,125 @@ int interp_process(unsigned char* cmd, int x) {
 				return labels[i]->line+1;
 			}
 		}
+		printf("Could not find label!\n");
+	} else if (strcmp(cmd1, "comp") == 0 && should_execute) {
+		float x = *(float*)array_args[0]->data;
+		float y = *(float*)array_args[1]->data;
+
+		if (x == y) {
+			comparison = EQUAL_TO;
+		} else if (x > y) {
+			comparison = GREATER_THEN;
+		} else {
+			comparison = LESS_THEN;
+		}
+		interp_clear_args();
+	} else if (strcmp(cmd1, "ce") == 0 && should_execute) {
+		if (comparison == EQUAL_TO) {
+			for (int i = 0; i < label_count; i++) {
+				if (strcmp(labels[i]->name, arg1) == 0) {
+					if (stack_count == 0) {
+						stack = malloc(sizeof(int));
+						stack[0] = x;
+						stack_count++;
+					} else {
+						int* temp = malloc(sizeof(int) * (stack_count+1));
+						memcpy(temp, stack, stack_count*sizeof(int));
+						free(stack);
+						temp[stack_count] = x;
+						stack = temp;
+						stack_count++;
+					}
+
+					return labels[i]->line+1;
+				}
+			}
+			printf("Could not find label!\n");
+		}
+	} else if (strcmp(cmd1, "cgt") == 0 && should_execute) {
+		if (comparison == GREATER_THEN) {
+			for (int i = 0; i < label_count; i++) {
+				if (strcmp(labels[i]->name, arg1) == 0) {
+					if (stack_count == 0) {
+						stack = malloc(sizeof(int));
+						stack[0] = x;
+						stack_count++;
+					} else {
+						int* temp = malloc(sizeof(int) * (stack_count+1));
+						memcpy(temp, stack, stack_count*sizeof(int));
+						free(stack);
+						temp[stack_count] = x;
+						stack = temp;
+						stack_count++;
+					}
+
+					return labels[i]->line+1;
+				}
+			}
+			printf("Could not find label!\n");
+		}
+	} else if (strcmp(cmd1, "clt") == 0 && should_execute) {
+		if (comparison == LESS_THEN) {
+			for (int i = 0; i < label_count; i++) {
+				if (strcmp(labels[i]->name, arg1) == 0) {
+					if (stack_count == 0) {
+						stack = malloc(sizeof(int));
+						stack[0] = x;
+						stack_count++;
+					} else {
+						int* temp = malloc(sizeof(int) * (stack_count+1));
+						memcpy(temp, stack, stack_count*sizeof(int));
+						free(stack);
+						temp[stack_count] = x;
+						stack = temp;
+						stack_count++;
+					}
+
+					return labels[i]->line+1;
+				}
+			}
+			printf("Could not find label!\n");
+		}
+	} else if (strcmp(cmd1, "ge") == 0 && should_execute) {
+		if (comparison == EQUAL_TO) {
+			for (int i = 0; i < label_count; i++) {
+				if (strcmp(labels[i]->name, arg1) == 0) {
+					return labels[i]->line+1;
+				}
+			}
+			printf("Could not find label!\n");
+		}
+	} else if (strcmp(cmd1, "ggt") == 0 && should_execute) {
+		if (comparison == GREATER_THEN) {
+			for (int i = 0; i < label_count; i++) {
+				if (strcmp(labels[i]->name, arg1) == 0) {
+					return labels[i]->line+1;
+				}
+			}
+			printf("Could not find label!\n");
+		}
+	} else if (strcmp(cmd1, "glt") == 0 && should_execute) {
+		if (comparison == LESS_THEN) {
+			for (int i = 0; i < label_count; i++) {
+				if (strcmp(labels[i]->name, arg1) == 0) {
+					return labels[i]->line+1;
+				}
+			}
+			printf("Could not find label!\n");
+		}
 	}
+
+	free(cmd1);
+	free(arg1);
 
 	return x + 1;
 }
 
 void interp(unsigned char* buf) {
+	program_executing = 1;
+
 	int done = 0;
-	char* commands[2048];
+	char* commands[1024];
 	int i = 0;
 	commands[i] = strtok(buf, "\n");
 	i++;
@@ -387,11 +568,24 @@ void interp(unsigned char* buf) {
 		i++;
 	}
 	i = 0;
-	while (commands[i] != 0 && i < 2048) {
+	while(commands[i] != 0 && i < 1024 && program_executing == 1) {
 		i = interp_process(commands[i], i);
-		update_screen();
+
+		if (program_executing == 0) break;
+
+		sleep(1);
 	}
 
-	interp_clear_args();
+	interp_clear_args_hard();
 	interp_clear_vars();
+	interp_clear_labels();
+	interp_clear_stack();
+
+	program_executing = 0;
+
+	for (i = 0; i < 1024; i++) {
+		free(commands[i]);
+	}
+
+	comparison = EQUAL_TO;
 }

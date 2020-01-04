@@ -4,6 +4,13 @@ double atof(const char *arr){
     int i,j,flag;
     double val;
     char c;
+	int sign = 1;
+
+	if (*arr == '-') {
+		sign = -1;
+		arr++;
+	}
+
     i=0;
     j=0;
     val=0;
@@ -24,5 +31,5 @@ double atof(const char *arr){
 		p /= 10;
 	}
     val = val*p;
-    return val;
+    return sign * val;
 }

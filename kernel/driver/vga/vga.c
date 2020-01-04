@@ -223,6 +223,17 @@ void vga_terminal_drawstr(char* str, size_t size) {
 
 				terminal_row --;
 			}
+		} else if (str[i] == '\t') {
+			terminal_column ++;
+			if (terminal_column == TERMINAL_WIDTH) {
+				terminal_column = 0;
+				terminal_row ++;
+			}
+			terminal_column ++;
+			if (terminal_column == TERMINAL_WIDTH) {
+				terminal_column = 0;
+				terminal_row ++;
+			}
 		} else {
 			terminal_mem[(terminal_row*TERMINAL_WIDTH) + terminal_column] = str[i];
 			terminal_column++;
@@ -348,8 +359,7 @@ void vga_blit_buffer(const unsigned char* buffer, int x, int y, int w, int h, in
 void vga_drawwindow(window_t window) {
 	vga_drawrect(window.x - window.border_radius, window.y - window.border_radius, window.w + (window.border_radius * 2), window.h + (window.tb_h - 2) + (window.border_radius * 2), 194, 188, 166, window.rounded);
 	vga_drawrect(window.x, window.y, window.w, window.tb_h, 194, 188, 166, window.rounded);
-	vga_drawstr(window.title, window.x + 1, window.y + 1, 255, 255, 255);
-	vga_drawrect(window.x + window.w - 16, window.y + 1, 14, 14, 255, 0, 0, 0);
+	vga_drawstr(window.title, window.x + 1, window.y + 1, 0, 0, 0);
 
 	// Draw the framebuffer
 	vga_blit_buffer(window.framebuffer, window.x, window.y + window.tb_h - 2, window.w, window.h, 32);
