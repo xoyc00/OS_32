@@ -29,7 +29,7 @@ char input_buf[1024];
 
 int comparison = EQUAL_TO;
 
-variable_t* interp_process_variable(unsigned char* buf) {
+variable_t* interp_process_variable(char* buf) {
 	variable_t* var = malloc(sizeof(variable_t));
 	var->name = 0;
 	if (buf[0] == '"') {
@@ -110,7 +110,7 @@ void interp_clear_stack() {
 	stack_count = 0;
 }
 
-int interp_process(unsigned char* cmd, int x) {
+int interp_process(char* cmd, int x) {
 	if (strlen(cmd) == 0) {
 		return x + 1;
 	}
@@ -540,6 +540,8 @@ int interp_process(unsigned char* cmd, int x) {
 			}
 			printf("Could not find label!\n");
 		}
+	} else if (strcmp(cmd1, "wmupdate") == 0 && should_execute) {
+		update_screen();
 	}
 
 	free(cmd1);
@@ -569,7 +571,7 @@ void interp(unsigned char* buf) {
 	}
 	i = 0;
 	while(commands[i] != 0 && i < 1024 && program_executing == 1) {
-		i = interp_process(commands[i], i);
+		i = interp_process((char*)commands[i], i);
 
 		if (program_executing == 0) break;
 
