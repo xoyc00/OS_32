@@ -464,6 +464,8 @@ int interp_process(char* cmd, int x) {
 						stack_count++;
 					}
 
+					free(cmd1);
+					free(arg1);
 					return labels[i]->line+1;
 				}
 			}
@@ -486,6 +488,8 @@ int interp_process(char* cmd, int x) {
 						stack_count++;
 					}
 
+					free(cmd1);
+					free(arg1);
 					return labels[i]->line+1;
 				}
 			}
@@ -508,6 +512,32 @@ int interp_process(char* cmd, int x) {
 						stack_count++;
 					}
 
+					free(cmd1);
+					free(arg1);
+					return labels[i]->line+1;
+				}
+			}
+			printf("Could not find label!\n");
+		}
+	} else if (strcmp(cmd1, "cne") == 0 && should_execute) {
+		if (comparison == LESS_THEN || comparison == GREATER_THEN) {
+			for (int i = 0; i < label_count; i++) {
+				if (strcmp(labels[i]->name, arg1) == 0) {
+					if (stack_count == 0) {
+						stack = malloc(sizeof(int));
+						stack[0] = x;
+						stack_count++;
+					} else {
+						int* temp = malloc(sizeof(int) * (stack_count+1));
+						memcpy(temp, stack, stack_count*sizeof(int));
+						free(stack);
+						temp[stack_count] = x;
+						stack = temp;
+						stack_count++;
+					}
+
+					free(cmd1);
+					free(arg1);
 					return labels[i]->line+1;
 				}
 			}
@@ -517,6 +547,8 @@ int interp_process(char* cmd, int x) {
 		if (comparison == EQUAL_TO) {
 			for (int i = 0; i < label_count; i++) {
 				if (strcmp(labels[i]->name, arg1) == 0) {
+					free(cmd1);
+					free(arg1);
 					return labels[i]->line+1;
 				}
 			}
@@ -526,6 +558,8 @@ int interp_process(char* cmd, int x) {
 		if (comparison == GREATER_THEN) {
 			for (int i = 0; i < label_count; i++) {
 				if (strcmp(labels[i]->name, arg1) == 0) {
+					free(cmd1);
+					free(arg1);
 					return labels[i]->line+1;
 				}
 			}
@@ -535,13 +569,37 @@ int interp_process(char* cmd, int x) {
 		if (comparison == LESS_THEN) {
 			for (int i = 0; i < label_count; i++) {
 				if (strcmp(labels[i]->name, arg1) == 0) {
+					free(cmd1);
+					free(arg1);
 					return labels[i]->line+1;
 				}
 			}
 			printf("Could not find label!\n");
 		}
-	} else if (strcmp(cmd1, "wmupdate") == 0 && should_execute) {
+	} else if (strcmp(cmd1, "gne") == 0 && should_execute) {
+		if (comparison == LESS_THEN || comparison == GREATER_THEN) {
+			for (int i = 0; i < label_count; i++) {
+				if (strcmp(labels[i]->name, arg1) == 0) {
+					free(cmd1);
+					free(arg1);
+					return labels[i]->line+1;
+				}
+			}
+			printf("Could not find label!\n");
+		}
+	}	else if (strcmp(cmd1, "wmupdate") == 0 && should_execute) {
 		update_screen();
+	} else if (strcmp(cmd1, "dir") == 0 && should_execute) {
+		read_directory_tree(0);
+	} else if (strcmp(cmd1, "ls") == 0 && should_execute) {
+		int count;
+		directory_entry_t *d = read_directory_from_name(0, current_directory, &count);
+		if (count != 0) {
+			list_directory(0, 0, count, d, 0, 1);
+			free(d);
+		}
+	} else if (strcmp(cmd1, "cd") == 0 && should_execute) {
+		current_directory = arg1;
 	}
 
 	free(cmd1);

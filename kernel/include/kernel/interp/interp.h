@@ -18,6 +18,7 @@ typedef struct label {
 
 extern char input_buf[1024];
 
+int interp_process(char* cmd, int x);
 void interp(unsigned char* buf);
 
 #endif

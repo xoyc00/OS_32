@@ -2,4 +2,4 @@
 ./img.sh
 
 rm -rf vbox.vdi
-VBoxManage convertfromraw image.img vbox.vdi --format VDI --uuid 72d45862-2ca5-481f-84e1-9fc7a93f18f4
+VBoxManage convertfromraw image.img vbox.vdi --format VDI --uuid 6ca52d9f-05b8-4995-acdf-42c5ae6cbf33
