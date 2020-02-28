@@ -27,4 +27,9 @@ void terminal_backspace();
 /* Clears the terminal */
 void terminal_clear();
 
+void terminal_u();
+void terminal_d();
+void terminal_l();
+void terminal_r();
+
 #endif

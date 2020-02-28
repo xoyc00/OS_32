@@ -56,4 +56,9 @@ void vga_drawwindow(window_t window);
 
 unsigned char* vga_load_bitmap_to_buffer(char* path, int *w, int *h, int *bpp);
 
+void vga_terminal_u();
+void vga_terminal_d();
+void vga_terminal_l();
+void vga_terminal_r();
+
 #endif

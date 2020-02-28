@@ -414,11 +414,12 @@ void write_fat_entry(int drive, uint32_t cluster_num, uint32_t cluster_val) {
 
 	fat_table[ent_offset] = cluster_val & 0x0FFFFFFF;
 
-	ata_write_sects(drive, fat_sector, 1, fat_table);
+	printf("%d\n", fat_sector);
+	//ata_write_sects(drive, fat_sector, 1, fat_table);
 }
 
 uint32_t allocate_free_fat(int drive) {
-	uint32_t cluster = 2;
+	uint32_t cluster = fat_drive[drive].volume_start_sect;
 	int cluster_status = 0;
 	uint32_t total_clusters = fat_drive[drive].data_sectors / fat_drive[drive].sectors_per_cluster;
 
@@ -467,13 +468,11 @@ uint32_t write_new_directory(int drive, directory_entry_t* dir, directory_entry_
 		int i = 0;
 		unsigned char* entry_list = read_cluster(drive, *clusters);
 		while(*entry_list != 0) {
-			while(entry_list[i] != 0) {
-				if (entry_list[i] == 0xE5) {
-					memcpy(entry_list+i, dir, 32);
-					write_cluster(drive, parent->first_cluster_low | (parent->first_cluster_low >> 16), entry_list, 512*fat_drive[drive].sectors_per_cluster);
-					free(entry_list);
-					return dir_start_cluster;
-				}
+			if (entry_list[i] == 0xE5) {
+				memcpy(entry_list+i, dir, 32);
+				write_cluster(drive, *clusters, entry_list, 512*fat_drive[drive].sectors_per_cluster);
+				free(entry_list);
+				return dir_start_cluster;
 			}
 			i += 32;
 		}
@@ -492,7 +491,7 @@ uint32_t write_new_directory(int drive, directory_entry_t* dir, directory_entry_
 	char* buf = malloc(512*fat_drive[drive].sectors_per_cluster);
 	memcpy(buf, dir, 32);
 
-	write_cluster(drive, parent->first_cluster_low | (parent->first_cluster_low >> 16), buf, 512*fat_drive[drive].sectors_per_cluster);
+	write_cluster(drive, new_cluster, buf, 512*fat_drive[drive].sectors_per_cluster);
 
 	free(buf);
 	return dir_start_cluster;

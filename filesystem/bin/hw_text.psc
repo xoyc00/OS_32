@@ -1,3 +1,5 @@
+print "This only works in text mode."
+
 ptr a
 push &753664
 set a

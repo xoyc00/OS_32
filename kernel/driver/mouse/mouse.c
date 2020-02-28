@@ -35,9 +35,9 @@ void mouse_handler()
       mouse_cycle=0;
 
 	  if (mouse_x < 1) mouse_x = 1;
-	  if (mouse_x > 1279) mouse_x = 1279;
+	  if (mouse_x > 1023) mouse_x = 1023;
 	  if (mouse_y < 1) mouse_y = 1;
-	  if (mouse_y > 1023) mouse_y = 1023;
+	  if (mouse_y > 767) mouse_y = 767;
 
       break;
   }

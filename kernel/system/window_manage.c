@@ -96,16 +96,16 @@ void wm_draw() {
 	vga_clearscreen(0, 0, 0);
 
 	if (wallpaper != 0) {
-		vga_blit_buffer(wallpaper, 0, 0, 1280, 1024, wallpaper_bpp);
+		vga_blit_buffer(wallpaper, 0, 0, 1024, 768, wallpaper_bpp);
 	}
 
 	vga_terminal_draw();
 
 	{		// Draw the task bar
-		vga_drawrect(0, 1024-24, 1280, 24, 110, 107, 95, 0);
-		vga_drawrect(0, 1024-24, 24, 24, 75, 75, 75, 0);
-		vga_drawrect(1, 1024-23, 22, 22, 194, 188, 166, 0);
-		vga_drawstr("*", 7, 1024-16, 0, 0, 0);
+		vga_drawrect(0, 768-24, 1024, 24, 110, 107, 95, 0);
+		vga_drawrect(0, 768-24, 24, 24, 75, 75, 75, 0);
+		vga_drawrect(1, 768-23, 22, 22, 194, 188, 166, 0);
+		vga_drawstr("*", 7, 768-16, 0, 0, 0);
 
 		for (int i = 0; i < window_count; i++) {				// Draw the window titles in the task bar
 			int r, g, b;
@@ -118,11 +118,11 @@ void wm_draw() {
 				g = 107;
 				b = 95;
 			}
-			vga_drawrect(24 + (96*i), 1024-24, 96, 24, r, g, b, 0);
+			vga_drawrect(24 + (96*i), 768-24, 96, 24, r, g, b, 0);
 			if (strlen(m_windows[i]->title) <= 8) {
-				vga_drawstr(m_windows[i]->title, 24 + (96*i) + 2, 1024-20, 0, 0, 0);
+				vga_drawstr(m_windows[i]->title, 24 + (96*i) + 2, 768-20, 0, 0, 0);
 			} else {
-				vga_drawstr("...", 24 + (96*i) + 2, 1024-20, 0, 0, 0);
+				vga_drawstr("...", 24 + (96*i) + 2, 768-20, 0, 0, 0);
 			}
 		}
 	}

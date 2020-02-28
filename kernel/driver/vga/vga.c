@@ -16,7 +16,7 @@
 
 size_t vga_width, vga_height, vga_pitch, vga_bpp;
 unsigned char* vga_mem;
-unsigned char backbuffer_mem[1280*1024*4];
+unsigned char backbuffer_mem[1024*768*4];
 
 static size_t terminal_row;
 static size_t terminal_column;
@@ -25,8 +25,8 @@ int vga_drvr_enabled = 0;
 int display_cursor = 0;
 int vga_drvr_finished = 0;
 
-#define TERMINAL_HEIGHT 60
-#define TERMINAL_WIDTH 	160
+#define TERMINAL_HEIGHT 46
+#define TERMINAL_WIDTH 	128
 
 unsigned char terminal_mem[TERMINAL_HEIGHT * TERMINAL_WIDTH];
 
@@ -38,7 +38,7 @@ void vga_init(size_t width, size_t height, size_t pitch, size_t bpp, size_t addr
 	vga_bpp = bpp;
 	vga_mem = (unsigned char*)addr;
 
-	memset(backbuffer_mem, 0, 1280*1024*4);
+	memset(backbuffer_mem, 0, 1024*768*4);
 	memset(terminal_mem, 0, TERMINAL_HEIGHT * TERMINAL_WIDTH);
 
 	terminal_row = 0;
@@ -418,4 +418,20 @@ unsigned char* vga_load_bitmap_to_buffer(char* path, int *w, int *h, int *bpp) {
 	*h = height;
 	*bpp = 24;
 	return data;
+}
+
+void vga_terminal_u() {
+	terminal_row --;
+}
+
+void vga_terminal_d() {
+	terminal_row ++;
+}
+
+void vga_terminal_l() {
+	terminal_column --;
+}
+
+void vga_terminal_r() {
+	terminal_column ++;
 }

@@ -14,6 +14,11 @@
 #define SHIFT_RELEASE 0xaa
 #define CAPS 0xba
 
+#define KEY_UP 72
+#define KEY_LEFT 75
+#define KEY_RIGHT 77
+#define KEY_DOWN 80
+
 static char key_buffer[512];
 
 int shifted = 0;
@@ -71,6 +76,30 @@ void keyboard_callback() {
 		shifted = 0;
 	} else if (scancode == CAPS) {
 		caps = !caps;
+	} else if (scancode == KEY_UP) {
+		if (vga_drvr_enabled) {
+			vga_terminal_u();
+		} else {
+			terminal_u();
+		}
+	} else if (scancode == KEY_DOWN) {
+		if (vga_drvr_enabled) {
+			vga_terminal_d();
+		} else {
+			terminal_d();
+		}
+	} else if (scancode == KEY_LEFT) {
+		if (vga_drvr_enabled) {
+			vga_terminal_l();
+		} else {
+			terminal_l();
+		}
+	} else if (scancode == KEY_RIGHT) {
+		if (vga_drvr_enabled) {
+			vga_terminal_r();
+		} else {
+			terminal_r();
+		}
 	} else {
 		if (scancode > SC_MAX) return;
     	
