@@ -1,8 +1,8 @@
-SYSTEM_HEADER_PROJECTS="libc kernel/arch/i386"
-PROJECTS="libc kernel/arch/i386"
+SYSTEM_HEADER_PROJECTS_64="libc kernel/arch/x86_64"
+PROJECTS_64="libc kernel/arch/x86_64"
 
 export MAKE=${MAKE:-make}
-export HOST=${HOST:-$(./default-host.sh)}
+export HOST=${HOST:-$(./default-host_64.sh)}
 
 export AR=${HOST}-ar
 export AS=${HOST}-as

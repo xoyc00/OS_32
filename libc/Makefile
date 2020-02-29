@@ -14,21 +14,16 @@ INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(EXEC_PREFIX)/lib
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra
-CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
+CPPFLAGS:=$(CPPFLAGS) -Iinclude
 LIBK_CFLAGS:=$(CFLAGS)
 LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk
 
-ARCHDIR=arch/$(HOSTARCH)
-
-include $(ARCHDIR)/make.config
-
-CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
-CPPFLAGS:=$(CPPFLAGS) $(ARCH_CPPFLAGS)
-LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
-LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
+CFLAGS:=$(CFLAGS)
+CPPFLAGS:=$(CPPFLAGS)
+LIBK_CFLAGS:=$(LIBK_CFLAGS)
+LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS)
 
 FREEOBJS=\
-$(ARCH_FREEOBJS) \
 assert/assert.o \
 ctype/isalnum.o \
 ctype/isalpha.o \
@@ -69,8 +64,7 @@ string/append.o \
 string/backspace.o \
 string/strtok.o \
 
-HOSTEDOBJS=\
-$(ARCH_HOSTEDOBJS) \
+HOSTEDOBJS=
 
 OBJS=\
 $(FREEOBJS) \
@@ -92,10 +86,10 @@ libk.a: $(LIBK_OBJS)
 	$(AR) rcs $@ $(LIBK_OBJS)
 
 .c.o:
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS) -D__is_libc
 
 .c.S:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS) -D__is_libc
 
 .c.libk.o:
 	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)

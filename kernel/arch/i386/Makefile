@@ -1,6 +1,6 @@
-DEFAULT_HOST!=../default-host.sh
+DEFAULT_HOST!=../../../default-host.sh
 HOST?=DEFAULT_HOST
-HOSTARCH!=../target-triplet-to-arch.sh $(HOST)
+HOSTARCH!=../../../target-triplet-to-arch.sh $(HOST)
 
 CFLAGS?=-O2 -g
 CPPFLAGS?=
@@ -14,14 +14,14 @@ BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra
-CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -Iinclude
+CPPFLAGS:=$(CPPFLAGS) -D__is_kernel -I../../include
 LDFLAGS:=$(LDFLAGS)
 LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
-ARCHDIR=arch/$(HOSTARCH)
-DRIVERDIR=driver/
-SYSTEMDIR=system/
-INTERPDIR=interp/
+ARCHDIR=./
+DRIVERDIR=../../driver/
+SYSTEMDIR=../../system/
+INTERPDIR=../../interp/
 
 include $(ARCHDIR)/make.config
 include $(DRIVERDIR)/make.config
@@ -38,10 +38,10 @@ $(KERNEL_ARCH_OBJS) \
 $(KERNEL_DRIVER_OBJS) \
 $(KERNEL_SYSTEM_OBJS) \
 $(KERNEL_INTERP_OBJS) \
-kernel/kernel.o \
-kernel/shell.o \
-kernel/memory_mapper.o \
-kernel/liballoc.o \
+../../kernel/kernel.o \
+../../kernel/shell.o \
+../../kernel/memory_mapper.o \
+../../kernel/liballoc.o \
 
 OBJS=\
 $(ARCHDIR)/crti.o \
@@ -86,7 +86,7 @@ install: install-headers install-kernel
 
 install-headers:
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
+	cp -R --preserve=timestamps ../../include/. $(DESTDIR)$(INCLUDEDIR)/.
 
 install-kernel: os_32.ker
 	mkdir -p $(DESTDIR)$(BOOTDIR)

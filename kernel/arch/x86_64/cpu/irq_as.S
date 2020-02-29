@@ -3,6 +3,11 @@
 .global irq2
 .global irq3
 .global irq4
+.global irq0
+.global irq1
+.global irq2
+.global irq3
+.global irq4
 .global irq5
 .global irq6
 .global irq7
@@ -34,105 +39,140 @@
 .global irq14_handler
 .global irq15_handler
 
+.macro pushall
+    push %rax
+    push %rcx
+    push %rdx
+    push %rbx
+    push %rbp
+    push %rsi
+    push %rdi
+    push %r8
+    push %r9
+    push %r10
+    push %r11
+    push %r12
+    push %r13
+    push %r14
+    push %r15
+.endm
+
+.macro popall
+    pop %rax
+    pop %rcx
+    pop %rdx
+    pop %rbx
+    pop %rbp
+    pop %rsi
+    pop %rdi
+    pop %r8
+    pop %r9
+    pop %r10
+    pop %r11
+    pop %r12
+    pop %r13
+    pop %r14
+    pop %r15
+.endm
+
 irq0:
-  pusha
+  pushall
   call irq0_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq1:
-  pusha
+  pushall
   call irq1_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq2:
-  pusha
+  pushall
   call irq2_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq3:
-  pusha
+  pushall
   call irq3_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq4:
-  pusha
+  pushall
   call irq4_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq5:
-  pusha
+  pushall
   call irq5_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq6:
-  pusha
+  pushall
   call irq6_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq7:
-  pusha
+  pushall
   call irq7_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq8:
-  pusha
+  pushall
   call irq8_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq9:
-  pusha
+  pushall
   call irq9_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq10:
-  pusha
+  pushall
   call irq10_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq11:
-  pusha
+  pushall
   call irq11_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq12:
-  pusha
+  pushall
   call irq12_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq13:
-  pusha
+  pushall
   call irq13_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq14:
-  pusha
+  pushall
   call irq14_handler
-  popa
-  iret
+  popall
+  iretw
  
 irq15:
-  pusha
+  pushall
   call irq15_handler
-  popa
-  iret
+  popall
+  iretw
  
 load_idt:
-	mov 4(%esp,1), %edx
-	lidt (%edx)
+	mov 4(%rsp,1), %rdx
+	lidt (%rdx)
 	sti
 	ret
-

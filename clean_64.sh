@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
-. ./config.sh
+. ./config_64.sh
 
-for PROJECT in $PROJECTS; do
+for PROJECT in $PROJECTS_64; do
   (cd $PROJECT && $MAKE clean)
 done
 

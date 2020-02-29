@@ -9,11 +9,6 @@ void* malloc(size_t size) {
 #if defined(__is_libk)
 	return kmalloc(size);
 #else
-	asm ("mov $0b001, %%eax" ::: "eax");
-	asm ("mov %0, %%ebx" :: "r"(size) : "ebx");
-	asm volatile ("int $0x80");
-	uint32_t out;
-	asm ("mov %%ecx, %0" : "=r"(out)::);
-	return (void*)out;
+	
 #endif
 }
