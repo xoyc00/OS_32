@@ -5,7 +5,11 @@
 #include <kernel/memory_mapper.h>
 #include <kernel/liballoc.h>
 #include <kernel/tty.h>
-#include <kernel/cpu/gdt.h>
+
+#ifndef __is_x64
+	#include <kernel/cpu/gdt.h>
+#endif
+
 #include <kernel/cpu/idt.h>
 #include <kernel/cpu/timer.h>
 #include <kernel/cpu/ports.h>
@@ -56,9 +60,11 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 		terminal_initialize();
 	}
 
+#ifndef __is_x64
 	printf("Installing GDT... ");
 	gdt_install();
 	printf("done\n");
+#endif
 
 	printf("Installing IDT... ");
 	idt_install();

@@ -21,11 +21,8 @@
 #define IRQ15 47
 
 #define SYS_PUTCHAR 		0b000
-#define SYS_MALLOC			0b001
-#define SYS_FREE			0b010
-#define SYS_CREATE_WINDOW	0b011
-#define SYS_REG_WINDOW		0b100
-#define SYS_DEREG_WINDOW	0b101
+#define SYS_PRINTF			0b001
+#define SYS_PUTS			0b010
 
 // Install the IDT
 void idt_install(void);

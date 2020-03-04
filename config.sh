@@ -1,5 +1,5 @@
-SYSTEM_HEADER_PROJECTS="libc kernel/arch/i386"
-PROJECTS="libc kernel/arch/i386"
+SYSTEM_HEADER_PROJECTS="libk kernel/arch/i386"
+PROJECTS="libk kernel/arch/i386"
 
 export MAKE=${MAKE:-make}
 export HOST=${HOST:-$(./default-host.sh)}

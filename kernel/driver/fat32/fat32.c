@@ -83,9 +83,13 @@ void fat32_init(int drive) {
 	fat_drive[i].root_cluster = fat_drive[i].ebr.root_directory_cluster;
 	fat_drive[i].sectors_per_cluster = (fat_drive[i].bpb.sectors_per_cluster != 0)? fat_drive[i].bpb.sectors_per_cluster : 8;
 
-	current_directory = malloc(2);
+	current_directory = malloc(6);
 	current_directory[0] = '/';
-	current_directory[1] = '\0';
+	current_directory[1] = 'U';
+	current_directory[2] = 'S';
+	current_directory[3] = 'E';
+	current_directory[4] = 'R';
+	current_directory[5] = '\0';
 }
 
 /* Read a single cluster from disk */
@@ -359,7 +363,7 @@ void read_directory_tree(int drive) {
 }
 
 /* Reads the file at a given cluster. */
-unsigned char* read_file(int drive, uint32_t cluster) {
+unsigned char* read_file(int drive, uint32_t cluster, unsigned int* size) {
 	int cluster_count;
 	uint32_t* cluster_chain = get_cluster_chain(drive, cluster, &cluster_count);
 	unsigned char* buf = malloc(((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster))+1);
@@ -382,23 +386,24 @@ unsigned char* read_file(int drive, uint32_t cluster) {
 	}
 
 	buf[((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster))] = '\0';
+	*size = ((cluster_count + 1) * (512*fat_drive[drive].sectors_per_cluster));
 
 	return buf;
 }
 
 /* Reads a file with a given path */
-unsigned char* read_file_from_name(int drive, char* path) {
+unsigned char* read_file_from_name(int drive, char* path, unsigned int* size) {
 	if (path[0] != '/') {
 		printf("Not a valid path!\n");
 		return 0;
 	}
 
-	int size;
+	int s;
 
-	directory_entry_t* d = read_directory_from_name(drive, path, &size);
-	if (size != 1) return 0;
+	directory_entry_t* d = read_directory_from_name(drive, path, &s);
+	if (s != 1) return 0;
 
-	unsigned char* out = read_file(drive, d->first_cluster_low | (d->first_cluster_high >> 16));
+	unsigned char* out = read_file(drive, d->first_cluster_low | (d->first_cluster_high >> 16), size);
 
 	return out;
 }
@@ -414,8 +419,7 @@ void write_fat_entry(int drive, uint32_t cluster_num, uint32_t cluster_val) {
 
 	fat_table[ent_offset] = cluster_val & 0x0FFFFFFF;
 
-	printf("%d\n", fat_sector);
-	//ata_write_sects(drive, fat_sector, 1, fat_table);
+	ata_write_sects(drive, fat_sector, 1, fat_table);
 }
 
 uint32_t allocate_free_fat(int drive) {
@@ -443,6 +447,7 @@ uint32_t write_new_directory(int drive, directory_entry_t* dir, directory_entry_
 	uint16_t first_cluster_high = dir_start_cluster >> 16;
 	dir->first_cluster_low = first_cluster_low;
 	dir->first_cluster_high = first_cluster_high;
+	dir->file_size = 0;
 
 
 	int c;
@@ -451,8 +456,9 @@ uint32_t write_new_directory(int drive, directory_entry_t* dir, directory_entry_
 	{
 		int i = 0;
 		unsigned char* entry_list = read_cluster(drive, parent->first_cluster_low | (parent->first_cluster_low >> 16));
-		while(entry_list[i] != 0) {
-			if (entry_list[i] == 0xE5) {
+		while(i < 512) {
+			printf("0x%x\n", entry_list[i]);
+			if (entry_list[i] == 0xE5 || entry_list[i] == 0x00) {
 				memcpy(entry_list+i, dir, 32);
 				write_cluster(drive, parent->first_cluster_low | (parent->first_cluster_low >> 16), entry_list, 512*fat_drive[drive].sectors_per_cluster);
 				free(entry_list);
@@ -467,7 +473,7 @@ uint32_t write_new_directory(int drive, directory_entry_t* dir, directory_entry_
 	while(*clusters != 0) {
 		int i = 0;
 		unsigned char* entry_list = read_cluster(drive, *clusters);
-		while(*entry_list != 0) {
+		while(entry_list[i] != 0) {
 			if (entry_list[i] == 0xE5) {
 				memcpy(entry_list+i, dir, 32);
 				write_cluster(drive, *clusters, entry_list, 512*fat_drive[drive].sectors_per_cluster);

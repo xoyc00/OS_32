@@ -4,6 +4,7 @@
 #include <kernel/kernel.h>
 #include <kernel/driver/fat32.h>
 #include <kernel/system/window_manage.h>
+#include <kernel/system/elf_loader.h>
 #include <kernel/cpu/timer.h>
 
 #include <string.h>
@@ -320,8 +321,9 @@ int interp_process(char* cmd, int x) {
 		interp_clear_args();
 	} else if (strcmp(cmd1, "include") == 0 && should_execute) {
 		unsigned char* buf;
+		int size;
 		if (arg1[0] == '/') {
-			buf = read_file_from_name(0, arg1);
+			buf = read_file_from_name(0, arg1, &size);
 		} else {
 			unsigned char* path = malloc(strlen(arg1) + strlen(current_directory) + 2);
 			strncpy(path, current_directory, strlen(current_directory));
@@ -331,7 +333,7 @@ int interp_process(char* cmd, int x) {
 				path[strlen(current_directory)] = '/';
 			}
 			strncpy(path + strlen(current_directory) + offset, arg1, strlen(arg1));
-			buf = read_file_from_name(0, path);
+			buf = read_file_from_name(0, path, &size);
 			free(path);
 		}
 		if (buf) {
@@ -344,8 +346,9 @@ int interp_process(char* cmd, int x) {
 	} else if (strcmp(cmd1, "read") == 0 && should_execute) {
 		if (array_args_count != 0) {
 			unsigned char* buf;
+			int size;
 			if (arg1[0] == '/') {
-				buf = read_file_from_name(0, arg1);
+				buf = read_file_from_name(0, arg1, &size);
 			} else {
 				unsigned char* path = malloc(strlen(arg1) + strlen(current_directory) + 2);
 				strncpy(path, current_directory, strlen(current_directory));
@@ -355,7 +358,7 @@ int interp_process(char* cmd, int x) {
 					path[strlen(current_directory)] = '/';
 				}
 				strncpy(path + strlen(current_directory) + offset, arg1, strlen(arg1));
-				buf = read_file_from_name(0, path);
+				buf = read_file_from_name(0, path, &size);
 				free(path);
 			}
 			if (buf) {
@@ -374,6 +377,13 @@ int interp_process(char* cmd, int x) {
 
 			if (c == 1 && entry != 0) {
 				int length = strlen((unsigned char*)array_args[0]->data);
+				unsigned char* array_args0_data = array_args[0]->data;
+				for (int i = 0; i < length; i++) {
+					if (array_args0_data[i] == '\\' && array_args0_data[i+1] == 'n') {
+						array_args0_data[i] = ' ';
+						array_args0_data[i+1] = '\n';
+					}
+				}
 				write_cluster(0, entry->first_cluster_low | (entry->first_cluster_high >> 16), (unsigned char*)array_args[0]->data, length);
 			} else if (c == 0 && entry != 0) {
 				// Add directory to parent and write to that.
@@ -416,7 +426,7 @@ int interp_process(char* cmd, int x) {
 			}
 
 			printf("Creating File Called: %s\n", new_entry.file_name);
-			printf("%d\n", write_new_directory(0, &new_entry, entry));		
+			write_new_directory(0, &new_entry, entry);		
 		}
 	} else if (strcmp(cmd1, "move") == 0 && should_execute) {
 		variable_t* var = 0;
@@ -682,8 +692,9 @@ int interp_process(char* cmd, int x) {
 		}
 	} else if (strcmp(cmd1, "readout") == 0 && should_execute) {
 		unsigned char* buf;
+		int size;
 		if (arg1[0] == '/') {
-			buf = read_file_from_name(0, arg1);
+			buf = read_file_from_name(0, arg1, &size);
 		} else {
 			unsigned char* path = malloc(strlen(arg1) + strlen(current_directory) + 2);
 			strncpy(path, current_directory, strlen(current_directory));
@@ -693,7 +704,7 @@ int interp_process(char* cmd, int x) {
 				path[strlen(current_directory)] = '/';
 			}
 			strncpy(path + strlen(current_directory) + offset, arg1, strlen(arg1));
-			buf = read_file_from_name(0, path);
+			buf = read_file_from_name(0, path, &size);
 			free(path);
 		}
 		if (buf) {
@@ -702,6 +713,30 @@ int interp_process(char* cmd, int x) {
 		} else {
 			printf("WARNING: could not find file: %s\n", arg1);
 		}
+	} else if (strcmp(cmd1, "execute") == 0 && should_execute) {
+		unsigned char* buf;
+		int size;
+		if (arg1[0] == '/') {
+			buf = read_file_from_name(0, arg1, &size);
+		} else {
+			unsigned char* path = malloc(strlen(arg1) + strlen(current_directory) + 2);
+			strncpy(path, current_directory, strlen(current_directory));
+			int offset = 0;
+			if(current_directory[strlen(current_directory)-1] != '/') {
+				offset = 1;
+				path[strlen(current_directory)] = '/';
+			}
+			strncpy(path + strlen(current_directory) + offset, arg1, strlen(arg1));
+			buf = read_file_from_name(0, path, &size);
+			free(path);
+		}
+		if (buf) {
+			load_elf_from_buffer(buf, size);
+		} else {
+			printf("WARNING: could not find file: %s\n", arg1);
+		}
+	} else if (strcmp(cmd1, "memrep") == 0 && should_execute) {
+		printf("%d", *(uint8_t*)atoi(arg1));
 	}
 
 	free(cmd1);

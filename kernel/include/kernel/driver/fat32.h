@@ -140,9 +140,9 @@ directory_entry_t* read_directory_from_name(int drive, char* path, int* count);
 void read_directory_tree(int drive);
 
 /* Read a file */
-unsigned char* read_file(int drive, uint32_t cluster);
+unsigned char* read_file(int drive, uint32_t cluster, unsigned int* size);
 
-unsigned char* read_file_from_name(int drive, char* path);
+unsigned char* read_file_from_name(int drive, char* path, unsigned int* size);
 
 void write_fat_entry(int drive, uint32_t cluster_num, uint32_t cluster_val);\
 
