@@ -16,7 +16,7 @@ static unsigned char atapi_packet[12] = {0xA8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 struct ide_device ata_devices[4];
 
 /* Detects and initialises ATA drives. */
-void ata_initialise(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, unsigned int BAR3, unsigned int BAR4) {
+int ata_initialise(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, unsigned int BAR3, unsigned int BAR4) {
 	int i, j, k, count = 0;
 
 	channels[ATA_PRIMARY	].base  = (BAR0 & 0xFFFFFFFC) + 0x1F0 * (!BAR0);
@@ -90,6 +90,8 @@ void ata_initialise(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, uns
 			count ++;
 		}
 	}
+
+	return count;
 }
 
 /* Reads data from the ATA registers. */

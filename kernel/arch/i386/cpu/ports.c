@@ -19,3 +19,13 @@ unsigned short inw (unsigned short port) {
 void outw (unsigned short port, unsigned short data) {
     asm("out %%ax, %%dx" : : "a" (data), "d" (port));
 }
+
+unsigned int inl (unsigned int port) {
+    unsigned int result;
+    asm("inl %%dx, %%ax" : "=a" (result) : "d" (port));
+    return result;
+}
+
+void outl (unsigned int port, unsigned int data) {
+    asm("outl %%ax, %%dx" : : "a" (data), "d" (port));
+}

@@ -13,4 +13,10 @@ unsigned short inw (unsigned short port);
 //Write a word from the specified port
 void outw (unsigned short port, unsigned short data);
 
+//Read a long from the specified port
+unsigned int inl (unsigned int port);
+
+//Write a long from the specified port
+void outl (unsigned int port, unsigned int data);
+
 #endif

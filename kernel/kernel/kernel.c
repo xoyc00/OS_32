@@ -6,9 +6,7 @@
 #include <kernel/liballoc.h>
 #include <kernel/tty.h>
 
-#ifndef __is_x64
-	#include <kernel/cpu/gdt.h>
-#endif
+#include <kernel/cpu/gdt.h>
 
 #include <kernel/cpu/idt.h>
 #include <kernel/cpu/timer.h>
@@ -19,6 +17,7 @@
 #include <kernel/driver/mouse.h>
 #include <kernel/driver/ata.h>
 #include <kernel/driver/fat32.h>
+#include <kernel/driver/pci.h>
 
 #include <kernel/system/window_manage.h>
 
@@ -31,6 +30,8 @@ size_t vga_height = 0;
 size_t vga_pitch = 0;
 size_t vga_bpp = 0;
 size_t vga_addr = 0;
+
+int boot_device;
 
 void update_screen() {
 	if (vga_enabled) {
@@ -46,6 +47,8 @@ void update_screen() {
 }
 
 void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
+	boot_device = 0;
+
 	if (mbt->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_RGB) {
 		// Initialise VGA Device
 		vga_addr = mbt->framebuffer_addr;
@@ -60,11 +63,9 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 		terminal_initialize();
 	}
 
-#ifndef __is_x64
 	printf("Installing GDT... ");
 	gdt_install();
 	printf("done\n");
-#endif
 
 	printf("Installing IDT... ");
 	idt_install();
@@ -79,14 +80,21 @@ void kernel_main(multiboot_info_t* mbt, unsigned int magic) {
 	printf("done\n");
 
 	printf("Initialising ATA... ");
-	ata_initialise(0x1F0, 0x3F6, 0x170, 0x376, 0x000);
+	int ata_device_count = ata_initialise(0x1F0, 0x3F6, 0x170, 0x376, 0x000);
 	printf("done\n");
-	
-	ata_list_devices();
 
-	printf("Initialising FAT32... ");
-	fat32_init(0);
-	printf("done\n");
+	if (ata_device_count != 0) {
+		printf("Found %d ATA devices: \n", ata_device_count);
+		ata_list_devices();
+
+		printf("Initialising FAT32... ");
+		fat32_init(boot_device);
+		printf("done\n");
+	} else {
+		pci_config_data_t* ahci_control_dev = pci_scan_all_buses(0, 0x01, 0x06, 0x01);
+	}
+
+	pci_scan_all_buses(0, 0, 0, 0);
 
 	if (mbt->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_RGB) {
 		printf("Initialising window manager... ");

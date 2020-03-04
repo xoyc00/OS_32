@@ -265,7 +265,7 @@ void irq15_handler(void) {
 }
 
 struct regs {
-   	uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; /* Pushed by pusha. */
+   	uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax_padding, eax; /* Pushed by pusha. */
   	uint32_t eip, cs, eflags, useresp, ss; /* Pushed by the processor automatically */
 };
 
@@ -274,12 +274,17 @@ struct regs {
 
 void i80_handler(struct regs r) {
 	switch(r.eax) {
-		case SYS_PUTCHAR:
+		case SYS_PUTCHAR: {
 			putchar(r.ebx);
-		break;
+		break; }
 
-		case SYS_PRINTF:
-			printf(r.ebx);			
-		break;
+		case SYS_MALLOC: {
+			void* ptr = malloc(r.ebx);
+			asm ("mov %0, %%eax" :: "r"(ptr));
+		break; }
+
+		case SYS_FREE: {
+			free(r.ebx);			
+		break; }
 	}
 }

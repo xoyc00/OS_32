@@ -30,6 +30,8 @@ char input_buf[1024];
 
 int comparison = EQUAL_TO;
 
+extern int boot_device;
+
 variable_t* interp_process_variable(char* buf) {
 	variable_t* var = malloc(sizeof(variable_t));
 	var->name = 0;
@@ -323,7 +325,7 @@ int interp_process(char* cmd, int x) {
 		unsigned char* buf;
 		int size;
 		if (arg1[0] == '/') {
-			buf = read_file_from_name(0, arg1, &size);
+			buf = read_file_from_name(boot_device, arg1, &size);
 		} else {
 			unsigned char* path = malloc(strlen(arg1) + strlen(current_directory) + 2);
 			strncpy(path, current_directory, strlen(current_directory));
@@ -333,7 +335,7 @@ int interp_process(char* cmd, int x) {
 				path[strlen(current_directory)] = '/';
 			}
 			strncpy(path + strlen(current_directory) + offset, arg1, strlen(arg1));
-			buf = read_file_from_name(0, path, &size);
+			buf = read_file_from_name(boot_device, path, &size);
 			free(path);
 		}
 		if (buf) {
@@ -348,7 +350,7 @@ int interp_process(char* cmd, int x) {
 			unsigned char* buf;
 			int size;
 			if (arg1[0] == '/') {
-				buf = read_file_from_name(0, arg1, &size);
+				buf = read_file_from_name(boot_device, arg1, &size);
 			} else {
 				unsigned char* path = malloc(strlen(arg1) + strlen(current_directory) + 2);
 				strncpy(path, current_directory, strlen(current_directory));
@@ -358,7 +360,7 @@ int interp_process(char* cmd, int x) {
 					path[strlen(current_directory)] = '/';
 				}
 				strncpy(path + strlen(current_directory) + offset, arg1, strlen(arg1));
-				buf = read_file_from_name(0, path, &size);
+				buf = read_file_from_name(boot_device, path, &size);
 				free(path);
 			}
 			if (buf) {
@@ -373,7 +375,7 @@ int interp_process(char* cmd, int x) {
 	} else if (strcmp(cmd1, "write") == 0 && should_execute) {
 		if (array_args_count != 0) {
 			int c = 0;
-			directory_entry_t* entry = read_directory_from_name(0, arg1, &c);
+			directory_entry_t* entry = read_directory_from_name(boot_device, arg1, &c);
 
 			if (c == 1 && entry != 0) {
 				int length = strlen((unsigned char*)array_args[0]->data);
@@ -384,7 +386,7 @@ int interp_process(char* cmd, int x) {
 						array_args0_data[i+1] = '\n';
 					}
 				}
-				write_cluster(0, entry->first_cluster_low | (entry->first_cluster_high >> 16), (unsigned char*)array_args[0]->data, length);
+				write_cluster(boot_device, entry->first_cluster_low | (entry->first_cluster_high >> 16), (unsigned char*)array_args[0]->data, length);
 			} else if (c == 0 && entry != 0) {
 				// Add directory to parent and write to that.
 				printf("WARNING: could not find file: %s\n", arg1);
@@ -401,11 +403,11 @@ int interp_process(char* cmd, int x) {
 			path[strlen(current_directory)] = '/';
 		}
 		strncpy(path + strlen(current_directory) + offset, arg1, strlen(arg1));
-		directory_entry_t* entry = read_directory_from_name(0, path, &c);
+		directory_entry_t* entry = read_directory_from_name(boot_device, path, &c);
 		if (c == 1 && entry != 0) {
 			printf("File already exists!\n");
 		} else {
-			entry = read_directory_from_name(0, current_directory, &c);
+			entry = read_directory_from_name(boot_device, current_directory, &c);
 			directory_entry_t new_entry;			
 			char* name = strtok(arg1, ".");
 			new_entry.file_name[0] = name[0];
@@ -426,7 +428,7 @@ int interp_process(char* cmd, int x) {
 			}
 
 			printf("Creating File Called: %s\n", new_entry.file_name);
-			write_new_directory(0, &new_entry, entry);		
+			write_new_directory(boot_device, &new_entry, entry);		
 		}
 	} else if (strcmp(cmd1, "move") == 0 && should_execute) {
 		variable_t* var = 0;
@@ -666,12 +668,12 @@ int interp_process(char* cmd, int x) {
 	}	else if (strcmp(cmd1, "wmupdate") == 0 && should_execute) {
 		update_screen();
 	} else if (strcmp(cmd1, "dir") == 0 && should_execute) {
-		read_directory_tree(0);
+		read_directory_tree(boot_device);
 	} else if (strcmp(cmd1, "ls") == 0 && should_execute) {
 		int count;
-		directory_entry_t *d = read_directory_from_name(0, current_directory, &count);
+		directory_entry_t *d = read_directory_from_name(boot_device, current_directory, &count);
 		if (count != 0) {
-			list_directory(0, 0, count, d, 0, 1);
+			list_directory(boot_device, 0, count, d, 0, 1);
 			free(d);
 		}
 	} else if (strcmp(cmd1, "cd") == 0 && should_execute) {
@@ -694,7 +696,7 @@ int interp_process(char* cmd, int x) {
 		unsigned char* buf;
 		int size;
 		if (arg1[0] == '/') {
-			buf = read_file_from_name(0, arg1, &size);
+			buf = read_file_from_name(boot_device, arg1, &size);
 		} else {
 			unsigned char* path = malloc(strlen(arg1) + strlen(current_directory) + 2);
 			strncpy(path, current_directory, strlen(current_directory));
@@ -704,7 +706,7 @@ int interp_process(char* cmd, int x) {
 				path[strlen(current_directory)] = '/';
 			}
 			strncpy(path + strlen(current_directory) + offset, arg1, strlen(arg1));
-			buf = read_file_from_name(0, path, &size);
+			buf = read_file_from_name(boot_device, path, &size);
 			free(path);
 		}
 		if (buf) {
@@ -717,7 +719,7 @@ int interp_process(char* cmd, int x) {
 		unsigned char* buf;
 		int size;
 		if (arg1[0] == '/') {
-			buf = read_file_from_name(0, arg1, &size);
+			buf = read_file_from_name(boot_device, arg1, &size);
 		} else {
 			unsigned char* path = malloc(strlen(arg1) + strlen(current_directory) + 2);
 			strncpy(path, current_directory, strlen(current_directory));
@@ -727,7 +729,7 @@ int interp_process(char* cmd, int x) {
 				path[strlen(current_directory)] = '/';
 			}
 			strncpy(path + strlen(current_directory) + offset, arg1, strlen(arg1));
-			buf = read_file_from_name(0, path, &size);
+			buf = read_file_from_name(boot_device, path, &size);
 			free(path);
 		}
 		if (buf) {

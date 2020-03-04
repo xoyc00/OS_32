@@ -104,8 +104,8 @@ struct ide_device {
    	unsigned char  model[41];   // Model in string.
 };
 
-/* Initialise the ATA driver */
-void ata_initialise(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, unsigned int BAR3, unsigned int BAR4);
+/* Initialise the ATA driver. Returns the number of ATA devices found. */
+int ata_initialise(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, unsigned int BAR3, unsigned int BAR4);
 
 unsigned char ata_read(unsigned char channel, unsigned char reg);
 void ata_write(unsigned char channel, unsigned char reg, unsigned char data);
