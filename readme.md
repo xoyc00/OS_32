@@ -9,6 +9,8 @@ Note that in order to use the included makefiles you should export TARGET=1386-e
 # Adding files
 To add files to the operating system's filesystem, create a folder called "filesystem" (without the quotations) and add any files you need to that.
 
+To add files to the secondary image, create a folder called "filesystem2" and add your files to that.
+
 Note that the desktop wallpaper is loaded from the file /user/wallpaper.bmp.
 
 # Compiling
