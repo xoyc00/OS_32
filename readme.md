@@ -27,7 +27,3 @@ To create an img, run:
 To run in qemu, run:
 		
 		./qemu.sh
-
-To create a virtualbox hard disk image, run:
-		
-		./vdi.sh
