@@ -4,3 +4,5 @@ sysroot
 *.img
 mnt
 *.vdi
+filesystem
+filesystem2
