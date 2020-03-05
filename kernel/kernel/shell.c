@@ -6,7 +6,7 @@
 #include <kernel/driver/pcspkr.h>
 #include <kernel/driver/vga/vga.h>
 #include <kernel/driver/ata.h>
-#include <kernel/driver/fat32.h>
+#include <kernel/driver/vfs.h>
 
 #include <kernel/interp/interp.h>
 

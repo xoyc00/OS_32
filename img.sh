@@ -31,3 +31,12 @@ sudo cp -r isodir/. mnt/
 sudo grub-install --target=i386-pc --boot-directory=mnt/boot --recheck --modules="fat" --force ${device}
 sudo umount mnt/
 sudo losetup -d ${device}
+
+dd if=/dev/zero of=part2.img bs=1M count=256
+device=$(sudo losetup --find --show part2.img)
+sudo parted -s "${device}" mklabel msdos mkpart primary fat32 32k 100% -a minimal set 1 boot on
+sudo mkfs.vfat -F32 -I ${device}p1
+sudo mount -t vfat ${device}p1 mnt/
+sudo cp -r filesystem2/. mnt/
+sudo umount mnt/
+sudo losetup -d ${device}

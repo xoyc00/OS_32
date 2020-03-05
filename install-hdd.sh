@@ -22,7 +22,7 @@ menuentry "os_32" {
 EOF
 
 mkdir -p mnt
-dd if=/dev/zero of=image.img bs=1M count=256
+dd if=/dev/zero of=image.img bs=1M count=$2
 device=$(sudo losetup --find --show image.img)
 sudo parted -s "${device}" mklabel msdos mkpart primary fat32 32k 100% -a minimal set 1 boot on
 sudo mkfs.vfat -F32 -I ${device}p1
@@ -32,4 +32,4 @@ sudo grub-install --target=i386-pc --boot-directory=mnt/boot --recheck --modules
 sudo umount mnt/
 sudo losetup -d ${device}
 
-sudo dd if=image.img of=/dev/$1 bs=1M count=256
+sudo dd if=image.img of=/dev/$1 bs=1M count=$2

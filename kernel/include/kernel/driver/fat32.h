@@ -82,8 +82,8 @@ typedef struct directory_entry {
 	lfn_entry_t lfn;
 } __attribute__((packed)) directory_entry_t;
 
-/* Fat32 struct for holding all the relevant information about a fat32 volume */
-typedef struct fat32 {
+
+typedef struct fat32_part {
 	uint32_t volume_start_sect;
 
 	BPB_t bpb;
@@ -96,6 +96,12 @@ typedef struct fat32 {
 	uint32_t data_sectors;
 	uint32_t root_cluster;
 	uint8_t sectors_per_cluster;
+} fat32_part_t;
+
+/* Fat32 struct for holding all the relevant information about a fat32 volume */
+typedef struct fat32 {
+	int is_ahci;
+	fat32_part_t partitions[4];
 } fat32_t;
 
 typedef struct part_table {
@@ -119,36 +125,35 @@ typedef struct boot_sect {
 	part_table_t part_4;
 } __attribute__((packed)) boot_sect_t;
 
-char* current_directory;
-
 /* Initialise a fat32 drive */
-void fat32_init(int drive);
+void fat32_init_ata(int drive, int part);
+void fat32_init_ahci(int drive, int part);
 
 /* Read a single cluster */
-unsigned char* read_cluster(int drive, uint32_t cluster);
+unsigned char* read_cluster(int drive, int part, uint32_t cluster);
 
-void write_cluster(int drive, uint32_t cluster, unsigned char* buf, size_t size);
+void write_cluster(int drive, int part, uint32_t cluster, unsigned char* buf, size_t size);
 
 /* Read a directory */
-directory_entry_t* read_directory(int drive, uint32_t cluster, int* count);
+directory_entry_t* read_directory(int drive, int part, uint32_t cluster, int* count);
 
-void list_directory(int drive, int tabs, int count, directory_entry_t* directory, int recursive, int max_tabs);
+void list_directory(int drive, int part, int tabs, int count, directory_entry_t* directory, int recursive, int max_tabs);
 
 /* Read a directory from a path */
-directory_entry_t* read_directory_from_name(int drive, char* path, int* count);
+directory_entry_t* read_directory_from_name(int drive, int part, char* path, int* count);
 
-void read_directory_tree(int drive);
+void read_directory_tree(int drive, int part);
 
 /* Read a file */
-unsigned char* read_file(int drive, uint32_t cluster, unsigned int* size);
+unsigned char* read_file(int drive, int part, uint32_t cluster, unsigned int* size);
 
-unsigned char* read_file_from_name(int drive, char* path, unsigned int* size);
+unsigned char* read_file_from_name(int drive, int part, char* path, unsigned int* size);
 
-void write_fat_entry(int drive, uint32_t cluster_num, uint32_t cluster_val);\
+void write_fat_entry(int drive, int part, uint32_t cluster_num, uint32_t cluster_val);\
 
-uint32_t allocate_free_fat(int drive);
+uint32_t allocate_free_fat(int drive, int part);
 
 /* Returns the first cluster of the new directory. */
-uint32_t write_new_directory(int drive, directory_entry_t* dir, directory_entry_t* parent);
+uint32_t write_new_directory(int drive, int part, directory_entry_t* dir, directory_entry_t* parent);
 
 #endif

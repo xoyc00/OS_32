@@ -2,7 +2,7 @@
 #include <kernel/driver/vga/vga_font.h>
 #include <kernel/driver/mouse.h>
 #include <kernel/driver/pcspkr.h>
-#include <kernel/driver/fat32.h>
+#include <kernel/driver/vfs.h>
 #include <kernel/cpu/timer.h>
 #include "font.c"
 
@@ -392,7 +392,7 @@ void wm_putstr(window_t* w, unsigned char* str, int x, int y, unsigned char r, u
 /* Loads a .BMP image to a memory buffer. */
 unsigned char* vga_load_bitmap_to_buffer(char* path, int *w, int *h, int *bpp) {
 	int size;
-	unsigned char* bmp_total = read_file_from_name(0, path, &size);
+	unsigned char* bmp_total = read_file_from_name(0, 0, path, &size);
 	if (bmp_total == 0) return 0;
 
 	// Data read from the header of the BMP file

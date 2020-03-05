@@ -132,10 +132,7 @@ void ata_write(unsigned char channel, unsigned char reg, unsigned char data) {
 void ata_read_buffer(unsigned char channel, unsigned char reg, unsigned int buffer, unsigned int quads) {
 	if (reg > 0x07 && reg < 0x0C)
 		ata_write(channel, ATA_REG_CONTROL, 0x80 | channels[channel].nIEN);
-#ifdef __is_x86_64
-#else
 	asm("pushw %es; pushw %ax; movw %ds, %ax; movw %ax, %es; popw %ax;");
-#endif
 	if (reg < 0x08)
 		insl(channels[channel].base  + reg - 0x00, buffer, quads);
 	else if (reg < 0x0C)
@@ -144,10 +141,7 @@ void ata_read_buffer(unsigned char channel, unsigned char reg, unsigned int buff
 		insl(channels[channel].ctrl  + reg - 0x0A, buffer, quads);
 	else if (reg < 0x16)
 		insl(channels[channel].bmide + reg - 0x0E, buffer, quads);
-#ifdef __is_x86_64
-#else
 	asm("popw %es");
-#endif
 	if (reg > 0x07 && reg < 0x0C)
 		ata_write(channel, ATA_REG_CONTROL, channels[channel].nIEN);
 }
